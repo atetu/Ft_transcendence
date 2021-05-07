@@ -1,8 +1,14 @@
 import colors from 'vuetify/es5/util/colors'
 
+const purple = '#A458FF'
+
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
+
+  router: {
+    history: 'history',
+  },
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -23,7 +29,7 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: ['~/plugins/axios'],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -34,6 +40,8 @@ export default {
     '@nuxt/typescript-build',
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
+
+    '@nuxtjs/proxy',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -42,8 +50,18 @@ export default {
     '@nuxtjs/axios',
   ],
 
+  proxy: {
+    '/api': {
+      changeOrigin: false,
+      pathRewrite: { '^/api/': '/' },
+      target: 'http://localhost:3001/',
+    },
+  },
+
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  axios: {
+    baseURL: 'http://localhost:300/',
+  },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
@@ -52,7 +70,7 @@ export default {
       dark: true,
       themes: {
         dark: {
-          primary: colors.blue.darken2,
+          primary: purple,
           accent: colors.grey.darken3,
           secondary: colors.amber.darken3,
           info: colors.teal.lighten1,
@@ -65,5 +83,12 @@ export default {
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {},
+  build: {
+    babel: {
+      plugins: [['@babel/plugin-proposal-private-methods', { loose: true }]],
+    },
+    extractCSS: {
+      allChunks: true,
+    },
+  },
 }
