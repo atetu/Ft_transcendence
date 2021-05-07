@@ -1,0 +1,4 @@
+272c272
+<     router.push(app.context.route.fullPath, resolve, (err) => {
+---
+>     router.replace(app.context.route.fullPath, resolve, (err) => {
