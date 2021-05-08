@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 interface Link {
   icon: string
@@ -29,50 +29,47 @@ interface Link {
   url: string
 }
 
-export default Vue.extend({
-  data: () => ({
-    links: [
-      {
-        title: 'home',
-        icon: 'view-dashboard',
-        url: '/',
-      },
-      {
-        title: 'channels',
-        icon: 'forum',
-        url: '/channels',
-      },
-      {
-        title: 'users',
-        icon: 'account-multiple',
-        url: '/users',
-      },
-      {
-        title: 'friends',
-        icon: 'account-group',
-        url: '/friends',
-      },
-      {
-        title: 'guilds',
-        icon: 'home-group',
-        url: '/guilds',
-      },
-      {
-        title: 'wars',
-        icon: 'sword-cross',
-        url: '/wars',
-      },
-    ] as Link[],
-  }),
-  computed: {
-    drawer: {
-      get() {
-        return this.$store.state.drawer
-      },
-      set(value) {
-        return this.$store.commit('setDrawerState', value)
-      },
+@Component
+export default class Default extends Vue {
+  public links: Link[] = [
+    {
+      title: 'home',
+      icon: 'view-dashboard',
+      url: '/',
     },
-  },
-})
+    {
+      title: 'channels',
+      icon: 'forum',
+      url: '/channels',
+    },
+    {
+      title: 'users',
+      icon: 'account-multiple',
+      url: '/users',
+    },
+    {
+      title: 'friends',
+      icon: 'account-group',
+      url: '/friends',
+    },
+    {
+      title: 'guilds',
+      icon: 'home-group',
+      url: '/guilds',
+    },
+    {
+      title: 'wars',
+      icon: 'sword-cross',
+      url: '/wars',
+    },
+  ]
+
+  get drawer(): boolean {
+    return this.$store.state.ui.drawer
+  }
+
+  set drawer(value) {
+    this.$store.commit('ui/setDrawer', value)
+  }
+}
 </script>

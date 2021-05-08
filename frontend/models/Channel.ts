@@ -7,6 +7,11 @@ export enum ChannelVisibility {
   PROTECTED = 'protected',
 }
 
+export enum ChannelType {
+  GROUP = 'group',
+  PRIVATE = 'private',
+}
+
 export interface Channel {
   id: number
   name: string

@@ -13,22 +13,17 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
-export default Vue.extend({
-  props: {
-    icon: {
-      type: String,
-      required: true,
-    },
-    title: {
-      type: String,
-      required: true,
-    },
-    url: {
-      type: String,
-      required: true,
-    },
-  },
-})
+@Component
+export default class Dot extends Vue {
+  @Prop({ type: String })
+  icon!: string
+
+  @Prop({ type: String })
+  title!: string
+
+  @Prop({ type: String })
+  url!: string
+}
 </script>

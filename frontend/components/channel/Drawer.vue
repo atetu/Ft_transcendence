@@ -13,7 +13,7 @@
         </slot>
       </v-col>
       <v-col cols="2" class="pl-0">
-        <v-btn icon>
+        <v-btn icon :loading="loading" @click="refresh">
           <v-icon>mdi-refresh</v-icon>
         </v-btn>
       </v-col>
@@ -21,23 +21,34 @@
 
     <v-divider />
 
+    <v-alert v-if="error" type="error" class="ma-2">
+      {{ error.message || 'error when fetching channels' }}
+    </v-alert>
+
     <channel-list :channels="channels" />
   </drawer-left>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapState } from 'vuex'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
-import { State } from '~/store'
+import { channelsModule } from '@/store/channels/const'
 
 import { Channel } from '~/models'
 
-export default Vue.extend({
-  computed: {
-    ...mapState({
-      channels: (state: State): Channel[] => state.channel.list,
-    }),
-  },
-})
+@Component
+export default class Drawer extends Vue {
+  @Prop({ type: Boolean, default: false })
+  loading!: boolean
+
+  @Prop({ type: Object })
+  error!: any
+
+  @channelsModule.State('channels')
+  channels!: Channel[]
+
+  refresh(): void {
+    this.$emit('refresh')
+  }
+}
 </script>

@@ -13,18 +13,15 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapState } from 'vuex'
+import { Component, Vue } from 'nuxt-property-decorator'
 
-import { State } from '~/store'
+import { uiModule } from '~/store/ui/const'
 
-export default Vue.extend({
-  computed: {
-    ...mapState({
-      drawer: (state: State): boolean => state.drawer,
-    }),
-  },
-})
+@Component
+export default class Left extends Vue {
+  @uiModule.State('drawer')
+  drawer!: boolean
+}
 </script>
 
 <style scoped>
