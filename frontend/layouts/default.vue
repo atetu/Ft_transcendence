@@ -16,7 +16,7 @@
       />
     </v-navigation-drawer>
 
-    <nuxt />
+    <nuxt style="height: 100vh" />
   </v-app>
 </template>
 
