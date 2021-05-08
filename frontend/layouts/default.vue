@@ -1,5 +1,5 @@
 <template>
-  <v-app dark>
+  <v-app dark :class="classes">
     <v-system-bar app> ft-transcendence </v-system-bar>
 
     <v-navigation-drawer v-model="drawer" app fixed mini-variant>
@@ -70,6 +70,16 @@ export default class Default extends Vue {
 
   set drawer(value) {
     this.$store.commit('ui/setDrawer', value)
+  }
+
+  get classes(): object {
+    const isDark = this.$vuetify.theme.dark
+
+    return {
+      dark: isDark,
+      light: !isDark,
+      'mini-drawer-open': this.drawer,
+    }
   }
 }
 </script>

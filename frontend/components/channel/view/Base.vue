@@ -1,9 +1,5 @@
 <template>
   <div>
-    <v-app-bar app clipped-right :class="{ 'offset-if-drawer': drawer }">
-      <v-spacer /> Hello <v-spacer />
-    </v-app-bar>
-
     <channel-drawer
       :loading="loading"
       :error="error"

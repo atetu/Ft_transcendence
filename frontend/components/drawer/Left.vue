@@ -2,7 +2,7 @@
   <v-navigation-drawer
     :value="drawer"
     width="300"
-    :class="{ 'offset-if-drawer': drawer }"
+    class="mini-drawer-offset"
     fixed
     app
     stateless
@@ -23,9 +23,3 @@ export default class Left extends Vue {
   drawer!: boolean
 }
 </script>
-
-<style scoped>
-  .offset-if-drawer {
-    margin-left: 56px;
-  }
-</style>
