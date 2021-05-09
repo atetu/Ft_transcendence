@@ -21,6 +21,11 @@ import { Channel } from '~/models'
   async fetch() {
     await this.$store.dispatch('channels/fetchAll')
   },
+  head() {
+    return {
+      title: 'channels',
+    }
+  },
 })
 export default class Index extends Vue {
   @channelsModule.State('channels')

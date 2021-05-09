@@ -72,6 +72,13 @@ import ScrollItem from '~/components/channel/message/ScrollItem'
   async fetch() {
     await this.$store.dispatch('channels/fetchAll')
   },
+  head() {
+    const self = this as any /* avoid warnings */
+
+    return {
+      title: `${self.channel?.name} - channels`,
+    }
+  },
 })
 export default class Index extends Vue {
   @channelsModule.State('channels')
