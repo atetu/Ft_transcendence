@@ -1,5 +1,5 @@
 <template>
-  <div class="fill-height">
+  <div v-if="channel" class="fill-height">
     <v-app-bar app clipped-right class="mini-drawer-offset">
       <v-toolbar-title>{{ channel.name }}</v-toolbar-title>
       <v-spacer />
@@ -10,24 +10,31 @@
 
     <v-card class="mx-auto fill-height">
       <v-list class="fill-height">
-        <v-virtual-scroll
+        <virtual-list
           class="fill-height"
-          item-height="25"
-          :bench="2"
-          :items="Array.from({ length: 1000 }, (k, v) => v + 1)"
-        >
-          <template #default="{ item }">
-            <v-list-item :key="item">
-              <v-list-item-content>
-                <v-list-item-title>
-                  User Database Record <strong>ID {{ item }}</strong>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </template>
-        </v-virtual-scroll>
+          style="overflow-y: auto"
+          data-key="id"
+          :data-sources="
+            Array.from({ length: 100 }, (_, v) => ({
+              id: v + 1,
+              user: channel.users[v % channel.users.length].user,
+              content: 'a'.repeat((v % 10) * 20 + 3) + v,
+            }))
+          "
+          :data-component="itemComponent"
+        />
       </v-list>
     </v-card>
+
+    <v-footer app height="72" inset class="mini-drawer-offset">
+      <v-text-field background-color="grey lighten-1" dense solo class="mt-2">
+        <template #append-outer>
+          <v-btn icon class="ml-2">
+            <v-icon>mdi-send</v-icon>
+          </v-btn>
+        </template>
+      </v-text-field>
+    </v-footer>
 
     <drawer-right>
       <channel-user-list :channel="channel" />
@@ -50,6 +57,7 @@
       </template>
     </drawer-right>
   </div>
+  <div v-else>loading...</div>
 </template>
 
 <script lang="ts">
@@ -58,6 +66,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { channelsModule } from '~/store/channels/const'
 
 import { Channel } from '~/models'
+import ScrollItem from '~/components/channel/message/ScrollItem'
 
 @Component({
   async fetch() {
@@ -76,6 +85,10 @@ export default class Index extends Vue {
     const id = this.id
 
     return this.channels.filter((x) => x.id === id)[0]
+  }
+
+  get itemComponent() {
+    return ScrollItem
   }
 }
 </script>

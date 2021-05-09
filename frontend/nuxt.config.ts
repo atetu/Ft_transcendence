@@ -26,10 +26,14 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: ['~/assets/double-drawer', '~/assets/scrollbar'],
+  css: ['~/assets/double-drawer', '~/assets/scrollbar', '~/assets/fix'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ['~/plugins/axios', '~/plugins/virtual-scroller'],
+  plugins: [
+    '~/plugins/axios',
+    '~/plugins/virtual-scroller',
+    '~/plugins/virtual-scroll-list',
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
