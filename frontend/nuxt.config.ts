@@ -1,7 +1,5 @@
 import colors from 'vuetify/es5/util/colors'
 
-const purple = '#A458FF'
-
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
@@ -74,7 +72,7 @@ export default {
       dark: true,
       themes: {
         dark: {
-          primary: purple,
+          primary: '#355DFF',
           accent: colors.grey.darken3,
           secondary: colors.amber.darken3,
           info: colors.teal.lighten1,
