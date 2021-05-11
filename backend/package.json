@@ -1,20 +1,39 @@
 {
-   "name": "backend",
-   "version": "0.0.1",
-   "description": "Awesome project developed with TypeORM.",
-   "devDependencies": {
-      "ts-node": "3.3.0",
-      "@types/node": "^8.0.29",
-      "typescript": "3.3.3333"
-   },
-   "dependencies": {
-      "typeorm": "0.2.32",
-      "reflect-metadata": "^0.1.10",
-      "mysql": "^2.14.1",
-      "express": "^4.15.4",
-      "body-parser": "^1.18.1"
-   },
-   "scripts": {
-      "start": "ts-node src/index.ts"
-   }
+  "name": "backend",
+  "version": "0.0.1",
+  "description": "Awesome project developed with TypeORM.",
+  "devDependencies": {
+    "ts-node": "3.3.0",
+    "@types/node": "^8.0.29",
+    "typescript": "3.3.3333"
+  },
+  "dependencies": {
+    "@types/cors": "^2.8.10",
+    "@types/express-jwt": "^6.0.1",
+    "@types/jsonwebtoken": "^8.5.1",
+    "@types/morgan": "^1.9.2",
+    "@types/passport": "^1.0.6",
+    "@types/passport-google-oauth2": "^0.1.3",
+    "@types/passport-oauth2": "^1.4.10",
+    "body-parser": "^1.18.1",
+    "cors": "^2.8.5",
+    "express": "^4.15.4",
+    "express-jwt": "^6.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "mysql": "^2.14.1",
+    "passport": "^0.4.1",
+    "passport-google-oauth2": "^0.2.0",
+    "passport-oauth2": "^1.5.0",
+    "reflect-metadata": "^0.1.10",
+    "ts-dotenv": "^0.8.3",
+    "ts-node-dev": "^1.1.6",
+    "typeorm": "0.2.32"
+  },
+  "scripts": {
+    "start": "set debug=* && ts-node-dev --respawn --transpile-only ./src/index.ts",
+    "sync": "ts-node ./node_modules/typeorm/cli.js schema:sync",
+    "drop": "ts-node ./node_modules/typeorm/cli.js schema:drop",
+    "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run"
+  }
 }
