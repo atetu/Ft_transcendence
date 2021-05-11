@@ -29,7 +29,9 @@ interface Link {
   url: string
 }
 
-@Component
+@Component({
+  middleware: 'authenticated',
+})
 export default class Default extends Vue {
   public links: Link[] = [
     {

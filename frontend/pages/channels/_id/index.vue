@@ -66,7 +66,8 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { channelsModule } from '~/store/channels/const'
 
 import { Channel } from '~/models'
-import ScrollItem from '~/components/channel/message/ScrollItem'
+
+const ScrollItem = require('~/components/channel/message/ScrollItem')
 
 @Component({
   async fetch() {
