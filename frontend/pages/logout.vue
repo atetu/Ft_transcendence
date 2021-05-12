@@ -7,7 +7,13 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { authModule } from '~/store/auth/const'
 
-@Component
+@Component({
+  head() {
+    return {
+      title: 'Logout',
+    }
+  },
+})
 export default class Logout extends Vue {
   @authModule.Action('logout')
   logout!: () => void

@@ -38,6 +38,11 @@ import { authModule } from '~/store/auth/const'
 
 @Component({
   layout: 'empty',
+  head() {
+    return {
+      title: 'Authentication',
+    }
+  },
 })
 export default class Index extends Vue {
   @authModule.State('providers')

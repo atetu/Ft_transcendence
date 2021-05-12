@@ -12,6 +12,13 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
     return provider in store.state.auth.providers
   },
+  head() {
+    const self: any = this
+
+    return {
+      title: `${self.provider} - Authentication`,
+    }
+  },
 })
 export default class Callback extends Vue {
   profile: any = null
