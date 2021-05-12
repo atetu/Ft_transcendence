@@ -1,6 +1,6 @@
 import { Plugin } from '@nuxt/types'
 
-const plugin: Plugin = ({ $axios, store }) => {
+const plugin: Plugin = ({ $axios, store, redirect }) => {
   $axios.defaults.baseURL = window.location.origin + '/api/' // 'http://127.0.0.1:3001/' // window.location.origin + '/api/'
 
   $axios.interceptors.request.use((config) => {
@@ -18,19 +18,28 @@ const plugin: Plugin = ({ $axios, store }) => {
       return response
     },
     async (error) => {
-      if (error.response.status === 401) {
+      if (
+        error.response.status === 401 &&
+        !error.response.data?.authenticated /* if admin only page */
+      ) {
         let newTokens
 
         try {
-          newTokens = await $axios.$post('/auth/refresh-token', {
-            accessToken: store.state.auth.accessToken,
-            refreshToken: store.state.auth.refreshToken,
-          })
+          newTokens = (
+            await $axios.$post('/auth/refresh-token', {
+              accessToken: store.state.auth.accessToken,
+              refreshToken: store.state.auth.refreshToken,
+            })
+          ).tokens
         } catch (error2) {
           console.error(
             'Another error has happen when trying to refresh the tokens',
             error2
           )
+
+          if (error2.response?.data?.message === 'invalid access token') {
+            redirect('/auth')
+          }
 
           return Promise.reject(error)
         }

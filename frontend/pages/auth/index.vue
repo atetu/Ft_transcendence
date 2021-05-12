@@ -5,7 +5,11 @@
         <v-col align="center">
           <h1>ft-transcendence</h1>
           <div class="text-center mt-16" style="max-width: 400px">
-            <v-progress-linear v-show="loading" indeterminate />
+            <v-alert v-if="state === 'error'" type="error">
+              failed to authenticate
+            </v-alert>
+            <v-alert v-if="state === 'success'" type="info"> success </v-alert>
+            <v-progress-linear v-if="loading" indeterminate />
             <v-btn
               v-for="(provider, key) in providers"
               :key="key"
@@ -40,6 +44,7 @@ export default class Index extends Vue {
   providers!: { [key: string]: AuthProvider }
 
   loading = false
+  state: string | null = null
 
   use(key: string) {
     if (this.loading) {
@@ -48,16 +53,47 @@ export default class Index extends Vue {
 
     const provider = this.providers[key]
 
+    this.state = null
     this.loading = true
 
-    function onMessage(event: MessageEvent) {
-      if (event.data !== 'popup-done') {
-        return
+    const onMessage = async (event: MessageEvent) => {
+      let done = false
+
+      switch (event.data) {
+        case 'fetching': {
+          console.log('fetching')
+
+          break
+        }
+
+        case 'success': {
+          console.log('success')
+
+          await this.$store.dispatch('auth/restoreTokens')
+          await this.$store.dispatch('auth/fetch')
+
+          done = true
+          break
+        }
+
+        case 'error': {
+          console.log('error')
+
+          done = true
+          break
+        }
+
+        default: {
+          return
+        }
       }
 
-      console.log('authed')
+      this.state = event.data
 
-      window.removeEventListener('message', onMessage)
+      if (done) {
+        this.loading = false
+        window.removeEventListener('message', onMessage)
+      }
     }
 
     window.addEventListener('message', onMessage)
@@ -84,9 +120,12 @@ export default class Index extends Vue {
     )
 
     if (childWindow) {
-      childWindow.onunload = () => {
-        this.loading = false
-      }
+      const timerId = setInterval(() => {
+        if (childWindow.closed) {
+          clearInterval(timerId)
+          this.loading = false
+        }
+      }, 100)
     }
   }
 }

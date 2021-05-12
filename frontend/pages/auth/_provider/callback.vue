@@ -4,6 +4,8 @@
       <v-row align="center">
         <v-col align="center">
           <h1>ft-transcendence</h1>
+
+          <v-progress-circular indeterminate />
           {{ callbackUrl }} : {{ code }} <br />
           {{ profile }}
         </v-col>
@@ -28,7 +30,7 @@ export default class Callback extends Vue {
 
   mounted() {
     if (window.opener) {
-      window.opener.postMessage('popup-done', '*')
+      window.opener.postMessage('fetching', '*')
 
       this.$axios
         .get(this.callbackUrl, {
@@ -36,20 +38,28 @@ export default class Callback extends Vue {
             code: this.code,
           },
         })
-        .then((response) => {
-          this.profile = response.data
+        .then(async (response) => {
+          const { accessToken, refreshToken } = response.data.user
+
+          await this.$store.dispatch('auth/updateTokens', {
+            accessToken,
+            refreshToken,
+          })
+
+          await this.$store.dispatch('auth/fetch')
+
+          window.opener.postMessage('success', '*')
         })
         .catch((error) => {
-          this.profile = error
+          console.log(error)
+
+          window.opener.postMessage(`error`, '*')
         })
-
-      console.log(this.$route)
-
-      // setTimeout(() => {
-      //   window.close()
-      // }, 1000)
+        .then(() => {
+          setTimeout(() => window.close(), 1000)
+        })
     } else {
-      console.log('no opener')
+      this.$router.push('/auth')
     }
   }
 
