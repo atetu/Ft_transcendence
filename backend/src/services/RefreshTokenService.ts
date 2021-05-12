@@ -2,9 +2,11 @@ import * as crypto from "crypto";
 
 import { getRepository, MigrationInterface, QueryRunner } from "typeorm";
 
-import { User, RefreshToken } from "../entities";
+import { User } from "../entities/User";
+import { RefreshToken } from "../entities/RefreshToken";
 import Tokens from "../models/Tokens";
 import { generateJWT } from "./JWTService";
+import assert = require("assert");
 
 function randomTokenString() {
   return crypto.randomBytes(40).toString("hex");
@@ -15,10 +17,19 @@ export async function getRefreshToken(token: string): Promise<RefreshToken> {
 
   const refreshToken = await repository.findOne({
     where: { token },
+    relations: ["user"],
   });
 
-  if (!refreshToken || !refreshToken.active) {
+  if (!refreshToken) {
     throw "invalid token";
+  }
+
+  if (!refreshToken.active) {
+    throw "inactive token";
+  }
+
+  if (refreshToken.expired) {
+    throw "expired token";
   }
 
   return refreshToken;

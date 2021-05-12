@@ -1,8 +1,6 @@
-import * as crypto from "crypto";
+import { getRepository } from "typeorm";
 
-import { getRepository, MigrationInterface, QueryRunner } from "typeorm";
-
-import { User } from "../entities";
+import { User } from "../entities/User";
 import Tokens from "../models/Tokens";
 import { generateJWT } from "./JWTService";
 import { generateRefreshToken } from "./RefreshTokenService";

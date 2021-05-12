@@ -2,7 +2,7 @@ import * as jsonwebtoken from "jsonwebtoken";
 
 import { env } from "../app";
 
-import { User } from "../entities";
+import { User } from "../entities/User";
 
 export function generateJWT(user: User): string {
   return jsonwebtoken.sign(

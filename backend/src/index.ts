@@ -27,9 +27,22 @@ createConnection()
 
     app.use(function (err, req, res, next) {
       if (err.name === "UnauthorizedError") {
+        if (err.inner && err.inner.name === "TokenExpiredError") {
+          return res.status(401).send({
+            message: "invalid access token",
+          });
+        } else {
+          return res.status(403).send({
+            message: "invalid access token",
+          });
+        }
+      } else if (err.name === "ValidationError") {
         return res.status(403).send({
-          message: "no access token",
+          message: "validation error",
+          info: err.messages,
         });
+      } else {
+        next(err);
       }
     });
 
