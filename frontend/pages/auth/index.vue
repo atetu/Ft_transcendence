@@ -72,6 +72,8 @@ export default class Index extends Vue {
           await this.$store.dispatch('auth/restoreTokens')
           await this.$store.dispatch('auth/fetch')
 
+          this.$router.push('/')
+
           done = true
           break
         }

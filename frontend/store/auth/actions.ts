@@ -32,6 +32,11 @@ export const actions: AuthActions = {
     })
   },
 
+  async logout({ commit, dispatch }) {
+    await dispatch('clearTokens')
+    commit('setUser', null)
+  },
+
   async fetch({ commit }) {
     const user: User = await this.$axios.$get('/users/@me')
 

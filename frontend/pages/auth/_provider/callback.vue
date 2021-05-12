@@ -1,17 +1,5 @@
 <template>
-  <v-main>
-    <v-container fill-height fluid>
-      <v-row align="center">
-        <v-col align="center">
-          <h1>ft-transcendence</h1>
-
-          <v-progress-circular indeterminate />
-          {{ callbackUrl }} : {{ code }} <br />
-          {{ profile }}
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-main>
+  <page-loading />
 </template>
 
 <script lang="ts">
@@ -50,13 +38,11 @@ export default class Callback extends Vue {
 
           window.opener.postMessage('success', '*')
         })
-        .catch((error) => {
-          console.log(error)
-
+        .catch((_error) => {
           window.opener.postMessage(`error`, '*')
         })
         .then(() => {
-          setTimeout(() => window.close(), 1000)
+          setTimeout(() => window.close(), 10)
         })
     } else {
       this.$router.push('/auth')

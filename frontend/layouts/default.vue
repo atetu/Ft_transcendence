@@ -64,6 +64,11 @@ export default class Default extends Vue {
       icon: 'sword-cross',
       url: '/wars',
     },
+    {
+      title: 'logout',
+      icon: 'logout',
+      url: '/logout',
+    },
   ]
 
   get drawer(): boolean {
