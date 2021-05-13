@@ -63,7 +63,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import ScrollItem from '~/components/channel/message/ScrollItem'
+import ScrollItem from '~/components/channel/message/ScrollItem.vue'
 
 import { channelsModule } from '~/store/channels/const'
 
