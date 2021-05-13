@@ -33,7 +33,8 @@
     "typeorm": "0.2.32"
   },
   "scripts": {
-    "start": "set debug=* && ts-node-dev --respawn --transpile-only ./src/index.ts",
+    "dev": "set debug=* && ts-node-dev --respawn --transpile-only ./src/index.ts",
+    "start": "ts-node ./src/index.ts",
     "sync": "ts-node ./node_modules/typeorm/cli.js schema:sync",
     "drop": "ts-node ./node_modules/typeorm/cli.js schema:drop",
     "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run"
