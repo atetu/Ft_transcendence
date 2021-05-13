@@ -18,6 +18,7 @@ export const initState = (): AuthState => ({
   },
   accessToken: null,
   refreshToken: null,
+  user: null,
 })
 
 export default initState
