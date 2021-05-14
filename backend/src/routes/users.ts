@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response, Router } from "express";
-import authorize from "../middlewares/authorize";
+import { authorizeRoute } from "../middlewares/authorize";
 
 const router = Router();
 
 router.get(
   "/@me",
-  authorize(),
+  authorizeRoute(),
   (req: Request, res: Response, next: NextFunction) => {
     res.status(200).send(req.user);
   }

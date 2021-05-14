@@ -9,6 +9,13 @@ import * as morgan from "morgan";
 import * as passport from "passport";
 import routes from "./routes";
 import * as oauth from "./security/oauth";
+import { createServer } from "http";
+import { Server, Socket } from "socket.io";
+import * as jwt from "jsonwebtoken";
+import { env } from "./app";
+import { getUser } from "./services/UserService";
+import e = require("express");
+import { authorizeSocket } from "./middlewares/authorize";
 
 const PORT = 3001;
 
@@ -24,6 +31,22 @@ createConnection()
     app.use(express.json());
     app.use(passport.initialize());
     app.use(routes);
+
+    const httpServer = createServer(app);
+    const io = new Server(httpServer, {
+      // ...
+    });
+
+    io.on("connection", (socket) => {
+      console.log("connected: " + socket.client.conn.id);
+    });
+
+    io.use(authorizeSocket());
+
+    let zzz = 0;
+    setInterval(() => {
+      io.emit("counter", ++zzz);
+    }, 1000);
 
     app.use(function (err, req, res, next) {
       if (err.name === "UnauthorizedError") {
@@ -46,8 +69,8 @@ createConnection()
       }
     });
 
-    app.listen(PORT);
-
-    console.log(`Started on port ${PORT}`);
+    const server = httpServer.listen(PORT, () => {
+      console.log(`Started on port ${PORT}`);
+    });
   })
   .catch((error) => console.log(error));

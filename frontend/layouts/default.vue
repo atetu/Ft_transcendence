@@ -1,6 +1,11 @@
 <template>
   <v-app dark :class="classes">
-    <v-system-bar app> ft-transcendence </v-system-bar>
+    <v-system-bar app>
+      ft-transcendence
+      <v-spacer />
+      <v-icon v-if="$socket.connected" color="green">mdi-power-plug</v-icon>
+      <v-icon v-else color="red">mdi-power-plug-off</v-icon>
+    </v-system-bar>
 
     <v-navigation-drawer v-model="drawer" app fixed mini-variant>
       <navigation-profile-dot />
@@ -22,6 +27,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { Socket } from 'vue-socket.io-extended'
 
 interface Link {
   icon: string
@@ -87,6 +93,11 @@ export default class Default extends Vue {
       light: !isDark,
       'mini-drawer-open': this.drawer,
     }
+  }
+
+  @Socket()
+  connect() {
+    console.log('connection established')
   }
 }
 </script>

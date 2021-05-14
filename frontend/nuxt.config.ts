@@ -30,6 +30,10 @@ export default {
   plugins: [
     '~/plugins/axios',
     '~/plugins/auth',
+    {
+      src: '~/plugins/socket',
+      ssr: false,
+    },
     '~/plugins/virtual-scroller',
     '~/plugins/virtual-scroll-list',
   ],
