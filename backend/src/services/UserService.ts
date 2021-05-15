@@ -21,4 +21,8 @@ export default class UserService {
   async save(user: User): Promise<User> {
     return this.repository.save(user);
   }
+
+  async all(): Promise<User[]> {
+    return this.repository.find();
+  }
 }
