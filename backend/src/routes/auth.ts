@@ -4,7 +4,7 @@ import * as joi from "@hapi/joi";
 
 import { validateRequest } from "../middlewares/validate-request";
 
-import { refreshToken } from "../services/RefreshTokenService";
+import RefreshToken from "../services/RefreshTokenService";
 
 const router = Router();
 

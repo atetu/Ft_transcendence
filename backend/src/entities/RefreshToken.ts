@@ -2,17 +2,16 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  Unique,
   Index,
   ManyToOne,
 } from "typeorm";
 
-import { User } from "./User";
+import User from "./User";
 
 @Entity({
   name: "refresh_tokens",
 })
-export class RefreshToken {
+export default class RefreshToken {
   @PrimaryGeneratedColumn()
   id: number;
 

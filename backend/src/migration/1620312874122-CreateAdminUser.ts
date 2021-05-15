@@ -1,6 +1,8 @@
+import { Service } from "typedi";
 import { getRepository, MigrationInterface, QueryRunner } from "typeorm";
-import { User } from "../entities/User";
+import User from "../entities/User";
 
+@Service()
 export class CreateAdminUser1620312874122 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     const user = new User();

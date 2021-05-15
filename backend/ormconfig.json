@@ -1,4 +1,5 @@
 {
+  "name": "default",
   "type": "mysql",
   "host": "ft-transcendence-mysql",
   "port": 3306,

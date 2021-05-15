@@ -1,25 +1,24 @@
-import { getRepository } from "typeorm";
+import { Service, Inject } from "typedi";
+import { InjectRepository } from "typeorm-typedi-extensions";
+import User from "../entities/User";
+import { UserRepository } from "../repositories/UserRepository";
 
-import { User } from "../entities/User";
-import Tokens from "../models/Tokens";
-import { generateJWT } from "./JWTService";
-import { generateRefreshToken } from "./RefreshTokenService";
+@Service()
+export default class UserService {
+  constructor(
+    @InjectRepository()
+    private readonly repository: UserRepository
+  ) {}
 
-export async function getUser(id: number): Promise<User> {
-  const repository = getRepository(User);
+  async findById(id: number): Promise<User> {
+    return this.repository.findOne(id);
+  }
 
-  return repository.findOne(id);
-}
+  async findByEmail(email: string): Promise<User> {
+    return this.repository.findByEmail(email);
+  }
 
-export async function generateTokens(user: User): Promise<Tokens> {
-  const refreshToken = await generateRefreshToken(user);
-
-  return {
-    accessToken: generateJWT(user),
-    refreshToken: refreshToken.token,
-  };
-}
-
-export async function authenticate(user: User): Promise<Tokens> {
-  return generateTokens(user);
+  async save(user: User): Promise<User> {
+    return this.repository.save(user);
+  }
 }

@@ -1,11 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, Unique, Index, OneToMany } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Index,
+  OneToMany,
+} from "typeorm";
 
-import { RefreshToken } from "./RefreshToken";
+import RefreshToken from "./RefreshToken";
 
 @Entity({
   name: "users",
 })
-export class User {
+export default class User {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -19,9 +25,9 @@ export class User {
 
   @Column()
   admin: boolean;
-  
-  @OneToMany(() => RefreshToken, refreshToken => refreshToken.user, {
-    cascade: ['remove'],
+
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user, {
+    cascade: ["remove"],
   })
   refreshTokens: RefreshToken[];
 }
