@@ -25,12 +25,10 @@ const plugin: Plugin = ({ $axios, store, redirect }) => {
         let newTokens
 
         try {
-          newTokens = (
-            await $axios.$post('/auth/refresh-token', {
-              accessToken: store.state.auth.accessToken,
-              refreshToken: store.state.auth.refreshToken,
-            })
-          ).tokens
+          newTokens = await $axios.$post('/auth/refresh-token', {
+            accessToken: store.state.auth.accessToken,
+            refreshToken: store.state.auth.refreshToken,
+          })
         } catch (error2) {
           console.error(
             'Another error has happen when trying to refresh the tokens',
