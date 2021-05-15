@@ -27,7 +27,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { Socket } from 'vue-socket.io-extended'
 
 interface Link {
   icon: string
@@ -93,11 +92,6 @@ export default class Default extends Vue {
       light: !isDark,
       'mini-drawer-open': this.drawer,
     }
-  }
-
-  @Socket()
-  connect() {
-    console.log('connection established')
   }
 }
 </script>

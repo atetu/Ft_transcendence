@@ -15,6 +15,7 @@
     "@nuxtjs/proxy": "^2.1.0",
     "@types/socket.io": "^2.1.13",
     "@types/socket.io-client": "^1.4.36",
+    "camelcase": "^6.2.0",
     "core-js": "^3.9.1",
     "intersection-observer": "^0.12.0",
     "nuxt": "^2.15.4",

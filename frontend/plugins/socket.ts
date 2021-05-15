@@ -3,6 +3,7 @@ import { Plugin } from '@nuxt/types'
 
 import io from 'socket.io-client'
 import VueSocketIOExt from 'vue-socket.io-extended'
+import camelcase from 'camelcase'
 
 const socket = io('http://localhost:3000/', {
   path: '/api/socket.io',
@@ -11,7 +12,7 @@ const socket = io('http://localhost:3000/', {
 
 const plugin: Plugin = ({ store }) => {
   socket.onAny((event, ...args) => {
-    console.log(`got ${event}:`, args.join(', '))
+    console.log(`got ${event}:`, args)
   })
 
   let retried = false
@@ -50,7 +51,9 @@ const plugin: Plugin = ({ store }) => {
     }
   )
 
-  Vue.use(VueSocketIOExt, socket, { store })
+  Vue.use(VueSocketIOExt, socket, {
+    store,
+  })
 
   store.watch(
     (_state, getters) => getters['auth/isAuthenticated'],
