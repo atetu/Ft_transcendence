@@ -23,6 +23,8 @@ export type AuthStore = Store<RootState>
 export interface AuthActions extends ActionTree<AuthState, RootState> {
   restoreTokens(this: AuthStore, context: AuthActionContext): void
 
+  refreshTokens(this: AuthStore, context: AuthActionContext): void
+
   updateTokens(
     this: AuthStore,
     context: AuthActionContext,

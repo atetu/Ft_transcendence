@@ -32,15 +32,14 @@ export const actions: AuthActions = {
     })
   },
 
-  async refreshToken({ dispatch, state }) {
-    const newTokens = (
-      await this.$axios.$post('/auth/refresh-token', {
+  async refreshTokens({ dispatch, state }) {
+    const { accessToken, refreshToken } = await this.$axios.$post(
+      '/auth/refresh-token',
+      {
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
-      })
-    ).tokens
-
-    const { accessToken, refreshToken } = newTokens
+      }
+    )
 
     await dispatch('updateTokens', {
       accessToken,
