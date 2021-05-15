@@ -34,7 +34,7 @@ export default class Callback extends Vue {
           },
         })
         .then(async (response) => {
-          const { accessToken, refreshToken } = response.data.user
+          const { accessToken, refreshToken } = response.data
 
           await this.$store.dispatch('auth/updateTokens', {
             accessToken,
@@ -45,7 +45,9 @@ export default class Callback extends Vue {
 
           window.opener.postMessage('success', '*')
         })
-        .catch((_error) => {
+        .catch((error) => {
+          console.log(error)
+
           window.opener.postMessage(`error`, '*')
         })
         .then(() => {
