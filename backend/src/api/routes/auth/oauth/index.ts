@@ -1,13 +1,12 @@
-import * as passport from "passport";
 import * as celebrate from "celebrate";
 import * as express from "express";
+import * as passport from "passport";
 import { Container } from "typedi";
-import OAuthService from "../../services/OAuthService";
-import AuthService from "../../services/AuthService";
+import OAuthService from "../../../../services/OAuthService";
 
 function oauth(route: express.Router, name: string, scopes: string[]) {
   route.get(
-    `/oauth/${name}`,
+    `/${name}`,
     passport.authenticate(name, {
       session: false,
       scope: scopes,
@@ -15,7 +14,7 @@ function oauth(route: express.Router, name: string, scopes: string[]) {
   );
 
   route.get(
-    `/oauth/${name}/callback`,
+    `/${name}/callback`,
     celebrate.celebrate({
       [celebrate.Segments.QUERY]: {
         code: celebrate.Joi.string().required(),
@@ -26,7 +25,7 @@ function oauth(route: express.Router, name: string, scopes: string[]) {
         console.log(err);
 
         if (err) {
-          next(err)
+          next(err);
         } else {
           res.status(200).send(user);
         }
@@ -36,37 +35,16 @@ function oauth(route: express.Router, name: string, scopes: string[]) {
 }
 
 export default (app: express.Router) => {
-  const authService = Container.get(AuthService);
   const oauthService = Container.get(OAuthService);
 
   const route = express.Router();
 
-  app.use("/auth", route);
+  app.use("/oauth", route);
 
   oauth(route, "google", ["profile", "email"]);
   oauth(route, "marvin", ["public"]);
 
   oauthService.install();
-
-  route.post(
-    "/refresh-token",
-    celebrate.celebrate({
-      [celebrate.Segments.BODY]: {
-        accessToken: celebrate.Joi.string().required(),
-        refreshToken: celebrate.Joi.string().required(),
-      },
-    }),
-    async (req, res, next) => {
-      try {
-
-        const tokens = await authService.refresh(req.body.refreshToken);
-
-        res.status(200).send(tokens);
-      } catch (error) {
-        next(error);
-      }
-    }
-  );
 
   return route;
 };
