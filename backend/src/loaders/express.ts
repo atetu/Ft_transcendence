@@ -16,6 +16,11 @@ export default async ({ app }: { app: express.Application }) => {
 
   app.use(cors());
 
+  app.use((req, res, next) => {
+      res.header('Content-Type', 'application/json');
+      next();
+  });
+
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 

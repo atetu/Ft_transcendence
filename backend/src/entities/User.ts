@@ -5,7 +5,9 @@ import {
   Index,
   OneToMany,
 } from "typeorm";
-
+import Channel from "./Channel";
+import ChannelMessage from "./ChannelMessage";
+import ChannelUser from "./ChannelUser";
 import RefreshToken from "./RefreshToken";
 
 @Entity({
@@ -30,4 +32,13 @@ export default class User {
     cascade: ["remove"],
   })
   refreshTokens: RefreshToken[];
+
+  @OneToMany(() => Channel, (channel) => channel.owner)
+  ownerChannels: Promise<Channel[]>;
+
+  @OneToMany(() => ChannelUser, (channelUser) => channelUser.user)
+  channelUsers: Promise<ChannelUser[]>;
+
+  @OneToMany(() => ChannelMessage, (channelMessage) => channelMessage.user)
+  channelMessages: Promise<ChannelMessage[]>;
 }

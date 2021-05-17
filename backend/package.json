@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "description": "Awesome project developed with TypeORM.",
   "devDependencies": {
-    "ts-node": "3.3.0",
     "@types/node": "^8.0.29",
-    "typescript": "3.3.3333"
+    "ts-node": "3.3.0",
+    "typescript": "^4.3.0-beta"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
@@ -24,6 +24,7 @@
     "cors": "^2.8.5",
     "express": "^4.15.4",
     "express-jwt": "^6.0.0",
+    "jackson-js": "^1.1.0",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
     "mysql": "^2.14.1",

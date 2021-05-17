@@ -1,5 +1,5 @@
 <template>
-  <v-progress-circular :value="100" width="1" :color="color">
+  <v-progress-circular value="100" width="1" :color="color">
     <v-avatar>
       <v-icon>mdi-sword</v-icon>
     </v-avatar>
