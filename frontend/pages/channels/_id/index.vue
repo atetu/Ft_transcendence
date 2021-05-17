@@ -1,6 +1,6 @@
 <template>
   <div v-if="channel" class="fill-height">
-    <v-app-bar app clipped-right class="mini-drawer-offset">
+    <v-app-bar app clipped-right>
       <v-toolbar-title>{{ channel.name }}</v-toolbar-title>
       <v-spacer />
       <v-btn :input-value="true" icon>
@@ -26,7 +26,7 @@
       </v-list>
     </v-card>
 
-    <v-footer app height="72" inset class="mini-drawer-offset">
+    <v-footer app height="72" inset>
       <v-text-field background-color="grey lighten-1" dense solo class="mt-2">
         <template #append-outer>
           <v-btn icon class="ml-2">

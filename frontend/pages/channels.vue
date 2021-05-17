@@ -4,7 +4,7 @@
     :error="$fetchState.error"
     @refresh="$fetch"
   >
-    <v-main class="mini-drawer-offset fill-height">
+    <v-main class="fill-height">
       <nuxt-child />
     </v-main>
   </channel-view-base>

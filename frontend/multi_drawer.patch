@@ -1,0 +1,4 @@
+41125c41125
+<     this.application[location] = (_a = {}, _a[uid] = size, _a);
+---
+>     this.application[location][uid] = size; // = (_a = {}, _a[uid] = size, _a);
