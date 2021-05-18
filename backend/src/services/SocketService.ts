@@ -6,12 +6,20 @@ import {
   OnDisconnect,
   ConnectedSocket,
   EmitOnSuccess,
+  OnMessage,
+  MessageBody,
 } from "socket-controllers";
+import User from "../entities/User";
+import ChannelService from "./ChannelService";
+import Channel from "../entities/Channel";
+import ChannelMessage from "../entities/ChannelMessage";
 
 @Service()
 @SocketController()
 export default class SocketService {
   connectedUserIds = {};
+
+  private channelService: ChannelService = Container.get(ChannelService);
 
   // constructor() {
   //   const io = Container.get(socketio.Server)
@@ -29,15 +37,12 @@ export default class SocketService {
     if (this.connectedUserIds[id]) {
       this.connectedUserIds[id] += 1;
     } else {
-      socket.broadcast.emit('client_connected_join', id);
+      socket.broadcast.emit("client_connected_join", id);
 
       this.connectedUserIds[id] = 1;
     }
 
-    console.log("client connected: " + socket.data.user.id);
-    console.log(this.connectedUserIds);
-
-    return Object.keys(this.connectedUserIds)
+    return Object.keys(this.connectedUserIds);
   }
 
   @OnDisconnect()
@@ -48,13 +53,40 @@ export default class SocketService {
       const now = (this.connectedUserIds[id] -= 1);
 
       if (now === 0) {
-        socket.broadcast.emit('client_connected_quit', id);
+        socket.broadcast.emit("client_connected_quit", id);
 
         delete this.connectedUserIds[id];
       }
     }
+  }
 
-    console.log("client disconnected: " + socket.data.user.id);
-    console.log(this.connectedUserIds);
+  @OnMessage("channel_connect")
+  async channelConnect(
+    @ConnectedSocket() socket: any,
+    @MessageBody() body: any
+  ) {
+    const user: User = socket.data.user;
+    const { channelId } = body;
+
+    try {
+      const channel = await this.channelService.findById(channelId);
+
+      if (!channel) {
+        throw new Error("channel not found");
+      }
+
+      socket.join(channel.toRoom());
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async broadcastMessage(message: ChannelMessage) {
+    const io = Container.get(socketio.Server);
+
+    const channel = message.channel;
+
+    io.to(channel.toRoom()).emit("channel_message", message.toJSON());
   }
 }

@@ -1,6 +1,7 @@
 import * as express from "express";
 import Container from "typedi";
 import ChannelService from "../../../services/ChannelService";
+import middlewares from "../../middlewares";
 import _id from "./_id";
 
 export default (app: express.Router) => {
@@ -8,7 +9,7 @@ export default (app: express.Router) => {
 
   const route = express.Router();
 
-  app.use("/channels", /*middlewares.authorize(false), */ route);
+  app.use("/channels", middlewares.authorize(false), route);
 
   route.get("/", async (req, res, next) => {
     const channels = await channelService.all();

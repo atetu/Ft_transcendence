@@ -53,6 +53,10 @@ export default class Channel {
   @OneToMany(() => ChannelMessage, (channelMessage) => channelMessage.channel)
   messages: Promise<ChannelMessage[]>;
 
+  public toRoom(): string {
+    return `channel_${this.id}`
+  }
+
   public toJSON() {
     return {
       id: this.id,

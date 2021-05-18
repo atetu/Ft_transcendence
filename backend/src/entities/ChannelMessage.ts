@@ -15,7 +15,7 @@ export default class ChannelMessage {
   id: number;
 
   @ManyToOne(() => Channel, (channel) => channel.messages)
-  channel: Promise<Channel>;
+  channel: Channel;
 
   @ManyToOne(() => User, (channel) => channel.channelMessages, { eager: true })
   user: User;
