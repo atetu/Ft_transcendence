@@ -40,6 +40,8 @@ export interface CurrentChannelActions
     context: CurrentChannelActionContext
   ): void
 
+  clear(this: CurrentChannelStore, context: CurrentChannelActionContext): void
+
   sendMessage(
     this: CurrentChannelStore,
     context: CurrentChannelActionContext,

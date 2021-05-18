@@ -39,6 +39,12 @@ export const actions: CurrentChannelActions = {
     }
   },
 
+  clear({ commit }) {
+    commit('set', null)
+    commit('setUsers', [])
+    commit('setMessages', [])
+  },
+
   async sendMessage({ state }, message) {
     const id = state.the?.id
 
