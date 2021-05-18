@@ -1,25 +1,17 @@
 import Container, { Service, Inject } from "typedi";
 import * as socketio from "socket.io";
-import {
-  SocketController,
-  OnConnect,
-  OnDisconnect,
-  ConnectedSocket,
-  EmitOnSuccess,
-  OnMessage,
-  MessageBody,
-} from "socket-controllers";
 import User from "../entities/User";
 import ChannelService from "./ChannelService";
-import Channel from "../entities/Channel";
 import ChannelMessage from "../entities/ChannelMessage";
 
 @Service()
-@SocketController()
 export default class SocketService {
   connectedUserIds = {};
 
-  private channelService: ChannelService = Container.get(ChannelService);
+  constructor(
+    @Inject()
+    private channelService: ChannelService
+  ) {}
 
   // constructor() {
   //   const io = Container.get(socketio.Server)
@@ -29,9 +21,7 @@ export default class SocketService {
   //   }, 8000)
   // }
 
-  @OnConnect()
-  @EmitOnSuccess("client_connected_list")
-  connect(@ConnectedSocket() socket: any) {
+  connect(socket: any) {
     const { id } = socket.data.user;
 
     if (this.connectedUserIds[id]) {
@@ -42,11 +32,10 @@ export default class SocketService {
       this.connectedUserIds[id] = 1;
     }
 
-    return Object.keys(this.connectedUserIds);
+    socket.emit("client_connected_list", Object.keys(this.connectedUserIds));
   }
 
-  @OnDisconnect()
-  disconnect(@ConnectedSocket() socket: any) {
+  disconnect(socket: any) {
     const { id } = socket.data.user;
 
     if (this.connectedUserIds[id]) {
@@ -60,11 +49,7 @@ export default class SocketService {
     }
   }
 
-  @OnMessage("channel_connect")
-  async channelConnect(
-    @ConnectedSocket() socket: any,
-    @MessageBody() body: any
-  ) {
+  async channelConnect(socket: any, body: any, callnack: any) {
     const user: User = socket.data.user;
     const { channelId } = body;
 
@@ -76,9 +61,10 @@ export default class SocketService {
       }
 
       socket.join(channel.toRoom());
+      callnack(null, 1)
     } catch (error) {
       console.log(error);
-      throw error;
+      callnack(error, null)
     }
   }
 

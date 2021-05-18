@@ -3,7 +3,7 @@ import * as socketio from "socket.io";
 import { Container } from "typedi";
 import * as socketController from "socket-controllers";
 import SocketService from "../services/SocketService";
-import { AuthenticationMiddleware } from "../middlewares/SocketAuthentication";
+import socketAuthentication from "../middlewares/SocketAuthentication";
 
 export default async ({ server }: { server: http.Server }) => {
   const io = new socketio.Server(server, {
@@ -11,13 +11,24 @@ export default async ({ server }: { server: http.Server }) => {
   });
 
   Container.set(socketio.Server, io);
-  
-  socketController.useSocketServer(io, {
+  const socketService = Container.get(SocketService);
+
+  io.use(socketAuthentication());
+
+  /*socketController.useSocketServer(io, {
     controllers: [SocketService],
     middlewares: [AuthenticationMiddleware],
-  });
+  });*/
 
   io.on("connection", (socket) => {
-    console.log("connected: " + socket.client.conn.id);
+    socketService.connect(socket);
+
+    socket.on('disconnect', () => {
+      socketService.disconnect(socket);
+    })
+
+    socket.on('channel_connect', (body, callback) => {
+      socketService.channelConnect(socket, body, callback)
+    })
   });
 };

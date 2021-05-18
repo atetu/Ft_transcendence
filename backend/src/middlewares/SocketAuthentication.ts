@@ -4,17 +4,16 @@ import Container from "typedi";
 import config from "../config";
 import UserService from "../services/UserService";
 
-@Middleware()
-export class AuthenticationMiddleware implements MiddlewareInterface {
-  private userService = Container.get(UserService);
+export default () => {
+  const userService = Container.get(UserService);
 
-  async use(socket: any, next: (err?: any) => any) {
+  return async (socket: any, next: (err?: any) => any) => {
     const { accessToken } = socket.handshake.auth;
 
     try {
       const payload: any = jsonwebtoken.verify(accessToken, config.JWT_SECRET);
 
-      const user = await this.userService.findById(payload.id);
+      const user = await userService.findById(payload.id);
 
       if (!user) {
         throw new Error("user not found");
@@ -25,5 +24,5 @@ export class AuthenticationMiddleware implements MiddlewareInterface {
     } catch (error) {
       next(error);
     }
-  }
-}
+  };
+};
