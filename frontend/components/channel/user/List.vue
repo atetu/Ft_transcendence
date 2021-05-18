@@ -1,25 +1,25 @@
 <template>
   <v-list>
     <channel-user-item
-      v-for="channelUser in channel.users"
-      :key="channelUser.user.id"
-      :channel-user="channelUser"
+      v-for="user in users"
+      :key="user.id"
+      :user="user"
       :channel="channel"
     />
   </v-list>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
-import { Channel } from '~/models'
+import { Channel, ChannelUser } from '~/models'
 
-export default Vue.extend({
-  props: {
-    channel: {
-      type: Object as PropType<Channel>,
-      required: true,
-    },
-  },
-})
+@Component
+export default class Drawer extends Vue {
+  @Prop({ type: Object })
+  channel!: Channel
+
+  @Prop({ type: Array })
+  users!: ChannelUser[]
+}
 </script>

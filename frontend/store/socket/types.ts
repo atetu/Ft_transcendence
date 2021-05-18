@@ -1,4 +1,5 @@
 import { Store, ActionContext, MutationTree, ActionTree } from 'vuex'
+import { ChannelMessage } from '~/models'
 
 import { RootState } from '../types'
 
@@ -16,6 +17,13 @@ export interface SocketActions extends ActionTree<SocketState, RootState> {
     this: SocketStore,
     context: SocketActionContext,
     payload: number[]
+  ): void
+
+  // eslint-disable-next-line camelcase
+  socket_channelMessage(
+    this: SocketStore,
+    context: SocketActionContext,
+    payload: ChannelMessage
   ): void
 }
 

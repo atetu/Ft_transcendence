@@ -1,5 +1,5 @@
 <template>
-  <channel-message-item :channel-message="source" />
+  <channel-message-item :message="source" />
 </template>
 
 <script lang="ts">

@@ -28,32 +28,32 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
-import { ChannelUser } from '~/models'
+import { Channel, ChannelUser } from '~/models'
 
-export default Vue.extend({
-  props: {
-    channelUser: {
-      type: Object as PropType<ChannelUser>,
-      required: true,
-    },
-    owner: {
-      type: Boolean as PropType<Boolean>,
-      required: false,
-      default: false,
-    },
-  },
-  computed: {
-    admin(): Boolean {
-      return this.channelUser.admin
-    },
-    banned(): Boolean {
-      return this.channelUser.banned
-    },
-    muted(): Boolean {
-      return this.channelUser.muted
-    },
-  },
-})
+@Component
+export default class Drawer extends Vue {
+  @Prop({ type: Object })
+  channel!: Channel
+
+  @Prop({ type: Object })
+  user!: ChannelUser
+
+  public get owner() {
+    return this.channel.owner?.id === this.user.id
+  }
+
+  public get admin() {
+    return this.user.admin
+  }
+
+  public get banned() {
+    return this.user.banned
+  }
+
+  public get muted() {
+    return this.user.muted
+  }
+}
 </script>

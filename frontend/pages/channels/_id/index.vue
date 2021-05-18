@@ -1,7 +1,7 @@
 <template>
   <div v-if="channel" class="fill-height">
     <v-app-bar app clipped-right>
-      <v-toolbar-title>{{ channel.name }}</v-toolbar-title>
+      <v-toolbar-title>{{ channel.name }} {{ id }} {{ $fetchState }}</v-toolbar-title>
       <v-spacer />
       <v-btn :input-value="true" icon>
         <v-icon>mdi-account-group</v-icon>
@@ -14,30 +14,18 @@
           class="fill-height"
           style="overflow-y: auto"
           data-key="id"
-          :data-sources="
-            Array.from({ length: 100 }, (_, v) => ({
-              id: v + 1,
-              user: channel.users[v % channel.users.length].user,
-              content: 'a'.repeat((v % 10) * 20 + 3) + v,
-            }))
-          "
+          :data-sources="messages"
           :data-component="itemComponent"
         />
       </v-list>
     </v-card>
 
     <v-footer app height="72" inset>
-      <v-text-field background-color="grey lighten-1" dense solo class="mt-2">
-        <template #append-outer>
-          <v-btn icon class="ml-2">
-            <v-icon>mdi-send</v-icon>
-          </v-btn>
-        </template>
-      </v-text-field>
+      <channel-message-input />
     </v-footer>
 
     <drawer-right>
-      <channel-user-list :channel="channel" />
+      <channel-user-list :channel="channel" :users="users" />
       <template #append>
         <v-list>
           <v-list-item>
@@ -61,17 +49,44 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Watch, Vue } from 'nuxt-property-decorator'
 
 import ScrollItem from '~/components/channel/message/ScrollItem.vue'
 
-import { channelsModule } from '~/store/channels/const'
+import { channelsCurrentModule } from '~/store/channels/const'
 
-import { Channel } from '~/models'
+import { Channel, ChannelMessage, ChannelUser } from '~/models'
 
 @Component({
   async fetch() {
-    await this.$store.dispatch('channels/fetchAll')
+    const self = this as any /* avoid warnings */
+
+    try {
+      await this.$store.dispatch('channels/current/fetch', self.id)
+      await this.$store.dispatch('channels/current/fetchUsers')
+      await this.$store.dispatch('channels/current/fetchMessages')
+
+      await new Promise((resolve, reject) => {
+        const channelId = self.id
+
+        this.$socket.client.emit(
+          'channel_connect',
+          {
+            channelId,
+          },
+          (error: any, message: any) => {
+            if (error) {
+              reject(error)
+            } else {
+              resolve(message)
+            }
+          }
+        )
+      })
+    } catch (error) {
+      await this.$store.dispatch('channels/current/clear')
+      throw error
+    }
   },
   head() {
     const self = this as any /* avoid warnings */
@@ -82,17 +97,22 @@ import { Channel } from '~/models'
   },
 })
 export default class Index extends Vue {
-  @channelsModule.State('channels')
-  channels!: Channel[]
+  @channelsCurrentModule.State('the')
+  channel!: Channel
+
+  @channelsCurrentModule.State('users')
+  users!: ChannelUser[]
+
+  @channelsCurrentModule.State('messages')
+  messages!: ChannelMessage[]
 
   get id(): number {
     return parseInt(this.$route.params.id)
   }
 
-  get channel(): Channel | null {
-    const id = this.id
-
-    return this.channels.filter((x) => x.id === id)[0]
+  @Watch('id')
+  async onIdChanged() {
+    await this.$fetch()
   }
 
   get itemComponent() {

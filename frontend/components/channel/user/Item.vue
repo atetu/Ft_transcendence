@@ -1,50 +1,42 @@
 <template>
   <v-list-item nuxt :to="to">
     <v-list-item-avatar>
-      <v-avatar color="primary" />
+      <user-avatar :user="user" />
     </v-list-item-avatar>
 
     <v-list-item-content>
-      <v-list-item-title v-text="channelUser.user.username" />
+      <v-list-item-title v-text="user.username" />
       <v-list-item-subtitle>
-        <v-chip v-if="channelUser.user.id == channel.owner.id" x-small>
+        <v-chip v-if="channel.owner && user.id === channel.owner.id" x-small>
           owner
         </v-chip>
-        <v-chip v-if="channelUser.admin" x-small>admin</v-chip>
-        <v-chip v-if="channelUser.muted" x-small>muted</v-chip>
-        <v-chip v-if="channelUser.banned" x-small>banned</v-chip>
+        <v-chip v-if="user.admin" x-small>admin</v-chip>
+        <v-chip v-if="user.muted" x-small>muted</v-chip>
+        <v-chip v-if="user.banned" x-small>banned</v-chip>
       </v-list-item-subtitle>
     </v-list-item-content>
 
     <v-list-item-icon>
-      <channel-user-action-menu
-        :channel-user="channelUser"
-        :channel="channel"
-      />
+      <channel-user-action-menu :user="user" :channel="channel" />
     </v-list-item-icon>
   </v-list-item>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
-import { ChannelUser, Channel } from '~/models'
+import { Channel, ChannelUser } from '~/models'
 
-export default Vue.extend({
-  props: {
-    channelUser: {
-      type: Object as PropType<ChannelUser>,
-      required: true,
-    },
-    channel: {
-      type: Object as PropType<Channel>,
-      required: true,
-    },
-  },
-  computed: {
-    to(): string {
-      return `/users/${this.channelUser.user.id}`
-    },
-  },
-})
+@Component
+export default class Drawer extends Vue {
+  @Prop({ type: Object })
+  channel!: Channel
+
+  @Prop({ type: Object })
+  user!: ChannelUser
+
+  public get to() {
+    return `/users/${this.user.id}`
+  }
+}
 </script>
