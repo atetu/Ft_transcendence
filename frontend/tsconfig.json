@@ -17,6 +17,7 @@
     },
     "types": [
       "@nuxt/types",
+      "nuxt-i18n",
       "@nuxtjs/axios",
       "@types/node",
       "vuetify"

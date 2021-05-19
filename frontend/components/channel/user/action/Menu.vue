@@ -14,15 +14,27 @@
     </template>
     <v-list>
       <template v-if="owner">
-        <channel-action v-if="admin" title="demote" icon="mdi-arrow-up-bold" />
-        <channel-action v-else title="promote" icon="mdi-arrow-down-bold" />
+        <channel-list-item-action
+          v-if="admin"
+          title="demote"
+          icon="mdi-arrow-up-bold"
+        />
+        <channel-list-item-action
+          v-else
+          title="promote"
+          icon="mdi-arrow-down-bold"
+        />
       </template>
 
-      <channel-action v-if="muted" title="unmute" icon="mdi-volume-plus" />
-      <channel-action v-else title="mute" icon="mdi-volume-mute" />
+      <channel-list-item-action
+        v-if="muted"
+        title="unmute"
+        icon="mdi-volume-plus"
+      />
+      <channel-list-item-action v-else title="mute" icon="mdi-volume-mute" />
 
-      <channel-action v-if="banned" title="unban" icon="mdi-check" />
-      <channel-action v-else title="ban" icon="mdi-cancel" />
+      <channel-list-item-action v-if="banned" title="unban" icon="mdi-check" />
+      <channel-list-item-action v-else title="ban" icon="mdi-cancel" />
     </v-list>
   </v-menu>
 </template>

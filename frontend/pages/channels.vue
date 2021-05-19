@@ -1,5 +1,5 @@
 <template>
-  <channel-view-base
+  <!-- <channel-view-base
     :loading="$fetchState.pending"
     :error="$fetchState.error"
     @refresh="$fetch"
@@ -7,7 +7,10 @@
     <v-main class="fill-height">
       <nuxt-child />
     </v-main>
-  </channel-view-base>
+  </channel-view-base> -->
+  <v-main class="fill-height">
+    <nuxt-child />
+  </v-main>
 </template>
 
 <script lang="ts">

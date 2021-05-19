@@ -47,9 +47,7 @@
 
       <v-col cols="6">
         <v-card outlined tile>
-          <v-card-title>
-            match history
-          </v-card-title>
+          <v-card-title> match history </v-card-title>
         </v-card>
       </v-col>
 

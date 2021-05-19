@@ -26,7 +26,7 @@ import { User } from '~/models'
     const self: any = this
 
     // TODO
-    self.users = await this.$axios.$get('/users')
+    self.users = await self.$axios.$get('/users')
   },
 })
 export default class Loading extends Vue {

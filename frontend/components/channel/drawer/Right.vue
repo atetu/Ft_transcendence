@@ -4,7 +4,7 @@
     <template #append>
       <v-list>
         <v-list-item>
-          <v-btn block color="primary">
+          <v-btn block color="primary" link :to="toSettings">
             settings
             <v-icon right>mdi-cog</v-icon>
           </v-btn>
@@ -33,5 +33,15 @@ export default class Index extends Vue {
 
   @Prop({ type: Array })
   users!: ChannelUser[]
+
+  public get toSettings() {
+    const id = this.channel?.id
+
+    if (id === undefined) {
+      return null
+    }
+
+    return `/channels/${id}/settings`
+  }
 }
 </script>
