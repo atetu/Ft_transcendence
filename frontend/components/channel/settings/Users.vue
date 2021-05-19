@@ -1,9 +1,9 @@
 <template>
-  <v-card>
+  <v-card :loading="loading">
     <v-card-title>
       Users
       <v-spacer />
-      <v-btn icon>
+      <v-btn icon :loading="loading" @click="$emit('refresh')">
         <v-icon>mdi-refresh</v-icon>
       </v-btn>
     </v-card-title>
@@ -24,21 +24,16 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { Channel, ChannelUser } from '~/models'
 
-@Component({
-  async fetch() {
-    const self: any = this
-
-    self.users = await this.$axios.$get(`/channels/${self.channel.id}/users`)
-  },
-})
+@Component
 export default class Drawer extends Vue {
   @Prop({ type: Object })
   channel!: Channel
 
-  users: ChannelUser[] = []
+  @Prop({ type: Array })
+  users!: ChannelUser[]
 
-  @Prop({ type: String })
-  name!: string
+  @Prop({ type: Boolean })
+  loading!: boolean
 
   get isOwner() {
     return this.$store.state.auth.user?.id === this.channel.owner.id

@@ -9,6 +9,10 @@
     touchless
   >
     <slot />
+
+    <template #append>
+      <slot name="append" />
+    </template>
   </v-navigation-drawer>
 </template>
 

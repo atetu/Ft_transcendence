@@ -26,6 +26,23 @@
     </v-alert>
 
     <channel-list :channels="channels" />
+
+    <template #append>
+      <v-list>
+        <v-list-item>
+          <v-btn block color="primary" link to="/channels/discover">
+            discover
+            <v-icon right>mdi-flare</v-icon>
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn block color="primary" link to="/channels/create">
+            create
+            <v-icon right>mdi-plus</v-icon>
+          </v-btn>
+        </v-list-item>
+      </v-list>
+    </template>
   </drawer-left>
 </template>
 
