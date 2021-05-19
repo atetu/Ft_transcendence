@@ -1,5 +1,10 @@
 <template>
   <channel-view-loading v-if="$fetchState.pending" :message="loadingMessage" />
+  <channel-view-error
+    v-else-if="$fetchState.error"
+    :error="$fetchState.error"
+    @refresh="$fetch"
+  />
   <div v-else class="fill-height">
     <v-app-bar app clipped-right>
       <v-toolbar-title>
