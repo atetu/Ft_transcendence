@@ -37,13 +37,13 @@ export default (app: express.Router) => {
       const { type, content } = req.body;
 
       try {
-        const message = new ChannelMessage()
-        message.channel = channel
-        message.user = user
-        message.type = type
-        message.content = content
+        const message = new ChannelMessage();
+        message.channel = channel;
+        message.user = user;
+        message.type = type;
+        message.content = content;
 
-        channelMessageService.create(message)
+        channelMessageService.create(message);
 
         res.status(200).send(message);
       } catch (error) {
@@ -52,7 +52,7 @@ export default (app: express.Router) => {
     }
   );
 
-  route.use(celebrate.errors())
+  route.use(celebrate.errors());
 
   return route;
 };

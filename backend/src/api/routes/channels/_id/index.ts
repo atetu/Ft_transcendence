@@ -1,7 +1,7 @@
 import * as celebrate from "celebrate";
 import * as express from "express";
 import Container from "typedi";
-import Channel from "../../../../entities/Channel";
+import Channel, { Visibility as ChannelVisibility } from "../../../../entities/Channel";
 import ChannelService from "../../../../services/ChannelService";
 import ChannelUserService from "../../../../services/ChannelUserService";
 import messages from "./messages";

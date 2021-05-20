@@ -2,6 +2,7 @@ import * as express from "express";
 import * as cors from "cors";
 import * as morgan from "morgan";
 import * as passport from "passport";
+import * as celebrate from "celebrate";
 
 import routes from "../api";
 
@@ -33,6 +34,8 @@ export default async ({ app }: { app: express.Application }) => {
     err["status"] = 404;
     next(err);
   });
+
+  app.use(celebrate.errors())
 
   app.use((err, req, res, next) => {
     if (err.name === "UnauthorizedError") {

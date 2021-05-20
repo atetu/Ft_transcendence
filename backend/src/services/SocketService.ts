@@ -3,15 +3,15 @@ import * as socketio from "socket.io";
 import User from "../entities/User";
 import ChannelService from "./ChannelService";
 import ChannelMessage from "../entities/ChannelMessage";
+import Channel from "../entities/Channel";
 
 @Service()
 export default class SocketService {
+  private channelService = Container.get(ChannelService);
+
   connectedUserIds = {};
 
-  constructor(
-    @Inject()
-    private channelService: ChannelService
-  ) {}
+  constructor() {}
 
   // constructor() {
   //   const io = Container.get(socketio.Server)
@@ -61,10 +61,10 @@ export default class SocketService {
       }
 
       socket.join(channel.toRoom());
-      callnack(null, 1)
+      callnack(null, 1);
     } catch (error) {
       console.log(error);
-      callnack(error, null)
+      callnack(error, null);
     }
   }
 
@@ -74,5 +74,11 @@ export default class SocketService {
     const channel = message.channel;
 
     io.to(channel.toRoom()).emit("channel_message", message.toJSON());
+  }
+
+  async broadcastNewChannel(channel: Channel) {
+    const io = Container.get(socketio.Server);
+
+    io.emit("channel_new", channel.toJSON());
   }
 }

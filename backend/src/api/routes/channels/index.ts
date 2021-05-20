@@ -1,8 +1,13 @@
 import * as express from "express";
+import * as celebrate from "celebrate";
 import Container from "typedi";
 import ChannelService from "../../../services/ChannelService";
+import Channel, {
+  Visibility as ChannelVisibility,
+} from "../../../entities/Channel";
 import middlewares from "../../middlewares";
 import _id from "./_id";
+import User from "../../../entities/User";
 
 export default (app: express.Router) => {
   const channelService = Container.get(ChannelService);
@@ -16,6 +21,48 @@ export default (app: express.Router) => {
 
     res.status(200).send(channels);
   });
+
+  route.post(
+    "/",
+    celebrate.celebrate({
+      [celebrate.Segments.BODY]: {
+        name: celebrate.Joi.string().required(),
+        visibility: celebrate.Joi.string()
+          .valid(
+            ChannelVisibility.PUBLIC,
+            ChannelVisibility.PROTECTED,
+            ChannelVisibility.PRIVATE
+          )
+          .required(),
+        password: celebrate.Joi.string().when("visibility", {
+          is: celebrate.Joi.equal(ChannelVisibility.PROTECTED),
+          then: celebrate.Joi.required(),
+          otherwise: celebrate.Joi.forbidden(),
+        }),
+      },
+    }),
+    async (req, res, next) => {
+      const user: User = req.user as any;
+      const { name, visibility, password } = req.body as {
+        name: string;
+        visibility: ChannelVisibility;
+        password?: string;
+      };
+
+      try {
+        const channel = new Channel();
+        channel.owner = user;
+        channel.name = name;
+        channel.visibility = visibility;
+
+        await channelService.create(channel);
+
+        res.status(200).send(channel.toJSON());
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
   _id(route);
 
