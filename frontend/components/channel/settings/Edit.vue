@@ -118,7 +118,10 @@ export default class Edit extends Vue {
       .post(this.actionUrl, {
         name: this.name,
         visibility: this.visibility,
-        password: this.password,
+        password:
+          this.visibility === ChannelVisibility.PROTECTED
+            ? this.password
+            : undefined,
       })
       .then((response) => {
         const channel: Channel = response.data

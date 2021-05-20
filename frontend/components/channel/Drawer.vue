@@ -48,6 +48,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Socket } from 'vue-socket.io-extended'
 
 import { channelsModule } from '@/store/channels/const'
 
@@ -66,6 +67,16 @@ export default class Drawer extends Vue {
 
   refresh(): void {
     this.$emit('refresh')
+  }
+
+  @Socket('channel_new')
+  onNewChannel() {
+    this.refresh()
+  }
+
+  @Socket('channel_delete')
+  onDeleteChannel() {
+    this.refresh()
   }
 }
 </script>
