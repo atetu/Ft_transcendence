@@ -9,7 +9,7 @@ export default class ChannelUser {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Channel, (channel) => channel.users, { eager: true })
+  @ManyToOne(() => Channel, (channel) => channel.users)
   channel: Channel;
 
   @ManyToOne(() => User, (channel) => channel.channelUsers, { eager: true })

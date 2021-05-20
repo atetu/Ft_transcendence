@@ -1,7 +1,9 @@
 import { Inject, Service, Container } from "typedi";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
 import { InjectRepository } from "typeorm-typedi-extensions";
 import Channel from "../entities/Channel";
 import ChannelRepository from "../repositories/ChannelRepository";
+import ChannelUserService from "./ChannelUserService";
 import SocketService from "./SocketService";
 
 @Service()
@@ -12,7 +14,10 @@ export default class ChannelService {
 
   constructor(
     @InjectRepository()
-    private repository: ChannelRepository
+    private repository: ChannelRepository,
+
+    @Inject()
+    private channelUserService: ChannelUserService
   ) {}
 
   public async all() {
@@ -23,13 +28,11 @@ export default class ChannelService {
     return await this.repository.findOne(id);
   }
 
-  public async create(channel: Channel) {
+  public async create(channel: Channel) { // TODO: Transactional?
     await this.repository.save(channel);
+    await this.channelUserService.createOwner(channel);
 
     this.socketService.broadcastNewChannel(channel);
-
-    console.log(channel)
-    console.log(channel.toJSON())
 
     return channel;
   }
