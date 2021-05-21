@@ -41,7 +41,9 @@
             <v-card-title> Danger Zone </v-card-title>
             <v-card-text>
               <v-btn color="primary">clear messages</v-btn>
-              <v-btn color="primary" class="ml-2">delete channel</v-btn>
+              <v-btn color="primary" class="ml-2" @click="confirmDelete()">
+                delete channel
+              </v-btn>
             </v-card-text>
           </v-alert>
         </v-card>
@@ -69,6 +71,23 @@ export default class Index extends Vue {
 
   get id(): number {
     return parseInt(this.$route.params.id)
+  }
+
+  confirmDelete() {
+    console.log('c')
+
+    this.$confirm('Are you sure you want to delete this channel?').then(
+      async (response) => {
+        if (response) {
+          try {
+            await this.$axios.delete(`/channels/${this.id}`)
+            this.$router.push('/channels')
+          } catch (error) {
+            alert(error) // TODO
+          }
+        }
+      }
+    )
   }
 }
 </script>

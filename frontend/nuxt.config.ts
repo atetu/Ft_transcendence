@@ -34,6 +34,7 @@ export default {
       src: '~/plugins/socket',
       ssr: false,
     },
+    '~/plugins/vuetify-confirm',
     '~/plugins/virtual-scroller',
     '~/plugins/virtual-scroll-list',
   ],
