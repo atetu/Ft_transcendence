@@ -3,6 +3,7 @@ import * as http from "http";
 import ormLoader from "./orm";
 import expressLoader from "./express";
 import socketioLoader from "./socket-io";
+import Achievements from "../game/Achievements";
 
 export default async ({
   app,
@@ -14,4 +15,6 @@ export default async ({
   await ormLoader();
   await expressLoader({ app });
   await socketioLoader({ server });
+
+  await Achievements.install()
 };

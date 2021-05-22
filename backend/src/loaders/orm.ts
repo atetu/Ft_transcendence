@@ -1,8 +1,8 @@
-import * as typeorm from "typeorm";
-import * as typedi from "typedi";
+import { useContainer, createConnection } from "typeorm";
+import { Container } from "typedi";
 
 export default async () => {
-  typeorm.useContainer(typedi.Container);
+  useContainer(Container);
   
-  await typeorm.createConnection();
+  await createConnection();
 };
