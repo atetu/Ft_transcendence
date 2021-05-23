@@ -15,7 +15,9 @@ export default class RefreshToken {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.refreshTokens)
+  @ManyToOne(() => User, (user) => user.refreshTokens, {
+    onDelete: "CASCADE",
+  })
   user: User;
 
   @Index({ unique: true })
@@ -28,14 +30,14 @@ export default class RefreshToken {
 
   @Index()
   @Column()
-  created: Date = new Date(Date.now());
+  created: Date = new Date();
 
   @Index()
   @Column({ nullable: true })
   revoked?: Date;
 
   public get expired() {
-    return new Date(Date.now()) >= this.expires;
+    return new Date() >= this.expires;
   }
 
   public get active() {
