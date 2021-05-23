@@ -1,7 +1,9 @@
 import * as celebrate from "celebrate";
 import * as express from "express";
 import Container from "typedi";
-import Channel, { Visibility as ChannelVisibility } from "../../../../entities/Channel";
+import Channel, {
+  Visibility as ChannelVisibility,
+} from "../../../../entities/Channel";
 import ChannelService from "../../../../services/ChannelService";
 import ChannelUserService from "../../../../services/ChannelUserService";
 import messages from "./messages";
@@ -43,6 +45,14 @@ export default (app: express.Router) => {
       ...channel.toJSON(),
       users,
     });
+  });
+
+  route.delete("/", async (req, res, next) => {
+    const channel: Channel = res.locals.channel;
+
+    await channelService.delete(channel);
+
+    res.status(204).end();
   });
 
   users(route);

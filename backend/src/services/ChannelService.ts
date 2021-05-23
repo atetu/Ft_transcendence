@@ -36,4 +36,8 @@ export default class ChannelService {
 
     return channel;
   }
+
+  async delete(channel: Channel) {
+    await this.repository.delete(channel);
+  }
 }
