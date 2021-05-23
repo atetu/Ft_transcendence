@@ -1,5 +1,5 @@
 <template>
-  <page-loading />
+  <page-loading title="authenticating..." />
 </template>
 
 <script lang="ts">

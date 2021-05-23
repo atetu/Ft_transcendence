@@ -60,6 +60,11 @@ export default class Default extends Vue {
       url: '/friends',
     },
     {
+      title: 'achievements',
+      icon: 'trophy-award',
+      url: '/achievements',
+    },
+    {
       title: 'logout',
       icon: 'logout',
       url: '/logout',

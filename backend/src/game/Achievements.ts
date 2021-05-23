@@ -23,8 +23,24 @@ export default class Achievements {
     id: 2000,
     name: "Community Member",
     description: "Send 20 messages",
-    percent: false,
+    percent: true,
     max: 20,
+  });
+
+  static BEGINNER = inline({
+    id: 3000,
+    name: "Beginner",
+    description: "Play your first game",
+    percent: false,
+    max: 1,
+  });
+
+  static INTERMEDIATE = inline({
+    id: 3100,
+    name: "Intermediate",
+    description: "Play 10 game",
+    percent: false,
+    max: 10,
   });
 
   static async install() {

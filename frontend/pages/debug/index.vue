@@ -1,6 +1,6 @@
 <template>
-  <v-main class="fill-height">
-    <v-row class="fill-height ma-2" style="overflow: auto">
+  <v-main class="fill-height" style="overflow: auto">
+    <v-row class="ma-2">
       <v-col cols="6">
         <v-card>
           <v-card-title>auth</v-card-title>

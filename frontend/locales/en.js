@@ -25,4 +25,7 @@ export default {
       },
     },
   },
+  error: {
+    retry: 'retry',
+  },
 }
