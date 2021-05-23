@@ -74,6 +74,16 @@ export default class Default extends Vue {
       icon: 'logout',
       url: '/logout',
     },
+    {
+      title: 'logout',
+      icon: 'logout',
+      url: '/logout',
+    },
+    {
+      title: 'debug',
+      icon: 'developer-board',
+      url: '/debug',
+    },
   ]
 
   get drawer(): boolean {
