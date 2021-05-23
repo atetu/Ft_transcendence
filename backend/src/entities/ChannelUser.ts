@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import Channel from "./Channel";
 import User from "./User";
 
@@ -9,10 +9,15 @@ export default class ChannelUser {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Channel, (channel) => channel.users)
+  @ManyToOne(() => Channel, {
+    onDelete: "CASCADE",
+  })
   channel: Channel;
 
-  @ManyToOne(() => User, (channel) => channel.channelUsers, { eager: true })
+  @ManyToOne(() => User, {
+    eager: true,
+    onDelete: "CASCADE",
+  })
   user: User;
 
   @Column({

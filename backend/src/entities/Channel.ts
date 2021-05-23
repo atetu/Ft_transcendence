@@ -1,12 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  ManyToOne,
-} from "typeorm";
-import ChannelMessage from "./ChannelMessage";
-import ChannelUser from "./ChannelUser";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import User from "./User";
 
 export enum Type {
@@ -44,17 +36,15 @@ export default class Channel {
   })
   visibility: Visibility;
 
-  @ManyToOne(() => User, (user) => user.ownerChannels, { eager: true })
+  @ManyToOne(() => User, {
+    eager: true,
+    nullable: true,
+    onDelete: "CASCADE",
+  })
   owner: User;
 
-  @OneToMany(() => ChannelUser, (channelUser) => channelUser.channel)
-  users: Promise<ChannelUser[]>;
-
-  @OneToMany(() => ChannelMessage, (channelMessage) => channelMessage.channel)
-  messages: Promise<ChannelMessage[]>;
-
   public toRoom(): string {
-    return `channel_${this.id}`
+    return `channel_${this.id}`;
   }
 
   public toJSON() {

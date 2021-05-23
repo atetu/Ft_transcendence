@@ -1,5 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import AchievementProgress from "./AchievementProgress";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({
   name: "achievements",
@@ -19,12 +18,6 @@ export default class Achievement {
 
   @Column()
   max: number;
-
-  @OneToMany(
-    () => AchievementProgress,
-    (achievementProgress) => achievementProgress.achievement
-  )
-  progresses: Promise<AchievementProgress[]>;
 
   public toJSON() {
     return {

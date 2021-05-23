@@ -9,12 +9,12 @@ export default class AchievementProgress {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (x) => x.achievementProgresses, {
+  @ManyToOne(() => User, {
     onDelete: "CASCADE",
   })
   user: Promise<User>;
 
-  @ManyToOne(() => Achievement, (x) => x.progresses, {
+  @ManyToOne(() => Achievement, {
     eager: true,
     onDelete: "CASCADE",
   })
@@ -26,15 +26,16 @@ export default class AchievementProgress {
   @Column({ nullable: true })
   unlockedAt?: Date;
 
+  get unlocked() {
+    return !!this.unlockedAt;
+  }
+
   public toJSON() {
     return {
       value: this.value,
+      unlocked: this.unlocked,
       unlockedAt: this.unlockedAt,
       achievement: this.achievement.toJSON(),
     };
-  }
-
-  get unlocked() {
-    return !!this.unlockedAt;
   }
 }
