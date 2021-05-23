@@ -5,6 +5,8 @@ import { Inject, Service } from "typedi";
 import * as marvinOAuth2 from "../auth/marvin";
 import config from "../config";
 import User from "../entities/User";
+import Achievements from "../game/Achievements";
+import AchievementProgressService from "./AchievementProgressService";
 import AuthService from "./AuthService";
 import UserService from "./UserService";
 
@@ -13,6 +15,9 @@ export default class OAuthService {
   constructor(
     @Inject()
     private readonly userService: UserService,
+    
+    @Inject()
+    private readonly achievementProgressService: AchievementProgressService,
 
     @Inject()
     private readonly authService: AuthService
@@ -39,6 +44,8 @@ export default class OAuthService {
         user.admin = false;
 
         user = await this.userService.save(user);
+
+        await this.achievementProgressService.unlock(Achievements.REGISTERED, user)
       }
 
       callback(null, await this.authService.authenticate(user));
