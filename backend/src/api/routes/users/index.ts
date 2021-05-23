@@ -3,6 +3,7 @@ import Container from "typedi";
 import UserService from "../../../services/UserService";
 import middlewares from "../../middlewares";
 import me from "./me";
+import _userid from "./_userid";
 
 export default (app: express.Router) => {
   const userService = Container.get(UserService);
@@ -16,6 +17,7 @@ export default (app: express.Router) => {
   });
 
   me(route);
+  _userid(route);
 
   return route;
 };

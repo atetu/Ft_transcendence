@@ -22,7 +22,7 @@ export default (app: express.Router) => {
     }),
     async (req, res, next) => {
       const id = Number(req.params.id);
-      const user: User = req.user as any;
+      const user: User = res.locals.user as any;
 
       try {
         const achievement = await achievementService.findById(id);
