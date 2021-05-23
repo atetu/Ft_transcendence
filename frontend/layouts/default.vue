@@ -3,7 +3,11 @@
     <v-system-bar app>
       ft-transcendence
       <v-spacer />
-      <v-icon v-if="$socket.connected" color="green">mdi-power-plug</v-icon>
+      <template v-if="$socket.connected">
+        {{ connectedCount }}
+        <v-icon>mdi-account-group</v-icon>
+        <v-icon color="green">mdi-power-plug</v-icon>
+      </template>
       <v-icon v-else color="red">mdi-power-plug-off</v-icon>
     </v-system-bar>
 
@@ -92,6 +96,10 @@ export default class Default extends Vue {
       light: !isDark,
       'mini-drawer-open': this.drawer,
     }
+  }
+
+  get connectedCount() {
+    return this.$store.state.socket.connectedUserIds.length
   }
 }
 </script>
