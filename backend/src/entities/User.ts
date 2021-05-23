@@ -5,6 +5,7 @@ import {
   Index,
   OneToMany,
 } from "typeorm";
+import AchievementProgress from "./AchievementProgress";
 import Channel from "./Channel";
 import ChannelMessage from "./ChannelMessage";
 import ChannelUser from "./ChannelUser";
@@ -28,9 +29,7 @@ export default class User {
   @Column()
   admin: boolean;
 
-  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user, {
-    cascade: ["remove"],
-  })
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshToken[];
 
   @OneToMany(() => Channel, (channel) => channel.owner)
@@ -41,4 +40,7 @@ export default class User {
 
   @OneToMany(() => ChannelMessage, (channelMessage) => channelMessage.user)
   channelMessages: Promise<ChannelMessage[]>;
+
+  @OneToMany(() => AchievementProgress, (x) => x.user)
+  achievementProgresses: Promise<AchievementProgress[]>;
 }

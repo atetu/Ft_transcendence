@@ -1,4 +1,5 @@
 import * as express from "express";
+import achievements from "./achievements";
 
 export default (app: express.Router) => {
   const route = express.Router();
@@ -8,6 +9,8 @@ export default (app: express.Router) => {
   route.get("/", (req, res, next) => {
     res.status(200).send(req.user);
   });
+
+  achievements(route);
 
   return route;
 };

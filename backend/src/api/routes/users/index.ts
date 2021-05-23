@@ -2,7 +2,7 @@ import * as express from "express";
 import Container from "typedi";
 import UserService from "../../../services/UserService";
 import middlewares from "../../middlewares";
-import me from "./@me";
+import me from "./me";
 
 export default (app: express.Router) => {
   const userService = Container.get(UserService);
