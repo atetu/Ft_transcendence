@@ -60,21 +60,6 @@ export default class Default extends Vue {
       url: '/friends',
     },
     {
-      title: 'guilds',
-      icon: 'home-group',
-      url: '/guilds',
-    },
-    {
-      title: 'wars',
-      icon: 'sword-cross',
-      url: '/wars',
-    },
-    {
-      title: 'logout',
-      icon: 'logout',
-      url: '/logout',
-    },
-    {
       title: 'logout',
       icon: 'logout',
       url: '/logout',
