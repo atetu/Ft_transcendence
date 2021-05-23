@@ -90,7 +90,7 @@ export default class Game extends Vue {
   drawRect(): void {
     if (this.ctx != null) {
       this.ctx.clearRect(0, 0, this.width, this.height)
-      this.ctx.fillStyle = this.$vuetify.theme.themes.dark.primary
+      this.ctx.fillStyle = `${this.$vuetify.theme.themes.dark.primary}`
       this.ctx.fillRect(0, 0, this.width, this.height)
 
       this.ctx.beginPath()
