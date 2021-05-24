@@ -34,11 +34,11 @@ export default async ({ server }: { server: http.Server }) => {
       socketService.channelConnect(socket, body, callback)
     })
 
-    socket.on('game_connect', (body, callback) => {
-      socketService.gameConnect(socket, body, callback)
+    socket.on('game_connect', () => {
+      socketService.gameConnect(socket)
     })
 
-    socket.on('game_movement', (body, callback) => {
+    socket.on('game_move', (body, callback) => {
       socketService.gameMove(socket, body, callback)
     })
   });

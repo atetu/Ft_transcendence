@@ -30,6 +30,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator' // propre a nuxt
+import { Socket } from 'vue-socket.io-extended'
 
 @Component
 export default class Game extends Vue {
@@ -43,13 +44,17 @@ export default class Game extends Vue {
   width: number = 800
   up: boolean = false
   down: boolean = false
-  paddle_right_x = 15
-  paddle_right_y = 10
-  paddle_left_x = 770
+  paddle_left_x = 15
   paddle_left_y = 10
+  paddle_right_x = 770
+  paddle_right_y = 10
+ 
+  get id() {
+    return this.$route.params.id
+  }
 
   onPressed(event: KeyboardEvent) {
-    console.log(event.key)
+    // console.log(event.key)
     switch (event.key) {
       case 'ArrowDown': {
         this.down = true
@@ -63,28 +68,31 @@ export default class Game extends Vue {
   }
 
   update_paddle() {
-      console.log("UPDATE")
-      console.log(this.down)
+    // console.log('UPDATE')
+    // console.log(this.down)
     if (this.up) {
-      this.paddle_right_y-= 1
+      this.paddle_right_y -= 1
       this.up = false
-    //   input = { side: self.my_side, movement: 'up' }
-    //   self.sub.perform('input', input)
+      //   input = { side: self.my_side, movement: 'up' }
+      //   self.sub.perform('input', input)
     }
     if (this.down) {
-      console.log('GO Down')
-      this.paddle_right_y+= 1
+      // console.log('GO Down')
+      this.paddle_right_y += 1
       this.down = false
-    //   input = { side: self.my_side, movement: 'down' }
-    //   self.sub.perform('input', input)
+      //   input = { side: self.my_side, movement: 'down' }
+      //   self.sub.perform('input', input)
     }
   }
 
   mounted() {
-    console.log(this.height)
+    // console.log(this.height)
     this.canvas = <HTMLCanvasElement>document.getElementById('myCanvas')
     this.ctx = <CanvasRenderingContext2D>this.canvas.getContext('2d')
     this.autoSaveInterval = setInterval(() => this.drawRect(), 1000 / 60)
+    this.$socket.client.emit('game_connect', {
+      gameId: this.id
+    })
   }
 
   drawRect(): void {
@@ -103,15 +111,32 @@ export default class Game extends Vue {
       this.ctx.moveTo(400, 20)
       this.ctx.lineTo(400, 580)
       this.ctx.stroke()
-      
-      this.update_paddle()
-      console.log(this.paddle_right_y)
-      this.ctx.fillStyle = 'white'
-      this.ctx.fillRect(this.paddle_right_x, this.paddle_right_y, 20, 100);
-      this.ctx.fillStyle = 'white'
-      this.ctx.fillRect(this.paddle_left_x, this.paddle_left_y, 20, 100);
 
+      this.update_paddle()
+      // console.log(this.paddle_right_y)
+      this.ctx.fillStyle = 'white'
+      this.ctx.fillRect(this.paddle_right_x, this.paddle_right_y, 20, 100)
+      this.ctx.fillStyle = 'white'
+      this.ctx.fillRect(this.paddle_left_x, this.paddle_left_y, 20, 100)
+
+      const prevY = 5
+      // update paddle
+
+      this.$socket.client.emit('game_move', {
+        gameId: this.id,
+        y: this.paddle_left_y
+        }, (err: any, body: any) => {
+        if (err) {
+          this.paddle_left_y = prevY
+        } else {
+
+        }
+        })
     }
+  }
+  @Socket('game_state')
+  getDatas(data: any) {
+    console.log(data)
   }
 }
 </script>

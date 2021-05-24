@@ -4,10 +4,14 @@ import User from "../entities/User";
 import ChannelService from "./ChannelService";
 import ChannelMessage from "../entities/ChannelMessage";
 import Channel from "../entities/Channel";
+import Game from "../game/Game";
+import GameService from "./GameService";
+import { x } from "@hapi/joi";
 
 @Service()
 export default class SocketService {
-  private channelService = Container.get(ChannelService);
+    private gameService = Container.get(GameService);
+    private channelService = Container.get(ChannelService);
 
   connectedUserIds = {};
 
@@ -80,5 +84,29 @@ export default class SocketService {
     const io = Container.get(socketio.Server);
 
     io.emit("channel_new", channel.toJSON());
+  }
+
+  async gameConnect(socket, body: any) {
+    const { gameId } = body  //pourquoi cont?
+    const io = Container.get(socketio.Server);
+    this.gameService.gameConnect(gameId, socket.data.user) 
+    // io.emit("game_new", game.toJSON());
+  }
+
+  async gameMove(socket, body, callback) {
+    const io = Container.get(socketio.Server);
+
+    const { gameId, y } = body
+    const success = this.gameService.gameMove({
+      gameId,
+      playerId: socket.data.user,
+      newY: y
+    })
+
+    if (success) {
+      callback(null, y)
+    } else {
+      callback(new Error('top'), null)
+    }
   }
 }
