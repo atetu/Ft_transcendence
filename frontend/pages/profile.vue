@@ -42,18 +42,46 @@
             </v-row>
           </v-col>
         </v-card>
-        <v-card class="pa-2 mt-4" outlined tile> First, but unordered </v-card>
+        <v-card class="pa-2 mt-4" outlined>
+          <v-card-title>
+            <v-spacer />
+            statistics
+            <v-spacer />
+          </v-card-title>
+          <v-list>
+            <v-list-item v-for="statistic in statistics" :key="statistic.name">
+              <v-list-item-content>
+                <v-list-item-title>{{ statistic.name }}</v-list-item-title>
+              </v-list-item-content>
+
+              <v-list-item-icon>
+                {{ statistic.value }}
+              </v-list-item-icon>
+            </v-list-item>
+          </v-list>
+        </v-card>
       </v-col>
 
       <v-col cols="6">
         <v-card outlined tile>
-          <v-card-title> match history </v-card-title>
+          <v-card-title>
+            match history ueuyuiyrpup uywpry ppuyru ehfjkkdssncjkb
+            0002654455464465456465 8979==/745132565
+            65565656556565656565656446546546546545645456465456
+          </v-card-title>
         </v-card>
       </v-col>
 
       <v-col cols="3">
-        <v-card class="pa-2" outlined tile> Third, but first </v-card>
-        <v-card class="pa-2" outlined tile> Third, but first </v-card>
+        <v-card class="pa-2" outlined tile> achievements </v-card>
+        <v-card class="pa-2 mt-4" outlined tile>
+          friends
+          <v-icon right>mdi-account-group</v-icon>
+          <v-btn outlined block color="red">
+            block
+            <v-icon right>mdi-account-cancel</v-icon>
+          </v-btn>
+        </v-card>
       </v-col>
     </v-row>
   </v-main>
@@ -70,5 +98,20 @@ import { User } from '~/models'
 export default class Dot extends Vue {
   @authModule.State('user')
   user!: User
+
+  statistics = [
+    {
+      name: 'games won',
+      value: 5,
+    },
+    {
+      name: 'games lost',
+      value: 9,
+    },
+    {
+      name: 'games',
+      value: 14,
+    },
+  ]
 }
 </script>
