@@ -1,13 +1,16 @@
 import * as http from "http";
 import * as socketio from "socket.io";
 import { Container } from "typedi";
-import * as socketController from "socket-controllers";
-import SocketService from "../services/SocketService";
 import socketAuthentication from "../middlewares/SocketAuthentication";
+import SocketService from "../services/SocketService";
 
 export default async ({ server }: { server: http.Server }) => {
   const io = new socketio.Server(server, {
     cookie: false,
+    cors: {    
+      origin: "*",    
+      methods: ["GET", "POST"]  
+    }
   });
 
   Container.set(socketio.Server, io);
@@ -29,6 +32,14 @@ export default async ({ server }: { server: http.Server }) => {
 
     socket.on('channel_connect', (body, callback) => {
       socketService.channelConnect(socket, body, callback)
+    })
+
+    socket.on('game_connect', (body, callback) => {
+      socketService.gameConnect(socket, body, callback)
+    })
+
+    socket.on('game_movement', (body, callback) => {
+      socketService.gameMove(socket, body, callback)
     })
   });
 };
