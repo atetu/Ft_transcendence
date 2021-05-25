@@ -3,6 +3,7 @@ import * as express from "express";
 import Container from "typedi";
 import Achievement from "../../../../entities/Achievement";
 import AchievementService from "../../../../services/AchievementService";
+import middlewares from "../../../middlewares";
 
 export default (app: express.Router) => {
   const achievementService = Container.get(AchievementService);
@@ -11,31 +12,9 @@ export default (app: express.Router) => {
 
   app.use(
     "/:id",
-    celebrate.celebrate({
-      [celebrate.Segments.PARAMS]: {
-        id: celebrate.Joi.number().required(),
-      },
+    middlewares.pathVariable("id", "achievement", async (id) => {
+      return await achievementService.findById(id);
     }),
-    async (req, res, next) => {
-      const id = Number(req.params.id);
-
-      try {
-        const achievement = await achievementService.findById(id);
-
-        if (!achievement) {
-          res.status(404).send({
-            message: `no achievement with id = ${id}`
-          });
-          return
-        }
-
-        res.locals.achievement = achievement;
-
-        next();
-      } catch (error) {
-        next(error);
-      }
-    },
     route
   );
 

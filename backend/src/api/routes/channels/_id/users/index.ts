@@ -1,7 +1,8 @@
 import * as express from "express";
 import Container from "typedi";
-import Channel from "../../../../entities/Channel";
-import ChannelUserService from "../../../../services/ChannelUserService";
+import Channel from "../../../../../entities/Channel";
+import ChannelUserService from "../../../../../services/ChannelUserService";
+import _userid from "./_userid";
 
 export default (app: express.Router) => {
   const channelUserService = Container.get(ChannelUserService);
@@ -16,6 +17,8 @@ export default (app: express.Router) => {
 
     res.status(200).send(users);
   });
+
+  _userid(route);
 
   return route;
 };

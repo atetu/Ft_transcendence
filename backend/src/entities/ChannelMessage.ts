@@ -46,4 +46,6 @@ export default class ChannelMessage {
       content: this.content,
     };
   }
+
+  static Type = Type
 }

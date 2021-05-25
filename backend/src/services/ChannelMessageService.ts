@@ -37,11 +37,21 @@ export default class ChannelMessageService {
     return await this.repository.find({ channel });
   }
 
+  public async findById(id: number) {
+    return await this.repository.findOne(id)
+  }
+
   public async create(message: ChannelMessage) {
     await this.repository.save(message);
 
     this.socketService.broadcastMessage(message);
 
     return message;
+  }
+
+  public async delete(message: ChannelMessage) {
+    await this.repository.delete(message)
+
+    // TODO Emit event to socket
   }
 }

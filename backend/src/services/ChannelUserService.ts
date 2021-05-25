@@ -2,6 +2,7 @@ import { Inject, Service } from "typedi";
 import { InjectRepository } from "typeorm-typedi-extensions";
 import Channel from "../entities/Channel";
 import ChannelUser from "../entities/ChannelUser";
+import User from "../entities/User";
 import { ChannelUserRepository } from "../repositories/ChannelUserRepository";
 
 @Service()
@@ -17,6 +18,10 @@ export default class ChannelUserService {
 
   public async allByChannel(channel: Channel) {
     return await this.repository.find({ channel });
+  }
+
+  public async findByChannelAndUser(channel: Channel, user: User) {
+    return await this.repository.findByChannelAndUser(channel, user)
   }
 
   public async createOwner(channel: Channel) {

@@ -1,12 +1,10 @@
-import * as express from "express";
 import * as celebrate from "celebrate";
+import * as express from "express";
 import Container from "typedi";
-import Channel from "../../../../entities/Channel";
-import ChannelMessage, {
-  Type as ChannelMessageType,
-} from "../../../../entities/ChannelMessage";
-import ChannelMessageService from "../../../../services/ChannelMessageService";
-import User from "../../../../entities/User";
+import Channel from "../../../../../entities/Channel";
+import ChannelMessage from "../../../../../entities/ChannelMessage";
+import User from "../../../../../entities/User";
+import ChannelMessageService from "../../../../../services/ChannelMessageService";
 
 export default (app: express.Router) => {
   const channelMessageService = Container.get(ChannelMessageService);
@@ -26,7 +24,7 @@ export default (app: express.Router) => {
     "/",
     celebrate.celebrate({
       [celebrate.Segments.BODY]: {
-        type: celebrate.Joi.string().valid(ChannelMessageType.TEXT).required(),
+        type: celebrate.Joi.string().valid(ChannelMessage.Type.TEXT).required(),
         content: celebrate.Joi.string().required(),
       },
     }),
@@ -51,8 +49,6 @@ export default (app: express.Router) => {
       }
     }
   );
-
-  route.use(celebrate.errors());
 
   return route;
 };
