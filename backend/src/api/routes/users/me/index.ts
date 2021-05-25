@@ -1,5 +1,6 @@
 import * as express from "express";
 import achievements from "./achievements";
+import relationships from "./relationships";
 
 export default (app: express.Router) => {
   const route = express.Router();
@@ -11,6 +12,7 @@ export default (app: express.Router) => {
   });
 
   achievements(route);
+  relationships(route);
 
   return route;
 };
