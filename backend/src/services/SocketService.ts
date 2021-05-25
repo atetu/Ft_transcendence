@@ -86,20 +86,29 @@ export default class SocketService {
     io.emit("channel_new", channel.toJSON());
   }
 
-  async gameConnect(socket, body: any) {
+  async gameConnect(socket, body: any, callback: any) {
+    console.log('Game connect')
     const { gameId } = body  //pourquoi cont?
-    const io = Container.get(socketio.Server);
-    this.gameService.gameConnect(gameId, socket.data.user) 
+    const io = Container.get(socketio.Server)
+    
+    const game = this.gameService.gameConnect(gameId, socket.data.user.id) 
     // io.emit("game_new", game.toJSON());
+    if (game) {
+      socket.join(game.toRoom());
+      callback(null)
+    } else {
+      callback(new Error('not enough players'))
+    }
   }
 
   async gameMove(socket, body, callback) {
+    console.log('Game move')
     const io = Container.get(socketio.Server);
 
     const { gameId, y } = body
     const success = this.gameService.gameMove({
       gameId,
-      playerId: socket.data.user,
+      player: socket.data.user,
       newY: y
     })
 
@@ -108,5 +117,6 @@ export default class SocketService {
     } else {
       callback(new Error('top'), null)
     }
+
   }
 }

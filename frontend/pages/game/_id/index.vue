@@ -38,16 +38,16 @@ export default class Game extends Vue {
   ctx: CanvasRenderingContext2D | null = null
 
   private autoSaveInterval: NodeJS.Timeout | null = null
-  ball_x: number = 300
-  ball_y = 200
+  ballX: number = 300
+  ballY = 200
   height: number = 600
   width: number = 800
   up: boolean = false
   down: boolean = false
-  paddle_left_x = 15
-  paddle_left_y = 10
-  paddle_right_x = 770
-  paddle_right_y = 10
+  paddleLeftX = 15
+  paddleLeftY = 10
+  paddleRightX = 770
+  paddleRightY = 10
  
   get id() {
     return this.$route.params.id
@@ -71,15 +71,36 @@ export default class Game extends Vue {
     // console.log('UPDATE')
     // console.log(this.down)
     if (this.up) {
-      this.paddle_right_y -= 1
+      let prevY: number = this.paddleRightY 
+      this.paddleRightY -= 1
       this.up = false
+      this.$socket.client.emit('game_move', {
+        gameId: this.id,
+        y: this.paddleRightY
+        }, (err: any, body: any) => {
+        if (err) {
+          console.log('error')
+          this.paddleRightY = prevY
+        } 
+        else
+          console.log('ok')
+        })
       //   input = { side: self.my_side, movement: 'up' }
       //   self.sub.perform('input', input)
     }
     if (this.down) {
+      let prevY: number = this.paddleRightY 
       // console.log('GO Down')
-      this.paddle_right_y += 1
+      this.paddleRightY += 1
       this.down = false
+      this.$socket.client.emit('game_move', {
+        gameId: this.id,
+        y: this.paddleRightY
+        }, (err: any, body: any) => {
+        if (err) {
+          this.paddleRightY = prevY
+        } 
+        })
       //   input = { side: self.my_side, movement: 'down' }
       //   self.sub.perform('input', input)
     }
@@ -89,10 +110,22 @@ export default class Game extends Vue {
     // console.log(this.height)
     this.canvas = <HTMLCanvasElement>document.getElementById('myCanvas')
     this.ctx = <CanvasRenderingContext2D>this.canvas.getContext('2d')
-    this.autoSaveInterval = setInterval(() => this.drawRect(), 1000 / 60)
+    let end = 0
+    console.log('before game connect')
+    // while(!end)
+    // {
     this.$socket.client.emit('game_connect', {
-      gameId: this.id
+      gameId: this.id}, 
+      (err: any) => {
+        if (!err) {
+          
+         end = 1
+        } 
     })
+    // }
+    this.autoSaveInterval = setInterval(() => this.drawRect(), 1000 / 60)
+    
+    console.log('after game connect')
   }
 
   drawRect(): void {
@@ -102,7 +135,7 @@ export default class Game extends Vue {
       this.ctx.fillRect(0, 0, this.width, this.height)
 
       this.ctx.beginPath()
-      this.ctx.arc(this.ball_x, this.ball_y, 15, 0, Math.PI * 2)
+      this.ctx.arc(this.ballX, this.ballY, 15, 0, Math.PI * 2)
       this.ctx.fillStyle = 'white'
       this.ctx.fill()
       this.ctx.closePath()
@@ -113,30 +146,41 @@ export default class Game extends Vue {
       this.ctx.stroke()
 
       this.update_paddle()
-      // console.log(this.paddle_right_y)
+      console.log(this.paddleRightY)
       this.ctx.fillStyle = 'white'
-      this.ctx.fillRect(this.paddle_right_x, this.paddle_right_y, 20, 100)
+      this.ctx.fillRect(this.paddleRightX, this.paddleRightY, 20, 100)
       this.ctx.fillStyle = 'white'
-      this.ctx.fillRect(this.paddle_left_x, this.paddle_left_y, 20, 100)
+      this.ctx.fillRect(this.paddleLeftX, this.paddleLeftY, 20, 100)
 
       const prevY = 5
       // update paddle
 
-      this.$socket.client.emit('game_move', {
-        gameId: this.id,
-        y: this.paddle_left_y
-        }, (err: any, body: any) => {
-        if (err) {
-          this.paddle_left_y = prevY
-        } else {
+      // this.$socket.client.emit('game_move', {
+      //   gameId: this.id,
+      //   y: this.paddleLeftY
+      //   }, (err: any, body: any) => {
+      //   if (err) {
+      //     this.paddleLeftY = prevY
+      //   } else {
 
-        }
-        })
+      //   }
+      //   })
     }
   }
   @Socket('game_state')
   getDatas(data: any) {
-    console.log(data)
+    
+    const { paddle1, paddle2, ballX, ballY } = data
+    this.ballX= ballX
+    this.ballY = ballY
+     console.log('ballX: ' + this.ballX )
+      console.log('ballY: ' + this.ballY )
+
+    this.paddleRightY = paddle1
+    console.log('right: ' + this.paddleRightY )
+    this.paddleLeftY = paddle2
+       console.log('left: ' + this.paddleLeftY )
+
   }
 }
 </script>
