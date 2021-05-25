@@ -3,10 +3,9 @@ import { Plugin } from '@nuxt/types'
 
 import io from 'socket.io-client'
 import VueSocketIOExt from 'vue-socket.io-extended'
-import camelcase from 'camelcase'
 
-const socket = io('http://localhost:3000/', {
-  path: '/api/socket.io',
+const socket = io('http://localhost:3001/', {
+  path: '/socket.io',
   autoConnect: false,
 })
 

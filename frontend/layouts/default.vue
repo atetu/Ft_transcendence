@@ -59,9 +59,9 @@ export default class Default extends Vue {
       url: '/users',
     },
     {
-      title: 'friends',
+      title: 'relationships',
       icon: 'account-group',
-      url: '/friends',
+      url: '/relationships',
     },
     {
       title: 'achievements',
