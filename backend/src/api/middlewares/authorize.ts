@@ -6,7 +6,7 @@ import config from "../../config";
 import UserService from "../../services/UserService";
 
 const authorize = (onlyAdmin = false) => [
-  /*expressJwt({
+  expressJwt({
     secret: config.JWT_SECRET,
     algorithms: [config.JWT_ALGORITHM],
   }),
@@ -25,7 +25,7 @@ const authorize = (onlyAdmin = false) => [
     req.user = user;
 
     next();
-  },*/
+  },
 ];
 
 export default authorize;
