@@ -38,6 +38,10 @@ export default class ChannelService {
     return channel;
   }
 
+  public async update(channel: Channel) {
+    await this.repository.save(channel);
+  }
+
   public async transferOwnership(channel: Channel, channelUser: ChannelUser) {
     channel.owner = channelUser.user;
 
