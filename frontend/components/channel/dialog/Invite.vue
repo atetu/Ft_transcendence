@@ -12,17 +12,35 @@
       <v-card-text>
         <v-autocomplete
           v-model="select"
-          :loading="loading"
+          :loading="queryLoading"
+          :disabled="loading"
           :items="items"
           :search-input.sync="search"
+          clearable
           cache-items
-          class="mx-4"
+          class="mx-4 mt-2"
+          :error-messages="errors"
           flat
           hide-no-data
-          hide-details
           :label="$t('channel.invite.label')"
           solo-inverted
-        ></v-autocomplete>
+          item-text="username"
+          item-value="id"
+        >
+          <template #append-outer>
+            <v-btn
+              :loading="queryLoading || loading"
+              :disabled="!isSelected"
+              large
+              color="primary"
+              height="48"
+              class="ml-2"
+              @click="submit()"
+            >
+              invite
+            </v-btn>
+          </template>
+        </v-autocomplete>
       </v-card-text>
     </v-card>
   </v-dialog>
@@ -39,86 +57,72 @@ export default class ComponentImpl extends Vue {
 
   dialog = false
 
+  queryLoading = false
   loading = false
+  error: any = null
+
   items = []
   search = null
   select = null
-  states = [
-    'Alabama',
-    'Alaska',
-    'American Samoa',
-    'Arizona',
-    'Arkansas',
-    'California',
-    'Colorado',
-    'Connecticut',
-    'Delaware',
-    'District of Columbia',
-    'Federated States of Micronesia',
-    'Florida',
-    'Georgia',
-    'Guam',
-    'Hawaii',
-    'Idaho',
-    'Illinois',
-    'Indiana',
-    'Iowa',
-    'Kansas',
-    'Kentucky',
-    'Louisiana',
-    'Maine',
-    'Marshall Islands',
-    'Maryland',
-    'Massachusetts',
-    'Michigan',
-    'Minnesota',
-    'Mississippi',
-    'Missouri',
-    'Montana',
-    'Nebraska',
-    'Nevada',
-    'New Hampshire',
-    'New Jersey',
-    'New Mexico',
-    'New York',
-    'North Carolina',
-    'North Dakota',
-    'Northern Mariana Islands',
-    'Ohio',
-    'Oklahoma',
-    'Oregon',
-    'Palau',
-    'Pennsylvania',
-    'Puerto Rico',
-    'Rhode Island',
-    'South Carolina',
-    'South Dakota',
-    'Tennessee',
-    'Texas',
-    'Utah',
-    'Vermont',
-    'Virgin Island',
-    'Virginia',
-    'Washington',
-    'West Virginia',
-    'Wisconsin',
-    'Wyoming',
-  ]
 
   @Watch('search')
-  onSearchUpdate(val) {
+  onSearchUpdate(val: string) {
+    this.error = null
+
     val && val !== this.select && this.querySelections(val)
   }
 
-  querySelections(v) {
-    this.loading = true
-    // Simulated ajax query
-    setTimeout(() => {
-      this.items = this.states.filter((e) => {
-        return (e || '').toLowerCase().indexOf((v || '').toLowerCase()) > -1
+  get errors() {
+    if (this.error) {
+      return [
+        this.error?.response?.data?.errors?.message ||
+          'could not add this person',
+      ]
+    }
+
+    return null
+  }
+
+  get isSelected() {
+    return !!this.select
+  }
+
+  querySelections(query: string) {
+    this.queryLoading = true
+    this.error = null
+
+    this.$axios
+      .$get('/search/users', {
+        params: {
+          query,
+        },
       })
+      .then((response) => {
+        this.items = response
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+      .then(() => (this.queryLoading = false))
+  }
+
+  async submit() {
+    if (this.isSelected) {
+      this.loading = true
+      this.error = null
+
+      try {
+        await this.$axios.post(`/channels/${this.channel.id}/users`, {
+          userId: this.select,
+        })
+
+        this.$emit('invited')
+      } catch (error) {
+        this.error = error
+      }
+
       this.loading = false
-    }, 500)
+    }
   }
 }
 </script>
