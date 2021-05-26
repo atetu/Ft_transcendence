@@ -9,17 +9,18 @@ export default class GameService {
 
 
   public gameConnect(gameId, playerId) {
-    console.log("here")
+    // console.log("here")
     let game = this.games["" + gameId]
 
     if (game === undefined) {
       game = this.games["" + gameId] = new Game(gameId)
-      console.log('created')
+      // console.log('created')
     }
 
     console.log(this.games)
 
     game.connected += 1
+    console.log('CONNECETED: ' + game.connected)
     if (game.connected === 1)
     {
       game.setPlayer(1, playerId)
@@ -36,9 +37,9 @@ export default class GameService {
   public gameMove({ gameId, player, newY }) {
    
     const game = this.games["" + gameId]
-    console.log('inside game move')
+    // console.log('inside game move')
     if (game === undefined) {
-      console.log('undefined')
+      // console.log('undefined')
       return (false)
     }
 //  console.log('new Y ' + newY)

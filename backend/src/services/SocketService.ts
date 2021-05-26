@@ -95,14 +95,18 @@ export default class SocketService {
     // io.emit("game_new", game.toJSON());
     if (game) {
       socket.join(game.toRoom());
-      callback(null)
+      if(game.connected === 2)
+        callback(null, {ok: true} as {ok: boolean})
+      else
+        callback(null, {ok: false} as {ok: boolean})
+
     } else {
-      callback(new Error('not enough players'))
+      callback(new Error('not enough players'), {ok: false} as {ok: boolean})
     }
   }
 
   async gameMove(socket, body, callback) {
-    console.log('Game move')
+    // console.log('Game move')
     const io = Container.get(socketio.Server);
 
     const { gameId, y } = body

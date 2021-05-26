@@ -48,7 +48,9 @@ export default class Game extends Vue {
   paddleLeftY = 10
   paddleRightX = 770
   paddleRightY = 10
- 
+  mySide: number = 0
+  over: boolean = false
+
   get id() {
     return this.$route.params.id
   }
@@ -70,41 +72,45 @@ export default class Game extends Vue {
   update_paddle() {
     // console.log('UPDATE')
     // console.log(this.down)
-    if (this.up) {
-      let prevY: number = this.paddleRightY 
-      this.paddleRightY -= 1
-      this.up = false
+    let prevY: number = 0
+    let Y: number = 0
+    let nb: number = 0
+    if (this.up)
+      nb = -2
+    else if (this.down)
+      nb = 2
+    this.up = false
+    this.down = false
+    if (this.mySide == 1)
+      {
+        prevY = this.paddleLeftY
+        this.paddleLeftY += nb
+        Y = this.paddleLeftY
+      }
+      else if (this.mySide == 2)
+      {
+        prevY = this.paddleRightY
+        this.paddleRightY += nb
+        Y = this.paddleRightY
+      }
+    if (nb)
+    {
       this.$socket.client.emit('game_move', {
         gameId: this.id,
-        y: this.paddleRightY
+        y: Y
         }, (err: any, body: any) => {
         if (err) {
           console.log('error')
-          this.paddleRightY = prevY
-        } 
+          if (this.mySide == 1)
+            this.paddleLeftY = prevY
+          else
+            this.paddleRightY = prevY
+        }
         else
           console.log('ok')
         })
-      //   input = { side: self.my_side, movement: 'up' }
-      //   self.sub.perform('input', input)
     }
-    if (this.down) {
-      let prevY: number = this.paddleRightY 
-      // console.log('GO Down')
-      this.paddleRightY += 1
-      this.down = false
-      this.$socket.client.emit('game_move', {
-        gameId: this.id,
-        y: this.paddleRightY
-        }, (err: any, body: any) => {
-        if (err) {
-          this.paddleRightY = prevY
-        } 
-        })
-      //   input = { side: self.my_side, movement: 'down' }
-      //   self.sub.perform('input', input)
     }
-  }
 
   mounted() {
     // console.log(this.height)
@@ -115,16 +121,20 @@ export default class Game extends Vue {
     // while(!end)
     // {
     this.$socket.client.emit('game_connect', {
-      gameId: this.id}, 
-      (err: any) => {
+      gameId: this.id},
+      (err: any, body: any) => {
         if (!err) {
-          
-         end = 1
-        } 
+
+        }
+        const { ok } = body
+        if (ok)
+          this.mySide = 2
+        else
+          this.mySide = 1
     })
     // }
     this.autoSaveInterval = setInterval(() => this.drawRect(), 1000 / 60)
-    
+
     console.log('after game connect')
   }
 
@@ -152,7 +162,14 @@ export default class Game extends Vue {
       this.ctx.fillStyle = 'white'
       this.ctx.fillRect(this.paddleLeftX, this.paddleLeftY, 20, 100)
 
-      const prevY = 5
+      if (this.over)
+      {
+            this.ctx.font = "30px Nunito";
+            this.ctx.fillStyle = "red";
+            this.ctx.textAlign = "center";
+            this.ctx.fillText("GAME OVER", this.width/2, this.height/2);
+      }
+
       // update paddle
 
       // this.$socket.client.emit('game_move', {
@@ -169,18 +186,25 @@ export default class Game extends Vue {
   }
   @Socket('game_state')
   getDatas(data: any) {
-    
+
     const { paddle1, paddle2, ballX, ballY } = data
     this.ballX= ballX
     this.ballY = ballY
-     console.log('ballX: ' + this.ballX )
-      console.log('ballY: ' + this.ballY )
+    //  console.log('ballX: ' + this.ballX )
+    //   console.log('ballY: ' + this.ballY )
 
-    this.paddleRightY = paddle1
-    console.log('right: ' + this.paddleRightY )
-    this.paddleLeftY = paddle2
+    this.paddleLeftY = paddle1
+   
+    this.paddleRightY = paddle2
        console.log('left: ' + this.paddleLeftY )
+       console.log('right: ' + this.paddleRightY )
 
   }
+   @Socket('game_over')
+   finishGame()
+   {
+    //  console.log('ovoer')
+     this.over = true
+   }
 }
 </script>

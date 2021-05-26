@@ -9,7 +9,7 @@ class Paddle {
 
   setY(newY: number){
     this.y = newY
-    console.log('newY: ' + this.y)
+    // console.log('newY: ' + this.y)
   }
 }
 
@@ -36,7 +36,7 @@ export default class Game {
   private paddle2: Paddle = new Paddle(770, 10)
   private player1: User | null = null
   private player2: User | null = null
-  private direction = 1
+  private direction: number = 1
   private status: string
   private velX: number = 2
   private velY: number = 1
@@ -56,16 +56,16 @@ public connected: number = 0
 
     if (nb === 1)
     {
-      console.log('nb: ' + 1)
+      // console.log('nb: ' + 1)
       this.player1 = await userService.findById(PlayerId)
       console.log('player1.id: ' + this.player1.id)
     }
     else 
     {
-      console.log('nb: ' + 2)
+      // console.log('nb: ' + 2)
 
       this.player2 = await userService.findById(PlayerId);
-      console.log('player1.id: ' + this.player2.id)
+      console.log('player2.id: ' + this.player2.id)
 
     }
   }
@@ -87,6 +87,12 @@ public connected: number = 0
   {
     let radius: number = 15
     let dist: number = (x - this.ball.x) * (x - this.ball.x) + (y - this.ball.y) * (y - this.ball.y)
+    // console.log ('xside : ' + x)
+    // console.log ('y : ' + y)
+    // console.log ('ballx : ' + this.ball.x)
+    // console.log ('bally : ' + this.ball.y)
+    // console.log('distance: ' + dist)
+    // console.log('radius' + radius)
     if (dist <= radius * radius)
       return 1
     return 0
@@ -95,7 +101,7 @@ public connected: number = 0
   check_up_and_down(x: number, y: number)
   {
     let i: number = x
-    while (i <= x + 15)
+    while (i <= x + 20)
     {
       let ret: number = this.check_collision(i, y)
       if (ret === 1)
@@ -108,7 +114,9 @@ public connected: number = 0
   check_side(x: number, y: number)
   {
     let i: number = y
-    while (i <= y + 80)
+    // console.log('CHECK SIDE')
+    // console.log('YYY ' + y)
+    while (i <= y + 100)
     {
       let ret: number = this.check_collision(x, i)
   
@@ -124,6 +132,7 @@ public connected: number = 0
   {
     let paddle: Paddle 
     let xSide: number
+    // console.log('DIRECTION: ' + this.direction)
     if (this.direction == -1)
     {
       paddle = this.paddle1
@@ -131,10 +140,18 @@ public connected: number = 0
     }
     else
     {
+      // console.log('paddle2: ' + this.paddle2.x)
+      // console.log('paddle2y: ' + this.paddle2.y)
+
       paddle = this.paddle2
-      xSide = this.paddle1.x
+      xSide = this.paddle2.x
     }
-    if (this.check_up_and_down(paddle.x, paddle.y) == 1 || this.check_up_and_down(paddle.x, paddle.y + 100) == 1 || this.check_side(xSide, paddle.y) == 1)
+    // console.log ('xside : ' + xSide)
+    // console.log ('ballx : ' + this.ball.x)
+    // console.log('paddley: ' + paddle.y)
+
+
+    if (this.check_up_and_down(paddle.x, paddle.y) === 1 || this.check_up_and_down(paddle.x, paddle.y + 100) === 1 || this.check_side(xSide, paddle.y) === 1)
       return 1
     return(0)
   }
@@ -146,20 +163,21 @@ public connected: number = 0
    
     if ((this.ball.x + radius) <= 0 ||  (this.ball.x + radius) >= 800)
     {  
-      this.status = "over"
+      // console.log('OVER')
+      // this.status = "over"
       return 0
     }
-    if ((this.ball.y - radius) <=0 || (this.ball.y + radius) >= 600)
+    if ((this.ball.y + radius) <=0 || (this.ball.y - radius) >= 600)
       this.velY*= -1
     
-    let ret = this.collision()
+    let ret: number = this.collision()
 
     if (ret === 1)
       this.direction*= -1
    
     this.ball.x = this.ball.x + this.velX * this.direction
     this.ball.x = this.ball.x
-    this.ball.y = this.ball.y + this.velY * this.direction
+    this.ball.y = this.ball.y + this.velY
     this.ball.y = this.ball.y
     return 1
   }
@@ -168,7 +186,11 @@ public connected: number = 0
     // console.log(1);
 
     const io = Container.get(socketio.Server);
-    this.updateBall()
+    if (!(this.updateBall()))
+    {
+      clearInterval(this.interval)
+      io.to(this.toRoom()).emit('game_over')
+    }
     io.to(this.toRoom()).emit('game_state', {
       paddle1: this.paddle1.y,
       paddle2: this.paddle2.y,
@@ -178,7 +200,7 @@ public connected: number = 0
   }
 
   movePaddle(player: User, y: number) {
-    console.log('YYYY: ' + y)
+    // console.log('YYYY: ' + y)
     if (y < 0 || y > 800)
       return(false)
     else
@@ -190,14 +212,14 @@ public connected: number = 0
 
       if (player.id == this.player1.id)
       {
-        // console.log('player1')
-        this.paddle1.setY(y)
+        console.log('player1')
+        this.paddle1.y = y
       }
       else if (player.id == this.player2.id)
       {
-        // console.log('player2')
+        console.log('player2')
 
-        this.paddle2.setY(y)
+        this.paddle2.y = y
       }
     }
     return (true)
