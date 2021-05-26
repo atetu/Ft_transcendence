@@ -45,6 +45,7 @@ export default class ChannelUser {
       id: this.user?.id,
       username: this.user?.username,
       admin: this.admin,
+      banned: this.banned,
       muted: this.admin,
       mutedUntil: this.admin,
     };

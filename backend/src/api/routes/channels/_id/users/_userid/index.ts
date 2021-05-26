@@ -6,6 +6,10 @@ import ChannelUser from "../../../../../../entities/ChannelUser";
 import User from "../../../../../../entities/User";
 import ChannelUserService from "../../../../../../services/ChannelUserService";
 import middlewares from "../../../../../middlewares";
+import admin from "./admin";
+import ban from "./ban";
+import mute from "./mute";
+import transfer from "./transfer";
 
 export default (app: express.Router) => {
   const channelUserService = Container.get(ChannelUserService);
@@ -16,7 +20,7 @@ export default (app: express.Router) => {
     "/:userid",
     middlewares.pathVariable("userid", "channelUser", async (id, _req, res) => {
       const channel: Channel = res.locals.channel;
-      const user: User = { id } as User
+      const user: User = { id } as User;
 
       return await channelUserService.findByChannelAndUser(channel, user);
     }),
@@ -28,6 +32,11 @@ export default (app: express.Router) => {
 
     res.status(200).send(channelUser);
   });
+
+  admin(route);
+  ban(route);
+  mute(route);
+  transfer(route);
 
   return route;
 };

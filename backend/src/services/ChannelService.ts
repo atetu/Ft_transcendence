@@ -1,7 +1,7 @@
-import { Inject, Service, Container } from "typedi";
-import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { Container, Inject, Service } from "typedi";
 import { InjectRepository } from "typeorm-typedi-extensions";
 import Channel from "../entities/Channel";
+import ChannelUser from "../entities/ChannelUser";
 import ChannelRepository from "../repositories/ChannelRepository";
 import ChannelUserService from "./ChannelUserService";
 import SocketService from "./SocketService";
@@ -28,11 +28,21 @@ export default class ChannelService {
     return await this.repository.findOne(id);
   }
 
-  public async create(channel: Channel) { // TODO: Transactional?
+  public async create(channel: Channel) {
+    // TODO: Transactional?
     await this.repository.save(channel);
     await this.channelUserService.createOwner(channel);
 
     this.socketService.broadcastNewChannel(channel);
+
+    return channel;
+  }
+
+  public async transferOwnership(channel: Channel, channelUser: ChannelUser) {
+    channel.owner = channelUser.user;
+
+    await this.channelUserService.setAdmin(channelUser, true);
+    await this.repository.save(channel);
 
     return channel;
   }

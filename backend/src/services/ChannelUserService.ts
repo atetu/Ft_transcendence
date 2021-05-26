@@ -21,19 +21,35 @@ export default class ChannelUserService {
   }
 
   public async findByChannelAndUser(channel: Channel, user: User) {
-    return await this.repository.findByChannelAndUser(channel, user)
+    return await this.repository.findByChannelAndUser(channel, user);
+  }
+
+  public async setAdmin(channelUser: ChannelUser, state: boolean) {
+    if (channelUser.admin != state) {
+      channelUser.admin = state;
+      
+      await this.repository.save(channelUser);
+    }
+  }
+
+  public async setBanned(channelUser: ChannelUser, state: boolean) {
+    if (channelUser.banned != state) {
+      channelUser.banned = state;
+      
+      await this.repository.save(channelUser);
+    }
   }
 
   public async createOwner(channel: Channel) {
-    const user = channel.owner
+    const user = channel.owner;
 
-    const channelUser = new ChannelUser()
-    channelUser.user = user
-    channelUser.channel = channel
-    channelUser.admin = true
+    const channelUser = new ChannelUser();
+    channelUser.user = user;
+    channelUser.channel = channel;
+    channelUser.admin = true;
 
-    await this.repository.save(channelUser)
+    await this.repository.save(channelUser);
 
-    return channelUser
+    return channelUser;
   }
 }

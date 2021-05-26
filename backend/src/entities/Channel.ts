@@ -47,6 +47,18 @@ export default class Channel {
     return `channel_${this.id}`;
   }
 
+  public isPublic(): boolean {
+    return this.visibility === Visibility.PUBLIC
+  }
+
+  public isProtected(): boolean {
+    return this.visibility === Visibility.PROTECTED
+  }
+
+  public isPrivate(): boolean {
+    return this.visibility === Visibility.PRIVATE
+  }
+
   public toJSON() {
     return {
       id: this.id,
