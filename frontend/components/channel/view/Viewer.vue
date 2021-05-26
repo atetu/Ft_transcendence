@@ -19,6 +19,7 @@
     <v-card class="mx-auto fill-height">
       <v-list class="fill-height">
         <virtual-list
+          ref="virtualMessageList"
           class="fill-height"
           style="overflow-y: auto"
           data-key="id"
@@ -37,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 
 import ScrollItem from '~/components/channel/message/ScrollItem.vue'
 
@@ -98,8 +99,30 @@ export default class Viewer extends Vue {
 
   loadingMessage = ''
 
+  @Watch('messages')
+  onNewMessage() {
+    this.scrollToBotton()
+  }
+
+  @Watch('$fetchState.pending')
+  onFetchFinished(val: boolean) {
+    if (!val) {
+      setTimeout(() => this.scrollToBotton(), 100)
+    }
+  }
+
   get itemComponent() {
     return ScrollItem
+  }
+
+  scrollToBotton() {
+    this.$nextTick(() => {
+      const container = this.$refs.virtualMessageList as any
+
+      if (container) {
+        container.scrollToBottom()
+      }
+    })
   }
 }
 </script>
