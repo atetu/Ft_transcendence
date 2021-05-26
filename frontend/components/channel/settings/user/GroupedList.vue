@@ -16,44 +16,59 @@
           v-if="isOwner"
           icon="mdi-swap-horizontal-bold"
           tooltip="transfer ownership"
+          @click="call('POST', 'transfer', user)"
         />
 
         <channel-settings-action
           v-if="user.admin"
           icon="mdi-arrow-down-bold"
           tooltip="demote"
+          @click="call('DELETE', 'admin', user)"
         />
         <channel-settings-action
           v-else
           icon="mdi-arrow-up-bold"
           tooltip="promote"
+          @click="call('POST', 'admin', user)"
         />
 
         <channel-settings-action
           v-if="user.muted"
           icon="mdi-volume-mute"
           tooltip="unmute"
+          @click="call('DELETE', 'mute', user)"
         />
-        <channel-settings-action v-else icon="mdi-volume-plus" tooltip="mute" />
+        <channel-settings-action
+          v-else
+          icon="mdi-volume-plus"
+          tooltip="mute"
+          @click="call('POST', 'mute', user)"
+        />
 
         <channel-settings-action
           v-if="user.banned"
           icon="mdi-check"
           tooltip="unban"
+          @click="call('DELETE', 'ban', user)"
         />
-        <channel-settings-action v-else icon="mdi-cancel" tooltip="ban" />
+        <channel-settings-action
+          v-else
+          icon="mdi-cancel"
+          tooltip="ban"
+          @click="call('POST', 'ban', user)"
+        />
       </v-list-item-icon>
     </v-list-item>
   </v-list>
 </template>
 
 <script lang="ts">
+import { Method } from 'axios'
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-
 import { Channel, ChannelUser } from '~/models'
 
 @Component
-export default class Drawer extends Vue {
+export default class ComponentImpl extends Vue {
   @Prop({ type: Object })
   channel!: Channel
 
@@ -65,5 +80,18 @@ export default class Drawer extends Vue {
 
   @Prop({ type: Boolean })
   isOwner!: boolean
+
+  call(method: Method, action: string, user: ChannelUser) {
+    this.$confirm(
+      `Are you sure you want to ${action} user ${user.username}?`
+    ).then((response) => {
+      if (response) {
+        this.$axios.$request({
+          method,
+          url: `/channels/${this.channel.id}/users/${user.id}/${action}`,
+        })
+      }
+    })
+  }
 }
 </script>

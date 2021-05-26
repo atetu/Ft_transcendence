@@ -3,6 +3,9 @@
     <v-card-title>
       Users
       <v-spacer />
+      <v-btn icon>
+        <v-icon>mdi-account-plus</v-icon>
+      </v-btn>
       <v-btn icon :loading="loading" @click="$emit('refresh')">
         <v-icon>mdi-refresh</v-icon>
       </v-btn>
