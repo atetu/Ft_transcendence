@@ -27,7 +27,7 @@ export default class ChannelUserService {
   public async setAdmin(channelUser: ChannelUser, state: boolean) {
     if (channelUser.admin != state) {
       channelUser.admin = state;
-      
+
       await this.repository.save(channelUser);
     }
   }
@@ -35,7 +35,7 @@ export default class ChannelUserService {
   public async setBanned(channelUser: ChannelUser, state: boolean) {
     if (channelUser.banned != state) {
       channelUser.banned = state;
-      
+
       await this.repository.save(channelUser);
     }
   }
@@ -43,10 +43,14 @@ export default class ChannelUserService {
   public async createOwner(channel: Channel) {
     const user = channel.owner;
 
+    return this.create(channel, user, true);
+  }
+  
+  public async create(channel: Channel, user: User, admin = false): Promise<ChannelUser> {
     const channelUser = new ChannelUser();
     channelUser.user = user;
     channelUser.channel = channel;
-    channelUser.admin = true;
+    channelUser.admin = admin;
 
     await this.repository.save(channelUser);
 
