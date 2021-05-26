@@ -7,9 +7,7 @@
       <v-card-title>
         {{ $t('channel.invite.title', { name: channel.name }) }}
         <v-spacer />
-        <v-btn icon @click="close()">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
+        <button-close @click="dialog = false" />
       </v-card-title>
       <v-card-text>
         <v-autocomplete
@@ -106,10 +104,6 @@ export default class ComponentImpl extends Vue {
     'Wisconsin',
     'Wyoming',
   ]
-
-  close() {
-    this.drawer = false
-  }
 
   @Watch('search')
   onSearchUpdate(val) {

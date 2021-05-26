@@ -6,11 +6,7 @@
 
     <v-row>
       <v-col cols="12">
-        <v-card>
-          <v-card-text>
-            <channel-settings-edit />
-          </v-card-text>
-        </v-card>
+        <channel-settings-card-edit />
       </v-col>
     </v-row>
   </div>

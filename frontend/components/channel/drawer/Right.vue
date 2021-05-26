@@ -4,10 +4,14 @@
     <template #append>
       <v-list>
         <v-list-item>
-          <v-btn block color="primary" link :to="toSettings">
-            settings
-            <v-icon right>mdi-cog</v-icon>
-          </v-btn>
+          <channel-dialog-settings :channel="channel" :users="users">
+            <template #activator="{ on, attrs }">
+              <v-btn block color="primary" v-bind="attrs" v-on="on">
+                settings
+                <v-icon right>mdi-cog</v-icon>
+              </v-btn>
+            </template>
+          </channel-dialog-settings>
         </v-list-item>
 
         <v-list-item>
