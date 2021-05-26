@@ -1,5 +1,6 @@
 <template>
   <v-text-field
+    ref="textField"
     v-model="content"
     :disabled="loading"
     background-color="grey lighten-1"
@@ -17,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Watch, Vue } from 'nuxt-property-decorator'
 
 import { ChannelMessage, ChannelMessageContentType } from '~/models'
 
@@ -26,6 +27,13 @@ export default class Input extends Vue {
   content = ''
 
   loading = false
+
+  @Watch('loading')
+  onLoadingChange(val: boolean) {
+    if (!val) {
+      this.$nextTick(() => (this.$refs.textField as any).focus())
+    }
+  }
 
   public async submit() {
     if (this.loading) {
