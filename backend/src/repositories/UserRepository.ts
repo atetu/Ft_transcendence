@@ -4,7 +4,7 @@ import User from "../entities/User";
 
 @Service()
 @EntityRepository(User)
-export class UserRepository extends Repository<User> {
+export default class UserRepository extends Repository<User> {
   public findByUsername(username: string) {
     return this.findOne({ username });
   }
