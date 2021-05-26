@@ -11,10 +11,14 @@
         </v-list-item>
 
         <v-list-item>
-          <v-btn block color="primary">
-            invite
-            <v-icon right>mdi-account-plus</v-icon>
-          </v-btn>
+          <channel-dialog-invite :channel="channel">
+            <template #activator="{ on, attrs }">
+              <v-btn block color="primary" v-bind="attrs" v-on="on">
+                invite
+                <v-icon right>mdi-account-plus</v-icon>
+              </v-btn>
+            </template>
+          </channel-dialog-invite>
         </v-list-item>
       </v-list>
     </template>

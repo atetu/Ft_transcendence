@@ -3,9 +3,13 @@
     <v-card-title>
       Users
       <v-spacer />
-      <v-btn icon>
-        <v-icon>mdi-account-plus</v-icon>
-      </v-btn>
+      <channel-dialog-invite :channel="channel">
+        <template #activator="{ on, attrs }">
+          <v-btn icon v-bind="attrs" v-on="on">
+            <v-icon>mdi-account-plus</v-icon>
+          </v-btn>
+        </template>
+      </channel-dialog-invite>
       <v-btn icon :loading="loading" @click="$emit('refresh')">
         <v-icon>mdi-refresh</v-icon>
       </v-btn>
