@@ -41,5 +41,10 @@ export default async ({ server }: { server: http.Server }) => {
     socket.on('game_move', (body, callback) => {
       socketService.gameMove(socket, body, callback)
     })
+
+    socket.on('waiting_room', () => {
+      console.log('first step')
+      socketService.matchMaking(socket)
+    })
   });
 };

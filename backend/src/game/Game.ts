@@ -4,6 +4,8 @@ import User from "../entities/User";
 import UserService from "../services/UserService";
 import { AdvancedConsoleLogger } from "typeorm";
 
+let nbGames: number = 0
+
 class Paddle {
   constructor(public x: number, public y: number) {}
 
@@ -30,20 +32,27 @@ class Ball {
 
 export default class Game {
   private interval?: ReturnType<typeof setInterval>
-  private users: User[]
+  // private users: User[]
   private ball: Ball = new Ball(300, 200, 3, 1)
   private paddle1: Paddle = new Paddle(15, 10)
   private paddle2: Paddle = new Paddle(770, 10)
-  private player1: User | null = null
-  private player2: User | null = null
+  // private player1: User | null = null
+  // private player2: User | null = null
   private direction: number = 1
-  private status: string
+  // private status: string
   private velX: number = 2
   private velY: number = 1
-public connected: number = 0
+  public connected: number = 0
+  public id = ++nbGames
+
+  // constructor(
+  //   public id: number,
+    
+  // ) {}
 
   constructor(
-    public id: number,
+    public player1: User,
+    public player2: User
     
   ) {}
 

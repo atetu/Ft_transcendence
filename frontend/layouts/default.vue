@@ -75,7 +75,7 @@ export default class Default extends Vue {
     },
     {
       title: 'games',
-      icon: 'gamepad-classic',
+      icon: 'controller-classic',
       url: '/games',
     },
     {

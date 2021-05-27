@@ -6,11 +6,17 @@ import ChannelMessage from "../entities/ChannelMessage";
 import Channel from "../entities/Channel";
 import Game from "../game/Game";
 import GameService from "./GameService";
+import MatchMakingService from "./MatchMakingService";
+import { Socket } from "socket.io";
+
+
 import { x } from "@hapi/joi";
 
 @Service()
 export default class SocketService {
     private gameService = Container.get(GameService);
+    private matchMakingService = Container.get(MatchMakingService);
+
     private channelService = Container.get(ChannelService);
 
   connectedUserIds = {};
@@ -122,5 +128,15 @@ export default class SocketService {
       callback(new Error('top'), null)
     }
 
+  }
+  async matchMaking(socket: Socket) {
+    const io = Container.get(socketio.Server);
+    console.log('matchMaking')
+    const game: Game = this.matchMakingService.addSocket(socket)
+
+    if (game)
+    {
+      io.to(game.toRoom()).emit('game_starting', { player1: game.player1.id, player2: game.player2.id, gameId: game.id })
+    }
   }
 }

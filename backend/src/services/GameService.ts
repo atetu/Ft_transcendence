@@ -20,7 +20,7 @@ export default class GameService {
     console.log(this.games)
 
     game.connected += 1
-    console.log('CONNECETED: ' + game.connected)
+    // console.log('CONNECETED: ' + game.connected)
     if (game.connected === 1)
     {
       game.setPlayer(1, playerId)
