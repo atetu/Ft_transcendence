@@ -1,4 +1,12 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import * as bcrypt from "bcrypt";
 import User from "./User";
 
 export enum Type {
@@ -43,20 +51,47 @@ export default class Channel {
   })
   owner: User;
 
+  @Column({
+    nullable: true,
+  })
+  passwordHash: string;
+
+  password?: string;
+
+  async updatePasswordHash() {
+    if (this.isProtected()) {
+      if (this.password !== undefined) {
+        console.log("updating password: ", this.password);
+        const salt = await bcrypt.genSalt(10);
+        this.passwordHash = await bcrypt.hash(this.password, salt);
+      }
+    } else {
+      this.passwordHash = null;
+    }
+  }
+
+  public async checkPassword(password: string) {
+    if (!this.isProtected()) {
+      return true;
+    }
+
+    return await bcrypt.compare(password, this.passwordHash);
+  }
+
   public toRoom(): string {
     return `channel_${this.id}`;
   }
 
   public isPublic(): boolean {
-    return this.visibility === Visibility.PUBLIC
+    return this.visibility === Visibility.PUBLIC;
   }
 
   public isProtected(): boolean {
-    return this.visibility === Visibility.PROTECTED
+    return this.visibility === Visibility.PROTECTED;
   }
 
   public isPrivate(): boolean {
-    return this.visibility === Visibility.PRIVATE
+    return this.visibility === Visibility.PRIVATE;
   }
 
   public toJSON() {
@@ -74,4 +109,7 @@ export default class Channel {
         : undefined,
     };
   }
+
+  static Type = Visibility;
+  static Visibility = Visibility;
 }

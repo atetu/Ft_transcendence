@@ -54,7 +54,11 @@ export default (app: express.Router) => {
         channel.owner = user;
         channel.name = name;
         channel.visibility = visibility;
+        channel.password = password;
 
+        console.log(password)
+
+        await channel.updatePasswordHash()
         await channelService.create(channel);
 
         res.status(200).send(channel.toJSON());

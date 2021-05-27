@@ -1,4 +1,5 @@
 import * as express from "express";
+import channels from "./channels";
 import achievements from "./achievements";
 import relationships from "./relationships";
 
@@ -13,6 +14,7 @@ export default (app: express.Router) => {
 
   achievements(route);
   relationships(route);
+  channels(route);
 
   return route;
 };

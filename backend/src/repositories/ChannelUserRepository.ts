@@ -8,6 +8,15 @@ import User from "../entities/User";
 @EntityRepository(ChannelUser)
 export class ChannelUserRepository extends Repository<ChannelUser> {
   async findByChannelAndUser(channel: Channel, user: User) {
-    return this.findOne({ channel, user });
+    return await this.findOne({ channel, user });
+  }
+  async findAllByUserAndNotBannedIncludeChannel(user: User) {
+    return await this.find({
+      where: {
+        user,
+        banned: false,
+      },
+      relations: ["channel"],
+    });
   }
 }

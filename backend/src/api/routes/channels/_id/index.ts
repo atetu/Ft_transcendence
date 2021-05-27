@@ -60,7 +60,9 @@ export default (app: express.Router) => {
       try {
         channel.name = name;
         channel.visibility = visibility;
+        channel.password = password;
 
+        await channel.updatePasswordHash()
         await channelService.update(channel);
 
         res.status(200).send(channel.toJSON());

@@ -24,6 +24,10 @@ export default class ChannelUserService {
     return await this.repository.findByChannelAndUser(channel, user);
   }
 
+  public async findAllByUserAndNotBanned(user: User) {
+    return await this.repository.findAllByUserAndNotBannedIncludeChannel(user)
+  }
+
   public async setAdmin(channelUser: ChannelUser, state: boolean) {
     if (channelUser.admin != state) {
       channelUser.admin = state;
