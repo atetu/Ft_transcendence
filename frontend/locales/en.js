@@ -2,6 +2,13 @@ export default {
   language: 'English',
   channel: {
     create: 'Create a channel',
+    discover: {
+      _: 'Discover some channels',
+      unlock: {
+        title: 'Unlock channel access {name}',
+        label: 'What is the psassword?',
+      },
+    },
     visibility: {
       public: 'Public',
       protected: 'Protected',
