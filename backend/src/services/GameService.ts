@@ -12,25 +12,27 @@ export default class GameService {
     // console.log("here")
     let game = this.games["" + gameId]
 
-    if (game === undefined) {
-      game = this.games["" + gameId] = new Game(gameId)
-      // console.log('created')
-    }
+    // if (game === undefined) {
+    //   game = this.games["" + gameId]
+    //   // game = this.games["" + gameId] = new Game(gameId)
 
-    console.log(this.games)
+    //   // console.log('created')
+    // }
 
-    game.connected += 1
-    // console.log('CONNECETED: ' + game.connected)
-    if (game.connected === 1)
-    {
-      game.setPlayer(1, playerId)
-    }
-    else if (game.connected === 2)
-      game.setPlayer(2, playerId)
+    // console.log(this.games)
 
-    if (game.connected === 2) {
-      game.start()
-    }
+    // game.connected += 1
+    // // console.log('CONNECETED: ' + game.connected)
+    // if (game.connected === 1)
+    // {
+    //   game.setPlayer(1, playerId)
+    // }
+    // else if (game.connected === 2)
+    //   game.setPlayer(2, playerId)
+
+    // if (game.connected === 2) {
+    //   game.start()
+    // }
     return (game)
   }
 

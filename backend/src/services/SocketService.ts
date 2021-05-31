@@ -100,7 +100,7 @@ export default class SocketService {
     const game = this.gameService.gameConnect(gameId, socket.data.user.id) 
     // io.emit("game_new", game.toJSON());
     if (game) {
-      socket.join(game.toRoom());
+      // socket.join(game.toRoom());
       if(game.connected === 2)
         callback(null, {ok: true} as {ok: boolean})
       else
@@ -133,10 +133,12 @@ export default class SocketService {
     const io = Container.get(socketio.Server);
     console.log('matchMaking')
     const game: Game = this.matchMakingService.addSocket(socket)
-
+    console.log('game : ' + game)
     if (game)
     {
       io.to(game.toRoom()).emit('game_starting', { player1: game.player1.id, player2: game.player2.id, gameId: game.id })
+      game.start()
+      console.log('starting....')
     }
   }
 }

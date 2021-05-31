@@ -44,6 +44,7 @@ export default class Game {
   private velY: number = 1
   public connected: number = 0
   public id = ++nbGames
+  public state: number = 3
 
   // constructor(
   //   public id: number,
@@ -52,41 +53,65 @@ export default class Game {
 
   constructor(
     public player1: User,
-    public player2: User
-    
+    public player2: User,
   ) {}
 
   public toRoom(): string {
     return `game_${this.id}`;
   }
-  async setPlayer(nb:number, PlayerId: number)
-  {
-    const userService = Container.get(UserService);
+  // async setPlayer(nb:number, PlayerId: number)
+  // {
+  //   const userService = Container.get(UserService);
 
-    if (nb === 1)
-    {
-      // console.log('nb: ' + 1)
-      this.player1 = await userService.findById(PlayerId)
-      console.log('player1.id: ' + this.player1.id)
-    }
-    else 
-    {
-      // console.log('nb: ' + 2)
+  //   if (nb === 1)
+  //   {
+  //     // console.log('nb: ' + 1)
+  //     this.player1 = await userService.findById(PlayerId)
+  //     console.log('player1.id: ' + this.player1.id)
+  //   }
+  //   else 
+  //   {
+  //     // console.log('nb: ' + 2)
 
-      this.player2 = await userService.findById(PlayerId);
-      console.log('player2.id: ' + this.player2.id)
+  //     this.player2 = await userService.findById(PlayerId);
+  //     console.log('player2.id: ' + this.player2.id)
 
-    }
+  //   }
+  // }
+
+  sleep(ms: number) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 
+  async decount()
+  {
+    while(this.state != -1)
+    {
+      await this.sleep(1000);
+      this.state--
+    }
+  }
+  
   start() {
+    console.log('start player 1: ' + this.player1.id)
+    console.log('start player 2: ' + this.player2.id)
+    //   const io = Container.get(socketio.Server);
+
+    //   io.to(this.toRoom()).emit('game_connect', {
+    //   player1: this.player1,
+    //   player2: this.player2
+    // })
     if (this.interval === undefined) {
       this.interval = setInterval(() => this.loop(), 1000 / 20);
     }
+    this.decount()
+    console.log('end of start')
   }
 
   stop() {
-    if (this.interval !== undefined) {
+    if (this.interval != undefined) {
       clearInterval(this.interval);
       this.interval = undefined;
     }
@@ -172,7 +197,7 @@ export default class Game {
    
     if ((this.ball.x + radius) <= 0 ||  (this.ball.x + radius) >= 800)
     {  
-      // console.log('OVER')
+      console.log('OVER')
       // this.status = "over"
       return 0
     }
@@ -195,16 +220,22 @@ export default class Game {
     // console.log(1);
 
     const io = Container.get(socketio.Server);
-    if (!(this.updateBall()))
+    if (this.state === -1 && this.updateBall() === 0)
     {
       clearInterval(this.interval)
+      console.log('OVER BIS')
       io.to(this.toRoom()).emit('game_over')
     }
+    // console.log('state: ' + this.state)
+    console.log('player1 before: ' + this.player1.id)
     io.to(this.toRoom()).emit('game_state', {
-      paddle1: this.paddle1.y,
-      paddle2: this.paddle2.y,
+      player1: this.player1,
+      player2: this.player2,
+      paddle1: this.paddle1,
+      paddle2: this.paddle2,
       ballX: this.ball.x,
       ballY: this.ball.y,
+      state: this.state
     })
   }
 
