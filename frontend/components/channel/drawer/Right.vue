@@ -1,7 +1,7 @@
 <template>
   <drawer-right>
     <channel-user-list :channel="channel" :users="users" />
-    <template #append>
+    <template v-if="hasJoined" #append>
       <v-list>
         <v-list-item>
           <channel-dialog-settings :channel="channel" :users="users">
@@ -52,6 +52,9 @@ export default class Index extends Vue {
 
   @Prop({ type: Array })
   users!: ChannelUser[]
+
+  @Prop({ type: Boolean })
+  hasJoined!: boolean
 
   public get toSettings() {
     const id = this.channel?.id

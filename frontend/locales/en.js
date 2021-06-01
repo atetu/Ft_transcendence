@@ -62,6 +62,9 @@ export default {
       title: 'Leave channel {name}?',
       button: 'leave',
     },
+    join: {
+      button: 'join',
+    },
   },
   error: {
     retry: 'retry',

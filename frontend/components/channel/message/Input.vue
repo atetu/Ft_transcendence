@@ -25,7 +25,6 @@ import { ChannelMessage, ChannelMessageContentType } from '~/models'
 @Component
 export default class Input extends Vue {
   content = ''
-
   loading = false
 
   @Watch('loading')

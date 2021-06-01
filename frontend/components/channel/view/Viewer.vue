@@ -10,10 +10,6 @@
       <v-toolbar-title>
         {{ channel.name }}
       </v-toolbar-title>
-      <v-spacer />
-      <v-btn :input-value="true" icon>
-        <v-icon>mdi-account-group</v-icon>
-      </v-btn>
     </v-app-bar>
 
     <v-card class="mx-auto fill-height">
@@ -30,10 +26,15 @@
     </v-card>
 
     <v-footer app height="72" inset>
-      <channel-message-input />
+      <channel-message-input v-if="hasJoined" />
+      <channel-join v-else :channel="channel" @joined="$fetch()" />
     </v-footer>
 
-    <channel-drawer-right :channel="channel" :users="users" />
+    <channel-drawer-right
+      :channel="channel"
+      :users="users"
+      :has-joined="hasJoined"
+    />
   </div>
 </template>
 
@@ -44,26 +45,37 @@ import ScrollItem from '~/components/channel/message/ScrollItem.vue'
 
 import { Channel, ChannelMessage, ChannelUser } from '~/models'
 
-@Component({
+@Component
+export default class Viewer extends Vue {
+  @Prop({ type: Number })
+  id!: number
+
+  @Prop({ type: Object, required: false, default: null })
+  channel!: Channel
+
+  @Prop({ type: Array })
+  users!: ChannelUser[]
+
+  @Prop({ type: Array })
+  messages!: ChannelMessage[]
+
+  loadingMessage = ''
+
   async fetch() {
-    const self = this as any /* avoid warnings */
-
     try {
-      const id = self.id
+      const channelId = this.id
 
-      self.loadingMessage = 'fetching channel'
-      await this.$store.dispatch('channels/current/fetch', id)
+      this.loadingMessage = 'fetching channel'
+      await this.$store.dispatch('channels/current/fetch', channelId)
 
-      self.loadingMessage = 'fetching users'
+      this.loadingMessage = 'fetching users'
       await this.$store.dispatch('channels/current/fetchUsers')
 
-      self.loadingMessage = 'fetching messages'
+      this.loadingMessage = 'fetching messages'
       await this.$store.dispatch('channels/current/fetchMessages')
 
-      self.loadingMessage = 'connecting to channel'
+      this.loadingMessage = 'connecting to channel'
       await new Promise((resolve, reject) => {
-        const channelId = self.id
-
         this.$socket.client.emit(
           'channel_connect',
           {
@@ -82,22 +94,7 @@ import { Channel, ChannelMessage, ChannelUser } from '~/models'
       await this.$store.dispatch('channels/current/clear')
       throw error
     }
-  },
-})
-export default class Viewer extends Vue {
-  @Prop({ type: Number })
-  id!: number
-
-  @Prop({ type: Object, required: false, default: null })
-  channel!: Channel
-
-  @Prop({ type: Array })
-  users!: ChannelUser[]
-
-  @Prop({ type: Array })
-  messages!: ChannelMessage[]
-
-  loadingMessage = ''
+  }
 
   @Watch('messages')
   onNewMessage() {
@@ -115,14 +112,22 @@ export default class Viewer extends Vue {
     return ScrollItem
   }
 
-  scrollToBotton() {
-    this.$nextTick(() => {
-      const container = this.$refs.virtualMessageList as any
+  get hasJoined() {
+    const userId = this.$store.state.auth.user.id
 
-      if (container) {
-        container.scrollToBottom()
-      }
-    })
+    return this.users.filter((x) => x.id === userId).length !== 0
+  }
+
+  scrollToBotton() {
+    for (let _ = 0; _ < 3; _++) {
+      this.$nextTick(() => {
+        const container = this.$refs.virtualMessageList as any
+
+        if (container) {
+          container.scrollToBottom()
+        }
+      })
+    }
   }
 }
 </script>
