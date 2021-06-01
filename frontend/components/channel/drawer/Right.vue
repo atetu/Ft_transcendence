@@ -7,7 +7,7 @@
           <channel-dialog-settings :channel="channel" :users="users">
             <template #activator="{ on, attrs }">
               <v-btn block color="primary" v-bind="attrs" v-on="on">
-                settings
+                {{ $t('channel.settings.button') }}
                 <v-icon right>mdi-cog</v-icon>
               </v-btn>
             </template>
@@ -18,11 +18,22 @@
           <channel-dialog-invite :channel="channel">
             <template #activator="{ on, attrs }">
               <v-btn block color="primary" v-bind="attrs" v-on="on">
-                invite
+                {{ $t('channel.invite.button') }}
                 <v-icon right>mdi-account-plus</v-icon>
               </v-btn>
             </template>
           </channel-dialog-invite>
+        </v-list-item>
+
+        <v-list-item>
+          <channel-dialog-leave :channel="channel">
+            <template #activator="{ on, attrs }">
+              <v-btn block color="primary" v-bind="attrs" v-on="on">
+                {{ $t('channel.leave.button') }}
+                <v-icon right>mdi-logout-variant</v-icon>
+              </v-btn>
+            </template>
+          </channel-dialog-leave>
         </v-list-item>
       </v-list>
     </template>

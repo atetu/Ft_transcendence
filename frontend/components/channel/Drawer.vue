@@ -31,13 +31,13 @@
       <v-list>
         <v-list-item>
           <v-btn block color="primary" link to="/channels/discover">
-            discover
+            {{ $t('channel.discover.action') }}
             <v-icon right>mdi-flare</v-icon>
           </v-btn>
         </v-list-item>
         <v-list-item>
           <v-btn block color="primary" link to="/channels/create">
-            create
+            {{ $t('channel.create.action') }}
             <v-icon right>mdi-plus</v-icon>
           </v-btn>
         </v-list-item>

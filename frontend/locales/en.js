@@ -1,9 +1,13 @@
 export default {
   language: 'English',
   channel: {
-    create: 'Create a channel',
+    create: {
+      _: 'Create a channel',
+      action: 'create',
+    },
     discover: {
       _: 'Discover some channels',
+      action: 'discover',
       unlock: {
         title: 'Unlock channel access {name}',
         label: 'What is the psassword?',
@@ -33,6 +37,7 @@ export default {
     },
     settings: {
       title: 'Settings of {name}',
+      button: 'settings',
       danger: {
         title: 'Danger Zone',
         actions: {
@@ -51,6 +56,11 @@ export default {
     invite: {
       title: 'Invite people to {name}',
       label: 'What is his username?',
+      button: 'invite',
+    },
+    leave: {
+      title: 'Leave channel {name}?',
+      button: 'leave',
     },
   },
   error: {
