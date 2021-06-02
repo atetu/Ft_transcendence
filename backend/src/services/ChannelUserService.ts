@@ -60,4 +60,8 @@ export default class ChannelUserService {
 
     return channelUser;
   }
+
+  public async delete(channelUser: ChannelUser) {
+    this.repository.delete(channelUser)
+  }
 }
