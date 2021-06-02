@@ -1,16 +1,23 @@
-import { Service } from "typedi";
+import { Inject, Service } from "typedi";
 import { PrimaryColumnCannotBeNullableError } from "typeorm";
 import Game from "../game/Game";
+import MatchMakingService from "./MatchMakingService";
+
 
 
 @Service()
 export default class GameService {
   private games: { [key: string]: Game } = {}
 
+  constructor(
+    @Inject()
+    private matchMakingService: MatchMakingService
+  ) {}
 
-  public gameConnect(gameId, playerId) {
+
+  public gameConnect(gameId) {
     // console.log("here")
-    let game = this.games["" + gameId]
+    let game = this.matchMakingService.games["" + gameId]
 
     // if (game === undefined) {
     //   game = this.games["" + gameId]
@@ -38,13 +45,14 @@ export default class GameService {
 
   public gameMove({ gameId, player, newY }) {
    
-    const game = this.games["" + gameId]
+    console.log('game moooooove')
+    const game = this.matchMakingService.games["" + gameId]
     // console.log('inside game move')
     if (game === undefined) {
-      // console.log('undefined')
+      console.log('undefined')
       return (false)
     }
-//  console.log('new Y ' + newY)
+ console.log('new Y ' + newY)
     return(game.movePaddle(player, newY))
   }
 

@@ -94,25 +94,22 @@ export default class SocketService {
 
   async gameConnect(socket, body: any, callback: any) {
     console.log('Game connect')
-    const { gameId } = body  //pourquoi cont?
+    const { gameId } = body 
     const io = Container.get(socketio.Server)
     
-    const game = this.gameService.gameConnect(gameId, socket.data.user.id) 
-    // io.emit("game_new", game.toJSON());
+    const game = this.gameService.gameConnect(gameId) 
     if (game) {
-      // socket.join(game.toRoom());
-      if(game.connected === 2)
-        callback(null, {ok: true} as {ok: boolean})
-      else
-        callback(null, {ok: false} as {ok: boolean})
-
-    } else {
-      callback(new Error('not enough players'), {ok: false} as {ok: boolean})
+        callback(null, {
+          player1: game.player1,
+         player2: game.player2})
+    }
+    else {
+      callback(new Error('not enough players'))
     }
   }
 
   async gameMove(socket, body, callback) {
-    // console.log('Game move')
+    console.log('Game move')
     const io = Container.get(socketio.Server);
 
     const { gameId, y } = body

@@ -95,14 +95,14 @@ export default class Game {
   }
   
   start() {
-    console.log('start player 1: ' + this.player1.id)
-    console.log('start player 2: ' + this.player2.id)
-    //   const io = Container.get(socketio.Server);
+    // console.log('start player 1: ' + this.player1.id)
+    // console.log('start player 2: ' + this.player2.id)
+      const io = Container.get(socketio.Server);
 
-    //   io.to(this.toRoom()).emit('game_connect', {
-    //   player1: this.player1,
-    //   player2: this.player2
-    // })
+      io.to(this.toRoom()).emit('game_connect', {
+      player1: this.player1,
+      player2: this.player2
+    })
     if (this.interval === undefined) {
       this.interval = setInterval(() => this.loop(), 1000 / 20);
     }
@@ -227,7 +227,7 @@ export default class Game {
       io.to(this.toRoom()).emit('game_over')
     }
     // console.log('state: ' + this.state)
-    console.log('player1 before: ' + this.player1.id)
+    // console.log('player1 before: ' + this.player1.id)
     io.to(this.toRoom()).emit('game_state', {
       player1: this.player1,
       player2: this.player2,
@@ -241,6 +241,7 @@ export default class Game {
 
   movePaddle(player: User, y: number) {
     // console.log('YYYY: ' + y)
+    console.log('MOVE PADDLE')
     if (y < 0 || y > 800)
       return(false)
     else
@@ -252,14 +253,17 @@ export default class Game {
 
       if (player.id == this.player1.id)
       {
-        console.log('player1')
+        console.log('player1 - paddle1')
         this.paddle1.y = y
+        console.log(this.paddle1.y)
       }
       else if (player.id == this.player2.id)
       {
-        console.log('player2')
+        console.log('player2 - paddle2')
 
         this.paddle2.y = y
+        console.log(this.paddle2.y)
+
       }
     }
     return (true)

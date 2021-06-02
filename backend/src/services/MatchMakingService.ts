@@ -12,6 +12,7 @@ import UserService from "./UserService";
 export default class MatchMakingService {
   private socketList: Socket[] = [];
   private socketDic: { [key: string]: Socket } = {};
+  public games: { [key: string]: Game } = {}
 
   constructor(
     @Inject()
@@ -37,7 +38,7 @@ export default class MatchMakingService {
       let socket2 = this.setSocket();
 
       let game = new Game(socket1.data.user, socket2.data.user)
-  
+      this.games["" + game.id] = game
       socket1.join(game.toRoom());
       socket2.join(game.toRoom());
       return (game)
