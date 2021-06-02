@@ -32,18 +32,15 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import API from '~/api/API'
 import { User } from '~/models'
 
 @Component
 export default class Page extends Vue {
   users: User[] = []
 
-  get id() {
-    return this.$route.params.id
-  }
-
   async fetch() {
-    this.users = await this.$axios.$get('/users/')
+    this.users = await API.Users.index()
   }
 }
 </script>

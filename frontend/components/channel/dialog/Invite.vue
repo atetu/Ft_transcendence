@@ -12,7 +12,7 @@
       <v-card-text>
         <v-autocomplete
           v-model="select"
-          :loading="queryLoading"
+          :loading="queryLoading !== 0"
           :disabled="loading"
           :items="items"
           :search-input.sync="search"
@@ -29,7 +29,7 @@
         >
           <template #append-outer>
             <v-btn
-              :loading="queryLoading || loading"
+              :loading="queryLoading !== 0 || loading"
               :disabled="!isSelected"
               large
               color="primary"
@@ -48,7 +48,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
-import { Channel } from '~/models'
+import API from '~/api/API'
+import { Channel, User } from '~/models'
 
 @Component
 export default class ComponentImpl extends Vue {
@@ -57,19 +58,19 @@ export default class ComponentImpl extends Vue {
 
   dialog = false
 
-  queryLoading = false
+  queryLoading = 0
   loading = false
   error: any = null
 
-  items = []
+  items: Array<User> = []
   search = null
-  select = null
+  select: number | null = null
 
   @Watch('search')
   onSearchUpdate(val: string) {
     this.error = null
 
-    val && val !== this.select && this.querySelections(val)
+    this.querySelections(val)
   }
 
   get errors() {
@@ -88,22 +89,16 @@ export default class ComponentImpl extends Vue {
   }
 
   querySelections(query: string) {
-    this.queryLoading = true
-    this.error = null
+    this.queryLoading++
 
-    this.$axios
-      .$get('/search/users', {
-        params: {
-          query,
-        },
-      })
+    API.Search.users(query)
       .then((response) => {
         this.items = response
       })
       .catch((error) => {
-        console.log(error)
+        console.log(error) // TODO
       })
-      .then(() => (this.queryLoading = false))
+      .then(() => this.queryLoading--)
   }
 
   async submit() {
@@ -112,9 +107,7 @@ export default class ComponentImpl extends Vue {
       this.error = null
 
       try {
-        await this.$axios.post(`/channels/${this.channel.id}/users`, {
-          userId: this.select,
-        })
+        await API.ChannelUsers.create(this.channel, this.select as number)
 
         this.$emit('invited')
       } catch (error) {

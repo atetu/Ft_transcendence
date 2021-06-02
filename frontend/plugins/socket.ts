@@ -3,6 +3,7 @@ import { Plugin } from '@nuxt/types'
 
 import io from 'socket.io-client'
 import VueSocketIOExt from 'vue-socket.io-extended'
+import { initializeSocket } from '~/utils/api'
 
 const socket = io('http://localhost:3001/', {
   path: '/socket.io',
@@ -10,6 +11,8 @@ const socket = io('http://localhost:3001/', {
 })
 
 const plugin: Plugin = ({ store }) => {
+  initializeSocket(socket)
+
   socket.onAny((event, ...args) => {
     console.log(`got ${event}:`, args)
   })

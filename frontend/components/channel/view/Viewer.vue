@@ -26,7 +26,7 @@
     </v-card>
 
     <v-footer app height="72" inset>
-      <channel-message-input v-if="hasJoined" />
+      <channel-message-input v-if="hasJoined" :channel="channel" />
       <channel-join v-else :channel="channel" @joined="$fetch()" />
     </v-footer>
 
@@ -40,9 +40,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
-
+import { Socket } from 'vue-socket.io-extended'
+import API from '~/api/API'
 import ScrollItem from '~/components/channel/message/ScrollItem.vue'
-
 import { Channel, ChannelMessage, ChannelUser } from '~/models'
 
 @Component
@@ -50,50 +50,28 @@ export default class Viewer extends Vue {
   @Prop({ type: Number })
   id!: number
 
-  @Prop({ type: Object, required: false, default: null })
-  channel!: Channel
-
-  @Prop({ type: Array })
-  users!: ChannelUser[]
-
-  @Prop({ type: Array })
-  messages!: ChannelMessage[]
+  channel: Channel | null = null
+  users: Array<ChannelUser> = []
+  messages: Array<ChannelMessage> = []
 
   loadingMessage = ''
 
   async fetch() {
-    try {
-      const channelId = this.id
+    this.loadingMessage = 'fetching channel'
+    const channel = await API.Channels.show(this.id)
 
-      this.loadingMessage = 'fetching channel'
-      await this.$store.dispatch('channels/current/fetch', channelId)
+    this.loadingMessage = 'fetching users'
+    const users = await API.ChannelUsers.index(channel)
 
-      this.loadingMessage = 'fetching users'
-      await this.$store.dispatch('channels/current/fetchUsers')
+    this.loadingMessage = 'fetching messages'
+    const messages = await API.ChannelMessages.index(channel)
 
-      this.loadingMessage = 'fetching messages'
-      await this.$store.dispatch('channels/current/fetchMessages')
+    this.loadingMessage = 'connecting to channel'
+    await API.Socket.channelConnect(channel)
 
-      this.loadingMessage = 'connecting to channel'
-      await new Promise((resolve, reject) => {
-        this.$socket.client.emit(
-          'channel_connect',
-          {
-            channelId,
-          },
-          (error: any, message: any) => {
-            if (error) {
-              reject(error)
-            } else {
-              resolve(message)
-            }
-          }
-        )
-      })
-    } catch (error) {
-      await this.$store.dispatch('channels/current/clear')
-      throw error
-    }
+    this.channel = channel
+    this.users = users
+    this.messages = messages
   }
 
   @Watch('messages')
@@ -106,6 +84,11 @@ export default class Viewer extends Vue {
     if (!val) {
       setTimeout(() => this.scrollToBotton(), 100)
     }
+  }
+
+  @Socket('channel_message')
+  onChannelMessage(message: ChannelMessage) {
+    this.messages.push(message)
   }
 
   get itemComponent() {

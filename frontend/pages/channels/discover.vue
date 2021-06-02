@@ -19,6 +19,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import API from '~/api/API'
 import { Channel } from '~/models'
 
 import { channelsModule } from '~/store/channels/const'
@@ -32,7 +33,7 @@ export default class Page extends Vue {
 
   async fetch() {
     await this.$store.dispatch('channels/fetchAll')
-    this.channels = await this.$axios.$get(`/channels`)
+    this.channels = await API.Channels.index()
   }
 
   get addedChannelIds() {

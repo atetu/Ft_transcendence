@@ -18,12 +18,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Watch, Vue } from 'nuxt-property-decorator'
+import { Component, Watch, Vue, Prop } from 'nuxt-property-decorator'
+import API from '~/api/API'
 
-import { ChannelMessage, ChannelMessageContentType } from '~/models'
+import { Channel, ChannelMessageContentType } from '~/models'
 
 @Component
 export default class Input extends Vue {
+  @Prop()
+  channel!: Channel
+
   content = ''
   loading = false
 
@@ -42,14 +46,14 @@ export default class Input extends Vue {
     this.loading = true
 
     try {
-      await this.$store.dispatch('channels/current/sendMessage', {
+      await API.ChannelMessages.create(this.channel, {
         type: ChannelMessageContentType.TEXT,
         content: this.content,
-      } as ChannelMessage)
+      })
 
       this.content = ''
     } catch (error) {
-      console.log(error)
+      console.log(error) // TODO
     }
 
     this.loading = false

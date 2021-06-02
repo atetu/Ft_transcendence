@@ -23,18 +23,19 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import API from '~/api/API'
 import { User } from '~/models'
 
 @Component
 export default class Loading extends Vue {
   user: User | null = null
 
-  get id() {
-    return this.$route.params.id
+  get id(): number {
+    return parseInt(this.$route.params.id)
   }
 
   async fetch() {
-    this.user = await this.$axios.$get(`/users/${this.id}`)
+    this.user = await API.Users.show(this.id)
   }
 }
 </script>

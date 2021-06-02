@@ -6,6 +6,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import API from '~/api/API'
 
 import { Channel } from '~/models'
 
@@ -28,9 +29,7 @@ export default class Input extends Vue {
     const userId = this.$store.state.auth.user.id
 
     try {
-      await this.$axios.post(`/channels/${this.channel.id}/users`, {
-        userId,
-      })
+      await API.ChannelUsers.create(this.channel, userId)
 
       this.$emit('joined')
     } catch (error) {

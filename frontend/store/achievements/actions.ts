@@ -1,9 +1,9 @@
 import { AchievementsActions } from './types'
-import { Achievement } from '~/models'
+import AchievementsAPI from '~/api/AchievementsAPI'
 
 export const actions: AchievementsActions = {
   async fetch({ commit }) {
-    const achievements: Achievement[] = await this.$axios.$get('/achievements')
+    const achievements = await AchievementsAPI.index()
 
     commit('setList', achievements)
   },

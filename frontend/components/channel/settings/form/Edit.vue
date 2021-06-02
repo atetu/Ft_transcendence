@@ -30,7 +30,7 @@
       :loading="loading"
       color="primary"
       class="mr-4"
-      @click="update"
+      @click="submit()"
     >
       {{ editMode ? 'edit' : 'create' }}
     </v-btn>
@@ -39,6 +39,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import API from '~/api/API'
 
 import { Channel, ChannelVisibility } from '~/models'
 
@@ -103,7 +104,7 @@ export default class Edit extends Vue {
     return `/channels`
   }
 
-  update() {
+  async submit() {
     this.form.validate()
 
     if (!this.valid) {
@@ -114,26 +115,30 @@ export default class Edit extends Vue {
       return
     }
 
-    return this.$axios
-      .post(this.actionUrl, {
+    try {
+      const body = {
         name: this.name,
         visibility: this.visibility,
         password:
           this.visibility === ChannelVisibility.PROTECTED
             ? this.password
             : undefined,
-      })
-      .then((response) => {
-        const channel: Channel = response.data
+      }
 
-        this.$router.push(`/channels/${channel.id}`)
-      })
-      .catch((error) => {
-        this.error = error
-      })
-      .then(() => {
-        this.loading = false
-      })
+      let channel: Channel
+
+      if (this.initial) {
+        channel = await API.Channels.update(this.initial, body)
+      } else {
+        channel = await API.Channels.create(body)
+      }
+
+      this.$router.push(`/channels/${channel.id}`)
+    } catch (error) {
+      this.error = error
+    }
+
+    this.loading = false
   }
 
   created() {

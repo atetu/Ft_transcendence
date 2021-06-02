@@ -1,7 +1,10 @@
 import { Plugin } from '@nuxt/types'
+import { initializeAxios } from '~/utils/api'
 
 const plugin: Plugin = ({ $axios, store, redirect }) => {
   $axios.defaults.baseURL = window.location.origin + '/api/' // 'http://127.0.0.1:3001/' // window.location.origin + '/api/'
+
+  initializeAxios($axios)
 
   $axios.interceptors.request.use((config) => {
     const accessToken = store.state.auth.accessToken

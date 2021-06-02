@@ -28,7 +28,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { Channel } from '~/models'
+import API from '~/api/API'
+import { Channel, User } from '~/models'
 
 @Component
 export default class ComponentImpl extends Vue {
@@ -59,8 +60,8 @@ export default class ComponentImpl extends Vue {
     this.error = null
 
     try {
-      const userId = this.$store.state.auth.user.id
-      await this.$axios.delete(`/channels/${this.channel.id}/users/${userId}`)
+      const user: User = this.$store.state.auth.user
+      await API.ChannelUsers.destroy(this.channel, user)
 
       this.$emit('leaved')
     } catch (error) {
