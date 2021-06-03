@@ -61,7 +61,6 @@ export default class Channel {
   async updatePasswordHash() {
     if (this.isProtected()) {
       if (this.password !== undefined) {
-        console.log("updating password: ", this.password);
         const salt = await bcrypt.genSalt(10);
         this.passwordHash = await bcrypt.hash(this.password, salt);
       }
