@@ -3,7 +3,12 @@
     <v-card-title>
       Users
       <v-spacer />
-      <channel-dialog-invite v-if="isAdmin" :channel="channel">
+      <channel-dialog-invite
+        v-if="isAdmin"
+        :channel="channel"
+        :users="users"
+        @invited="$emit('refresh')"
+      >
         <template #activator="{ on, attrs }">
           <v-btn icon v-bind="attrs" v-on="on">
             <v-icon>mdi-account-plus</v-icon>
