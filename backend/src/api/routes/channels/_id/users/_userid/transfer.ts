@@ -18,13 +18,17 @@ export default (app: express.Router) => {
     const channel: Channel = res.locals.channel;
     const channelUser: ChannelUser = res.locals.channelUser;
 
-    if (user.id !== channel.owner.id) {
-      return helpers.forbidden("only owner can transfer ownership");
+    try {
+      if (user.id !== channel.owner.id) {
+        return helpers.forbidden("only owner can transfer ownership");
+      }
+
+      await channelService.transferOwnership(channel, channelUser);
+
+      res.status(200).send(channel);
+    } catch (error) {
+      next(error);
     }
-
-    await channelService.transferOwnership(channel, channelUser);
-
-    res.status(200).send(channel);
   });
 
   return route;

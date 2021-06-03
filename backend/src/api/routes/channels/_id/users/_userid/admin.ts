@@ -28,17 +28,21 @@ export default (app: express.Router) => {
       const channel: Channel = res.locals.channel;
       const channelUser: ChannelUser = res.locals.channelUser;
 
-      if (channel.owner.id !== user.id) {
-        return helpers.forbidden(errorNotOwner);
+      try {
+        if (channel.owner.id !== user.id) {
+          return helpers.forbidden(errorNotOwner);
+        }
+
+        if (channel.owner.id === channelUser.user.id) {
+          return helpers.forbidden(errorOwnerItself);
+        }
+
+        await channelUserService.setAdmin(channelUser, to);
+
+        res.status(200).send(channelUser);
+      } catch (error) {
+        next(error);
       }
-
-      if (channel.owner.id === channelUser.user.id) {
-        return helpers.forbidden(errorOwnerItself);
-      }
-
-      await channelUserService.setAdmin(channelUser, to);
-
-      res.status(200).send(channelUser);
     };
   }
 

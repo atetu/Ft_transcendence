@@ -25,17 +25,21 @@ export default (app: express.Router) => {
       const selfChannelUser: ChannelUser = res.locals.selfChannelUser;
       const channelUser: ChannelUser = res.locals.channelUser;
 
-      if (!selfChannelUser.admin) {
-        return helpers.forbidden(errorNotAdmin);
+      try {
+        if (!selfChannelUser.admin) {
+          return helpers.forbidden(errorNotAdmin);
+        }
+
+        if (selfChannelUser.user.id === channelUser.user.id) {
+          return helpers.forbidden(errorAdminItself);
+        }
+
+        await channelUserService.setBanned(channelUser, to);
+
+        res.status(200).send(channelUser);
+      } catch (error) {
+        next(error);
       }
-
-      if (selfChannelUser.user.id === channelUser.user.id) {
-        return helpers.forbidden(errorAdminItself);
-      }
-
-      await channelUserService.setBanned(channelUser, to);
-
-      res.status(200).send(channelUser);
     };
   }
 
