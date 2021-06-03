@@ -33,6 +33,7 @@ export default {
       },
       password: {
         _: 'Password',
+        'leave-empty': 'Leave empty to not modify',
       },
     },
     settings: {

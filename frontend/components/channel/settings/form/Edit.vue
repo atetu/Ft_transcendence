@@ -1,37 +1,35 @@
 <template>
-  <v-form ref="form" v-model="valid" lazy-validation>
-    {{ error }}
-
+  <v-form ref="form">
     <v-text-field
       v-model="name"
       :counter="20"
-      :rules="rules.name"
       :label="$t('channel.field.name._')"
+      :error-messages="errorOf('name')"
       required
-    ></v-text-field>
+    />
 
     <v-select
       v-model="visibility"
       :items="visibilities"
-      :rules="rules.visibility"
       :label="$t('channel.field.visibility._')"
+      :error-messages="errorOf('visibility')"
       required
-    ></v-select>
+    />
 
     <v-text-field
+      v-show="visibility === 'protected'"
       v-model="password"
-      :rules="rules.password"
       :label="$t('channel.field.password._')"
+      :hint="editMode ? $t('channel.field.password.leave-empty') : null"
+      :error-messages="errorOf('password')"
       required
-    ></v-text-field>
+    />
 
-    <v-btn
-      :disabled="!valid"
-      :loading="loading"
-      color="primary"
-      class="mr-4"
-      @click="submit()"
-    >
+    <p v-if="error" class="red--text">
+      {{ error }}
+    </p>
+
+    <v-btn :loading="loading" color="primary" class="mr-4" @click="submit()">
       {{ editMode ? 'edit' : 'create' }}
     </v-btn>
   </v-form>
@@ -40,6 +38,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import API from '~/api/API'
+import JoiHelper from '~/utils/joi'
 
 import { Channel, ChannelVisibility } from '~/models'
 
@@ -50,26 +49,11 @@ export default class Edit extends Vue {
 
   loading = false
   error: any = null
+  validationErrors: { [key: string]: string } = {}
 
   name = ''
   visibility = ChannelVisibility.PUBLIC
   password = ''
-  valid = true
-
-  rules = {
-    name: [
-      (v: string) => !!v || 'Name is required',
-      (v: string) =>
-        (v && v.length >= 3 && v.length <= 20) ||
-        'Name must be between 3 and 20 characters',
-    ],
-    visibility: [(v: ChannelVisibility) => !!v || 'Visibility is required'],
-    password: [],
-  }
-
-  validate() {
-    this.form.validate()
-  }
 
   get visibilities() {
     return this.visibilityEnumValues.map((visibility) => ({
@@ -86,8 +70,14 @@ export default class Edit extends Vue {
     ]
   }
 
-  get form(): any {
-    return this.$refs.form
+  errorOf(field: string) {
+    const error = this.validationErrors[field]
+
+    if (error === undefined) {
+      return null
+    }
+
+    return [error]
   }
 
   get editMode() {
@@ -105,15 +95,12 @@ export default class Edit extends Vue {
   }
 
   async submit() {
-    this.form.validate()
-
-    if (!this.valid) {
-      return
-    }
-
     if (this.loading) {
       return
     }
+
+    this.error = null
+    this.validationErrors = {}
 
     try {
       const body = {
@@ -121,7 +108,9 @@ export default class Edit extends Vue {
         visibility: this.visibility,
         password:
           this.visibility === ChannelVisibility.PROTECTED
-            ? this.password
+            ? !this.password
+              ? undefined
+              : this.password
             : undefined,
       }
 
@@ -135,7 +124,12 @@ export default class Edit extends Vue {
 
       this.$router.push(`/channels/${channel.id}`)
     } catch (error) {
-      this.error = error
+      if (error.response?.status === 400) {
+        this.error = 'validation error'
+        JoiHelper.extract(error.response.data.validation, this.validationErrors)
+      } else {
+        this.error = error
+      }
     }
 
     this.loading = false
