@@ -39,6 +39,10 @@ export default (app: express.Router) => {
           return helpers.forbidden("banned");
         }
 
+        if (!channel.isPublic() && !selfUserChannel) {
+          return helpers.forbidden(channel.visibility);
+        }
+
         res.locals.channel = channel;
         res.locals.selfUserChannel = selfUserChannel;
 
