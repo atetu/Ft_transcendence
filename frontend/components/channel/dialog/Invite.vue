@@ -49,12 +49,15 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import API from '~/api/API'
-import { Channel, User } from '~/models'
+import { Channel, ChannelUser, User } from '~/models'
 
 @Component
 export default class ComponentImpl extends Vue {
   @Prop({ type: Object })
   channel!: Channel
+
+  @Prop({ type: Array })
+  users!: ChannelUser[]
 
   dialog = false
 
@@ -93,7 +96,9 @@ export default class ComponentImpl extends Vue {
 
     API.Search.users(query)
       .then((response) => {
-        this.items = response
+        const already = this.users.map((x) => x.id)
+
+        this.items = response.filter((x) => !already.includes(x.id))
       })
       .catch((error) => {
         console.log(error) // TODO

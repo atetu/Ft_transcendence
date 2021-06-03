@@ -65,6 +65,15 @@ export default {
     join: {
       button: 'join',
     },
+    action: {
+      transfer:
+        'Are you sure that you want to transfer the ownership of this channel to {user}?',
+      promote: 'Are you sure that you want to promote {user}?',
+      demote: 'Are you sure that you want to demote {user}?',
+      ban: 'Are you sure that you want to ban {user}?',
+      unban: 'Are you sure that you want to unban {user}?',
+      kick: 'Are you sure that you want to kick {user}?',
+    },
   },
   error: {
     retry: 'retry',

@@ -3,7 +3,7 @@
     <v-card-title>
       Users
       <v-spacer />
-      <channel-dialog-invite :channel="channel">
+      <channel-dialog-invite v-if="isAdmin" :channel="channel">
         <template #activator="{ on, attrs }">
           <v-btn icon v-bind="attrs" v-on="on">
             <v-icon>mdi-account-plus</v-icon>
@@ -19,6 +19,7 @@
       v-for="(group, key) in groups"
       :key="key"
       :is-owner="isOwner"
+      :is-admin="isAdmin"
       :channel="channel"
       :users="group.users"
       :name="group.name"
@@ -42,9 +43,11 @@ export default class Drawer extends Vue {
   @Prop({ type: Boolean })
   loading!: boolean
 
-  get isOwner() {
-    return this.$store.state.auth.user?.id === this.channel.owner.id
-  }
+  @Prop({ type: Boolean, default: false })
+  isOwner!: boolean
+
+  @Prop({ type: Boolean, default: false })
+  isAdmin!: boolean
 
   get groups() {
     const makeGroup = (name: string) => ({

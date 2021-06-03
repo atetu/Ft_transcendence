@@ -1,5 +1,8 @@
 <template>
-  <channel-view-loading v-if="$fetchState.pending" :message="loadingMessage" />
+  <channel-view-loading
+    v-if="$fetchState.pending && !channel"
+    :message="loadingMessage"
+  />
   <channel-view-error
     v-else-if="$fetchState.error"
     :error="$fetchState.error"
@@ -34,6 +37,10 @@
       :channel="channel"
       :users="users"
       :has-joined="hasJoined"
+      :is-owner="isOwner"
+      :is-admin="isAdmin"
+      :loading="$fetchState.pending"
+      @refresh="$fetch()"
     />
   </div>
 </template>
@@ -95,10 +102,28 @@ export default class Viewer extends Vue {
     return ScrollItem
   }
 
-  get hasJoined() {
+  get selfChannelUser() {
     const userId = this.$store.state.auth.user.id
 
-    return this.users.filter((x) => x.id === userId).length !== 0
+    return this.users.filter((x) => x.id === userId)[0]
+  }
+
+  get hasJoined() {
+    return this.selfChannelUser !== null
+  }
+
+  get isOwner() {
+    const userId = this.$store.state.auth.user.id
+
+    if (this.channel) {
+      return this.channel.owner.id === userId
+    }
+
+    return false
+  }
+
+  get isAdmin() {
+    return this.selfChannelUser?.admin || false
   }
 
   scrollToBotton() {

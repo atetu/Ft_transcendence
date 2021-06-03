@@ -3,8 +3,15 @@
     <channel-user-list :channel="channel" :users="users" />
     <template v-if="hasJoined" #append>
       <v-list>
-        <v-list-item>
-          <channel-dialog-settings :channel="channel" :users="users">
+        <v-list-item v-if="isAdmin">
+          <channel-dialog-settings
+            :channel="channel"
+            :users="users"
+            :is-admin="isAdmin"
+            :is-owner="isOwner"
+            :loading="loading"
+            @refresh="$emit('refresh')"
+          >
             <template #activator="{ on, attrs }">
               <v-btn block color="primary" v-bind="attrs" v-on="on">
                 {{ $t('channel.settings.button') }}
@@ -14,8 +21,12 @@
           </channel-dialog-settings>
         </v-list-item>
 
-        <v-list-item>
-          <channel-dialog-invite :channel="channel">
+        <v-list-item v-if="isAdmin">
+          <channel-dialog-invite
+            :channel="channel"
+            :users="users"
+            @invited="$emit('refresh')"
+          >
             <template #activator="{ on, attrs }">
               <v-btn block color="primary" v-bind="attrs" v-on="on">
                 {{ $t('channel.invite.button') }}
@@ -55,6 +66,15 @@ export default class Index extends Vue {
 
   @Prop({ type: Boolean })
   hasJoined!: boolean
+
+  @Prop({ type: Boolean, default: false })
+  isOwner!: boolean
+
+  @Prop({ type: Boolean, default: false })
+  isAdmin!: boolean
+
+  @Prop({ type: Boolean, default: false })
+  loading!: boolean
 
   public get toSettings() {
     const id = this.channel?.id

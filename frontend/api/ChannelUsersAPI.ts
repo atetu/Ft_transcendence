@@ -48,6 +48,10 @@ export default class ChannelUsersAPI {
     return $axios.$delete(`channels/${channel.id}/users/${user.id}/mute`)
   }
 
+  static transfer(channel: Channel, user: ChannelUser): Promise<ChannelUser> {
+    return $axios.$post(`channels/${channel.id}/users/${user.id}/transfer`)
+  }
+
   static destroy(channel: Channel, user: AnUser): Promise<void> {
     return $axios.$delete(`channels/${channel.id}/users/${user.id}`)
   }

@@ -1,0 +1,167 @@
+<template>
+  <v-list-item>
+    <v-list-item-avatar>
+      <user-avatar :user="user" />
+    </v-list-item-avatar>
+
+    <v-list-item-content>
+      <v-list-item-title>{{ user.username }}</v-list-item-title>
+    </v-list-item-content>
+
+    <v-list-item-icon>
+      <template v-if="isOwner">
+        <channel-settings-action
+          v-if="!isChannelOwner"
+          icon="mdi-swap-horizontal-bold"
+          tooltip="transfer ownership"
+          @click="transferOwnership()"
+        />
+
+        <template v-if="!isSelf">
+          <channel-settings-action
+            v-if="user.admin"
+            icon="mdi-arrow-down-bold"
+            tooltip="demote"
+            @click="demote()"
+          />
+          <channel-settings-action
+            v-else
+            icon="mdi-arrow-up-bold"
+            tooltip="promote"
+            @click="promote()"
+          />
+        </template>
+      </template>
+
+      <template v-if="isAdmin">
+        <channel-settings-action
+          v-if="user.muted"
+          icon="mdi-volume-mute"
+          tooltip="unmute"
+          @click="unmute()"
+        />
+        <channel-settings-action
+          v-else
+          icon="mdi-volume-plus"
+          tooltip="mute"
+          @click="mute()"
+        />
+
+        <template v-if="!isSelf && !isChannelOwner">
+          <channel-settings-action
+            v-if="user.banned"
+            icon="mdi-check"
+            tooltip="unban"
+            @click="unban()"
+          />
+          <channel-settings-action
+            v-else
+            icon="mdi-cancel"
+            tooltip="ban"
+            @click="ban()"
+          />
+        </template>
+
+        <channel-settings-action
+          v-if="!isChannelOwner"
+          icon="mdi-logout-variant"
+          tooltip="kick"
+          @click="kick()"
+        />
+      </template>
+    </v-list-item-icon>
+  </v-list-item>
+</template>
+
+<script lang="ts">
+import { Method } from 'axios'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import API from '~/api/API'
+import { Channel, ChannelUser } from '~/models'
+
+@Component
+export default class ComponentImpl extends Vue {
+  @Prop({ type: Object })
+  channel!: Channel
+
+  @Prop({ type: Object })
+  user!: ChannelUser
+
+  @Prop({ type: Boolean })
+  isOwner!: boolean
+
+  @Prop({ type: Boolean })
+  isAdmin!: boolean
+
+  get isChannelOwner() {
+    return this.channel.owner.id === this.user.id
+  }
+
+  get isSelf() {
+    return this.user.id === this.$store.state.auth.user.id
+  }
+
+  call(method: Method, action: string, user: ChannelUser) {
+    this.$confirm(
+      `Are you sure you want to ${action} user ${user.username}?`
+    ).then((response) => {
+      if (response) {
+        this.$axios.$request({
+          method,
+          url: `/channels/${this.channel.id}/users/${user.id}/${action}`,
+        })
+      }
+    })
+  }
+
+  confirmAction(i18nKey: string, onYes: () => Promise<void>) {
+    this.$confirm(
+      this.$t(i18nKey, { user: this.user.username }) as string
+    ).then(async (response) => {
+      if (response) {
+        try {
+          await onYes()
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    })
+  }
+
+  transferOwnership() {
+    this.confirmAction('channel.action.transfer', async () => {
+      await API.ChannelUsers.transfer(this.channel, this.user)
+    })
+  }
+
+  promote() {
+    this.confirmAction('channel.action.promote', async () => {
+      await API.ChannelUsers.promote(this.channel, this.user)
+    })
+  }
+
+  demote() {
+    this.confirmAction('channel.action.demote', async () => {
+      await API.ChannelUsers.demote(this.channel, this.user)
+    })
+  }
+
+  ban() {
+    this.confirmAction('channel.action.ban', async () => {
+      await API.ChannelUsers.ban(this.channel, this.user)
+    })
+  }
+
+  unban() {
+    this.confirmAction('channel.action.unban', async () => {
+      await API.ChannelUsers.unban(this.channel, this.user)
+    })
+  }
+
+  kick() {
+    this.confirmAction('channel.action.kick', async () => {
+      await API.ChannelUsers.destroy(this.channel, this.user)
+    })
+  }
+}
+</script>

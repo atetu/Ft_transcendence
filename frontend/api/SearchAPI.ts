@@ -3,7 +3,11 @@ import { User } from '~/models'
 
 export default class SearchAPI {
   static users(query: string): Promise<Array<User>> {
-    return $axios.get(`/search/users`, {
+    if (!query || !query.length) {
+      return Promise.resolve([])
+    }
+
+    return $axios.$get(`/search/users`, {
       params: {
         query,
       },
