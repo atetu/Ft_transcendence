@@ -49,6 +49,7 @@ export default class Edit extends Vue {
       if (response) {
         try {
           await this.$axios.delete(`/channels/${this.channel.id}`)
+          this.$store.dispatch('channels/fetchAll')
           this.$router.push('/channels')
         } catch (error) {
           alert(error) // TODO
