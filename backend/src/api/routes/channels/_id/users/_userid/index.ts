@@ -36,6 +36,7 @@ export default (app: express.Router) => {
   route.delete("/", async (req, res, next) => {
     const user: User = req.user as any;
     const channel: Channel = res.locals.channel;
+    const selfChannelUser: ChannelUser = res.locals.selfChannelUser;
     const channelUser: ChannelUser = res.locals.channelUser;
 
     try {
@@ -44,7 +45,7 @@ export default (app: express.Router) => {
       }
 
       if (user.id !== channelUser.user.id) {
-        if (!channelUser.admin) {
+        if (!selfChannelUser.admin) {
           return helpers.forbidden("you are not an admin");
         }
 
