@@ -30,21 +30,21 @@ export default (app: express.Router) => {
           return helpers.notFound(`no channel found with id: ${id}`);
         }
 
-        const selfUserChannel = await channelUserService.findByChannelAndUser(
+        const selfChannelUser = await channelUserService.findByChannelAndUser(
           channel,
           user
         );
 
-        if (selfUserChannel?.banned) {
+        if (selfChannelUser?.banned) {
           return helpers.forbidden("banned");
         }
 
-        if (!channel.isPublic() && !selfUserChannel) {
+        if (!channel.isPublic() && !selfChannelUser) {
           return helpers.forbidden(channel.visibility);
         }
 
         res.locals.channel = channel;
-        res.locals.selfUserChannel = selfUserChannel;
+        res.locals.selfChannelUser = selfChannelUser;
 
         next();
       } catch (error) {
