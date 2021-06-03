@@ -1,30 +1,49 @@
 import * as express from "express";
 import { Container } from "typeorm-typedi-extensions";
+import User from "../../../../../../entities/User";
+import Channel from "../../../../../../entities/Channel";
 import ChannelUser from "../../../../../../entities/ChannelUser";
 import ChannelUserService from "../../../../../../services/ChannelUserService";
+import helpers from "../../../../../helpers";
 
 export default (app: express.Router) => {
-  const channelUserService = Container.get(ChannelUserService)
+  const channelUserService = Container.get(ChannelUserService);
 
   const route = express.Router();
 
   app.use("/admin", route);
 
-  route.post("/", async (req, res, next) => {
-    const channelUser: ChannelUser = res.locals.channelUser
+  function update(to: boolean) {
+    const action = to ? "promote" : "demote";
 
-    await channelUserService.setAdmin(channelUser, true)
+    const errorNotOwner = `only owner can ${action}`;
+    const errorOwnerItself = `owner cannot ${action} itself`;
 
-    res.status(200).send(channelUser)
-  });
+    return async (
+      req: express.Request,
+      res: express.Response,
+      next: express.NextFunction
+    ) => {
+      const user: User = req.user as any;
+      const channel: Channel = res.locals.channel;
+      const channelUser: ChannelUser = res.locals.channelUser;
 
-  route.delete("/", async (req, res, next) => {
-    const channelUser: ChannelUser = res.locals.channelUser
+      if (channel.owner.id !== user.id) {
+        return helpers.forbidden(errorNotOwner);
+      }
 
-    await channelUserService.setAdmin(channelUser, false)
+      if (channel.owner.id === channelUser.user.id) {
+        return helpers.forbidden(errorOwnerItself);
+      }
 
-    res.status(200).send(channelUser)
-  });
+      await channelUserService.setAdmin(channelUser, to);
+
+      res.status(200).send(channelUser);
+    };
+  }
+
+  route.post("/", update(true));
+  route.delete("/", update(false));
 
   return route;
 };
