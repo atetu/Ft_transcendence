@@ -11,7 +11,7 @@ export default (app: express.Router) => {
 
   app.use(
     "/:channelid",
-    middlewares.pathVariable("channelid", "channel", async (id) => {
+    middlewares.simplePathVariable("channelid", "channel", async (id) => {
       return await channelService.findById(id);
     }),
     route

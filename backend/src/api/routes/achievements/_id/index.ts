@@ -12,7 +12,7 @@ export default (app: express.Router) => {
 
   app.use(
     "/:id",
-    middlewares.pathVariable("id", "achievement", async (id) => {
+    middlewares.simplePathVariable("id", "achievement", async (id) => {
       return await achievementService.findById(id);
     }),
     route

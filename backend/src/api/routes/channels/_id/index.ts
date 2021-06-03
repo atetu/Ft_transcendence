@@ -4,21 +4,48 @@ import Container from "typedi";
 import Channel, {
   Visibility as ChannelVisibility,
 } from "../../../../entities/Channel";
+import User from "../../../../entities/User";
 import ChannelService from "../../../../services/ChannelService";
 import ChannelUserService from "../../../../services/ChannelUserService";
+import helpers from "../../../helpers";
 import middlewares from "../../../middlewares";
 import messages from "./messages";
 import users from "./users";
 
 export default (app: express.Router) => {
   const channelService = Container.get(ChannelService);
+  const channelUserService = Container.get(ChannelUserService);
 
   const route = express.Router();
 
   app.use(
     "/:id",
-    middlewares.pathVariable("id", "channel", async (id) => {
-      return await channelService.findById(id);
+    middlewares.pathVariable("id", async (id, req, res, next) => {
+      const user: User = req.user as any;
+
+      try {
+        const channel = await channelService.findById(id);
+
+        if (!channel) {
+          return helpers.notFound(`no channel found with id: ${id}`);
+        }
+
+        const selfUserChannel = await channelUserService.findByChannelAndUser(
+          channel,
+          user
+        );
+
+        if (selfUserChannel?.banned) {
+          return helpers.forbidden("banned");
+        }
+
+        res.locals.channel = channel;
+        res.locals.selfUserChannel = selfUserChannel;
+
+        next();
+      } catch (error) {
+        next(error);
+      }
     }),
     route
   );
@@ -62,7 +89,7 @@ export default (app: express.Router) => {
         channel.visibility = visibility;
         channel.password = password;
 
-        await channel.updatePasswordHash()
+        await channel.updatePasswordHash();
         await channelService.update(channel);
 
         res.status(200).send(channel.toJSON());

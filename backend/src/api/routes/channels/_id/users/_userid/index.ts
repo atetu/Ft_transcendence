@@ -18,7 +18,7 @@ export default (app: express.Router) => {
 
   app.use(
     "/:userid",
-    middlewares.pathVariable("userid", "channelUser", async (id, _req, res) => {
+    middlewares.simplePathVariable("userid", "channelUser", async (id, _req, res) => {
       const channel: Channel = res.locals.channel;
       const user: User = { id } as User;
 
