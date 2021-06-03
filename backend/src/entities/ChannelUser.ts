@@ -42,12 +42,12 @@ export default class ChannelUser {
 
   public toJSON() {
     return {
-      id: this.user?.id,
-      username: this.user?.username,
+      id: this.user.id,
+      username: this.user.username,
       admin: this.admin,
       banned: this.banned,
-      muted: this.admin,
-      mutedUntil: this.admin,
+      muted: this.muted,
+      mutedUntil: this.mutedUntil,
     };
   }
 }
