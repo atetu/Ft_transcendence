@@ -242,7 +242,7 @@ export default class Game {
   movePaddle(player: User, y: number) {
     // console.log('YYYY: ' + y)
     console.log('MOVE PADDLE')
-    if (y < 0 || y > 800)
+    if (y < 0 || y > 500)
       return(false)
     else
     {

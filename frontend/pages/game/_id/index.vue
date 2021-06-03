@@ -1,15 +1,24 @@
 <template>
   <!-- Canvas -->
 
-  <div style="text-align: center">
+  <div>
+    <v-card
+      class="d-flex flex-row mb-6"
+      :color="$vuetify.theme.dark ? 'grey darken-3' : 'grey lighten-4'"
+      flat
+      tile
+    >
+    Score 1
+    </v-card>
     <canvas
       id="myCanvas"
       :width="width"
       :height="height"
       tabindex="0"
       @keydown="onPressed"
-    ></canvas>
-    <span id="time">05:00</span>
+    ></canvas> 
+    </v-col>
+    </v-row>
   </div>
 
   <!-- Add Rectangle Button -->
@@ -34,6 +43,7 @@ import { Component, Vue } from 'nuxt-property-decorator' // propre a nuxt
 import { Socket } from 'vue-socket.io-extended'
 
 import { User } from '~/models'
+enum Status {waiting = 1, playing = 2, over = 3 }
 
 @Component
 export default class Game extends Vue {
@@ -60,6 +70,8 @@ export default class Game extends Vue {
   timer: number = 3
   playing: boolean = false
   user: User | null = null
+  status :Status = Status.waiting
+
 
   get id() {
     return this.$route.params.id
@@ -69,16 +81,16 @@ export default class Game extends Vue {
     // console.log(event.key)
     switch (event.key) {
       case 'ArrowDown': {
-        if (this.playing)
+        if (this.status = Status.playing)
         {
           this.down = true
-          console.log('down')
-          console.log('myside: ' + this.mySide)
+          // console.log('down')
+          // console.log('myside: ' + this.mySide)
           break
         }
       }
       case 'ArrowUp': {
-        if (this.playing)
+        if (this.status = Status.playing)
         {
           this.up = true
           break
@@ -106,7 +118,7 @@ export default class Game extends Vue {
       this.paddleRightY += nb
       Y = this.paddleRightY
     }
-    console.log('front update: ' + Y)
+    // console.log('front update: ' + Y)
     if (nb) {
       this.$socket.client.emit(
         'game_move',
@@ -141,14 +153,14 @@ export default class Game extends Vue {
       },
       (error: any, body: any) => {
         if (!error) {
-          console.log('inside error')
+          // console.log('inside error')
           const { player1, player2 } = body
           if (player1.id === this.$store.state.auth.user.id)
             this.mySide = 1
           else 
             this.mySide = 2
         }
-        console.log('MY SIDE: ' + this.mySide)
+        // console.log('MY SIDE: ' + this.mySide)
       }
     )
     
@@ -179,14 +191,15 @@ export default class Game extends Vue {
       this.ctx.fillStyle = 'white'
       this.ctx.fillRect(this.paddleLeftX, this.paddleLeftY, 20, 100)
 
-      if (this.over) {
+// console.log('status after over and before writing: ' + this.status)
+      if (this.status === Status.over) {
         this.ctx.font = '80px Nunito'
         this.ctx.fillStyle = 'white'
         this.ctx.textAlign = 'center'
         this.ctx.fillText('GAME OVER', this.width / 2, this.height / 2)
       }
      
-     if (this.timer != -1)
+     if (this.status === Status.waiting)
      {
 
       this.ctx.font = '80px Nunito'
@@ -195,9 +208,9 @@ export default class Game extends Vue {
       this.ctx.fillText("" + this.timer, this.width / 2, this.height / 2)
  
      }
-      if (this.timer === -1){
-     this.playing = true
-      }
+    //   if (this.timer === -1){
+    //  this.playing = true
+    
 
     }
   }
@@ -214,16 +227,21 @@ export default class Game extends Vue {
 
     this.paddleRightY = paddle2.y
     this.timer = state
-   
-    console.log('game statae left: ' + this.paddleLeftY)
-    console.log('game state right: ' + this.paddleRightY)
+   if (this.timer === -1 && this.status === Status.waiting){
+     this.status = Status.playing
+   }
+    // console.log('game statae left: ' + this.paddleLeftY)
+    // console.log('game state right: ' + this.paddleRightY)
    
 
   }
 
   @Socket('game_over')
   finishGame() {
-    this.over = true
+    console.log('OVERRRRR')
+    // this.timer = -2
+    this.status = Status.over
+    console.log('status after over: ' + this.status)
     // if (this.autoSaveInterval)
     //   clearInterval(this.autoSaveInterval)
   }
