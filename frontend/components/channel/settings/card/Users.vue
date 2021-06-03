@@ -28,6 +28,7 @@
       :channel="channel"
       :users="group.users"
       :name="group.name"
+      @refresh="$emit('refresh')"
     />
   </v-card>
 </template>

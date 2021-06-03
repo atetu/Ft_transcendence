@@ -74,7 +74,6 @@
 </template>
 
 <script lang="ts">
-import { Method } from 'axios'
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import API from '~/api/API'
 import { Channel, ChannelUser } from '~/models'
@@ -101,19 +100,6 @@ export default class ComponentImpl extends Vue {
     return this.user.id === this.$store.state.auth.user.id
   }
 
-  call(method: Method, action: string, user: ChannelUser) {
-    this.$confirm(
-      `Are you sure you want to ${action} user ${user.username}?`
-    ).then((response) => {
-      if (response) {
-        this.$axios.$request({
-          method,
-          url: `/channels/${this.channel.id}/users/${user.id}/${action}`,
-        })
-      }
-    })
-  }
-
   confirmAction(i18nKey: string, onYes: () => Promise<void>) {
     this.$confirm(
       this.$t(i18nKey, { user: this.user.username }) as string
@@ -121,6 +107,8 @@ export default class ComponentImpl extends Vue {
       if (response) {
         try {
           await onYes()
+
+          this.$emit('refresh')
         } catch (error) {
           console.log(error)
         }

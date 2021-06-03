@@ -9,6 +9,7 @@
       :channel="channel"
       :is-owner="isOwner"
       :is-admin="isAdmin"
+      @refresh="$emit('refresh')"
     />
   </v-list>
 </template>
