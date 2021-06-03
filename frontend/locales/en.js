@@ -66,6 +66,21 @@ export default {
     join: {
       button: 'join',
     },
+    mute: {
+      title: 'Mute {user}',
+      button: 'mute',
+      durations: {
+        '5m': '5 minutes',
+        '15m': '15 minutes',
+        '1h': '1 hour',
+        '12h': '12 hours',
+        '1d': '1 day',
+        '10d': '10 days',
+        '1M': '1 month',
+        '1Y': '1 year',
+        indefinitely: 'indefinitely',
+      },
+    },
     action: {
       transfer:
         'Are you sure that you want to transfer the ownership of this channel to {user}?',
@@ -74,6 +89,7 @@ export default {
       ban: 'Are you sure that you want to ban {user}?',
       unban: 'Are you sure that you want to unban {user}?',
       kick: 'Are you sure that you want to kick {user}?',
+      unmute: 'Are you sure that you want to unmute {user}?',
     },
   },
   error: {

@@ -1,5 +1,5 @@
 <template>
-  <v-tooltip top>
+  <v-tooltip top v-bind="attr" v-on="on">
     <template #activator="{ on, attrs }">
       <v-btn
         icon
@@ -28,5 +28,11 @@ export default class Drawer extends Vue {
 
   @Prop({ type: Boolean, default: false })
   loading!: boolean
+
+  @Prop()
+  on!: any
+
+  @Prop()
+  attr!: any
 }
 </script>

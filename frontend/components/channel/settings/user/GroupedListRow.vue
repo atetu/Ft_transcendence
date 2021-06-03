@@ -40,12 +40,19 @@
           tooltip="unmute"
           @click="unmute()"
         />
-        <channel-settings-action
-          v-else
-          icon="mdi-volume-plus"
-          tooltip="mute"
-          @click="mute()"
-        />
+        <template v-else>
+          <channel-settings-action
+            icon="mdi-volume-plus"
+            tooltip="mute"
+            @click="openMuteDialog()"
+          />
+          <channel-dialog-mute
+            ref="muteDialog"
+            :channel="channel"
+            :user="user"
+            @muted="$emit('refresh')"
+          />
+        </template>
 
         <template v-if="!isSelf && !isChannelOwner">
           <channel-settings-action
@@ -143,6 +150,18 @@ export default class ComponentImpl extends Vue {
   unban() {
     this.confirmAction('channel.action.unban', async () => {
       await API.ChannelUsers.unban(this.channel, this.user)
+    })
+  }
+
+  openMuteDialog() {
+    const dialog: any = this.$refs.muteDialog
+
+    dialog.open()
+  }
+
+  unmute() {
+    this.confirmAction('channel.action.unmute', async () => {
+      await API.ChannelUsers.unmute(this.channel, this.user)
     })
   }
 
