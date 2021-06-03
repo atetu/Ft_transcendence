@@ -25,7 +25,7 @@ export default class ChannelUserService {
   }
 
   public async findAllByUserAndNotBanned(user: User) {
-    return await this.repository.findAllByUserAndNotBannedIncludeChannel(user)
+    return await this.repository.findAllByUserAndNotBannedIncludeChannel(user);
   }
 
   public async setAdmin(channelUser: ChannelUser, state: boolean) {
@@ -44,13 +44,33 @@ export default class ChannelUserService {
     }
   }
 
+  public async setMuted(
+    channelUser: ChannelUser,
+    state: boolean,
+    duration: number | null
+  ) {
+    channelUser.muted = state;
+
+    if (!state || duration == null) {
+      channelUser.mutedUntil = null;
+    } else {
+      channelUser.mutedUntil = new Date(Date.now() + duration * 1000);
+    }
+
+    await this.repository.save(channelUser);
+  }
+
   public async createOwner(channel: Channel) {
     const user = channel.owner;
 
     return this.create(channel, user, true);
   }
-  
-  public async create(channel: Channel, user: User, admin = false): Promise<ChannelUser> {
+
+  public async create(
+    channel: Channel,
+    user: User,
+    admin = false
+  ): Promise<ChannelUser> {
     const channelUser = new ChannelUser();
     channelUser.user = user;
     channelUser.channel = channel;
@@ -62,6 +82,6 @@ export default class ChannelUserService {
   }
 
   public async delete(channelUser: ChannelUser) {
-    this.repository.delete(channelUser)
+    this.repository.delete(channelUser);
   }
 }
