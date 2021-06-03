@@ -62,24 +62,26 @@ export default (app: express.Router) => {
 
   route.post(
     "/",
-    celebrate.celebrate({
-      [celebrate.Segments.BODY]: {
-        name: celebrate.Joi.string().required(),
-        visibility: celebrate.Joi.string()
-          .valid(
-            ChannelVisibility.PUBLIC,
-            ChannelVisibility.PROTECTED,
-            ChannelVisibility.PRIVATE
-          )
-          .required(),
-        password: celebrate.Joi.string().when("visibility", {
-          is: celebrate.Joi.equal(ChannelVisibility.PROTECTED),
-          then: celebrate.Joi.required(),
-          otherwise: celebrate.Joi.forbidden(),
-        }),
+    celebrate.celebrate(
+      {
+        [celebrate.Segments.BODY]: {
+          name: celebrate.Joi.string().min(3).max(20).required(),
+          visibility: celebrate.Joi.string()
+            .valid(
+              ChannelVisibility.PUBLIC,
+              ChannelVisibility.PROTECTED,
+              ChannelVisibility.PRIVATE
+            )
+            .required(),
+          password: celebrate.Joi.string().min(8).max(20).optional(),
+        },
       },
-    }),
+      {
+        abortEarly: false,
+      }
+    ),
     async (req, res, next) => {
+      const user: User = req.user as any;
       const channel: Channel = res.locals.channel;
 
       const { name, visibility, password } = req.body as {
@@ -89,6 +91,10 @@ export default (app: express.Router) => {
       };
 
       try {
+        if (channel.owner.id !== user.id) {
+          return helpers.forbidden("only owner can edit channel");
+        }
+
         channel.name = name;
         channel.visibility = visibility;
         channel.password = password;

@@ -18,8 +18,8 @@ export default async ({ app }: { app: express.Application }) => {
   app.use(cors());
 
   app.use((req, res, next) => {
-      res.header('Content-Type', 'application/json');
-      next();
+    res.header("Content-Type", "application/json");
+    next();
   });
 
   app.use(express.json());
@@ -35,10 +35,22 @@ export default async ({ app }: { app: express.Application }) => {
     next(err);
   });
 
-  app.use(celebrate.errors())
-
   app.use((err, req, res, next) => {
-    if (err.name === "UnauthorizedError") {
+    if (celebrate.isCelebrateError(err)) {
+      const validation = {};
+
+      for (const [segment, joiError] of err.details.entries()) {
+        validation[segment] = {
+          source: segment,
+          fields: joiError.details.map((detail) => ({
+            message: detail.message,
+            path: detail.path.join('.')
+          })),
+        };
+      }
+
+      return res.status(400).send({ validation });
+    } else if (err.name === "UnauthorizedError") {
       return res.status(err.status).send({ message: err.message });
     }
 

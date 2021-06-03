@@ -24,23 +24,31 @@ export default (app: express.Router) => {
 
   route.post(
     "/",
-    celebrate.celebrate({
-      [celebrate.Segments.BODY]: {
-        name: celebrate.Joi.string().required(),
-        visibility: celebrate.Joi.string()
-          .valid(
-            ChannelVisibility.PUBLIC,
-            ChannelVisibility.PROTECTED,
-            ChannelVisibility.PRIVATE
-          )
-          .required(),
-        password: celebrate.Joi.string().when("visibility", {
-          is: celebrate.Joi.equal(ChannelVisibility.PROTECTED),
-          then: celebrate.Joi.required(),
-          otherwise: celebrate.Joi.forbidden(),
-        }),
+    celebrate.celebrate(
+      {
+        [celebrate.Segments.BODY]: {
+          name: celebrate.Joi.string().min(3).max(20).required(),
+          visibility: celebrate.Joi.string()
+            .valid(
+              ChannelVisibility.PUBLIC,
+              ChannelVisibility.PROTECTED,
+              ChannelVisibility.PRIVATE
+            )
+            .required(),
+          password: celebrate.Joi.string()
+            .min(8)
+            .max(20)
+            .when("visibility", {
+              is: celebrate.Joi.equal(ChannelVisibility.PROTECTED),
+              then: celebrate.Joi.required(),
+              otherwise: celebrate.Joi.forbidden(),
+            }),
+        },
       },
-    }),
+      {
+        abortEarly: false,
+      }
+    ),
     async (req, res, next) => {
       const user: User = req.user as any;
       const { name, visibility, password } = req.body as {
@@ -56,9 +64,9 @@ export default (app: express.Router) => {
         channel.visibility = visibility;
         channel.password = password;
 
-        console.log(password)
+        console.log(password);
 
-        await channel.updatePasswordHash()
+        await channel.updatePasswordHash();
         await channelService.create(channel);
 
         res.status(200).send(channel.toJSON());
