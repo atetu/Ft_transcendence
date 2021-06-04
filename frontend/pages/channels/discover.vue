@@ -4,7 +4,7 @@
       <v-toolbar-title> {{ $t('channel.discover._') }} </v-toolbar-title>
     </v-app-bar>
 
-    <v-row>
+    <v-row v-if="notAddedChannels.length">
       <v-col
         v-for="channel in notAddedChannels"
         :key="channel.id"
@@ -12,6 +12,25 @@
         md="6"
       >
         <channel-discover-card-item :channel="channel" />
+      </v-col>
+    </v-row>
+
+    <v-row v-else align="center">
+      <v-col align="center">
+        <v-alert
+          v-if="!addedChannels.length"
+          type="info"
+          style="max-width: 400px"
+        >
+          There is no channels available
+          <v-btn class="mt-2" block small color="primary" to="/channels/create">
+            why don't you create the first?
+          </v-btn>
+        </v-alert>
+
+        <v-alert v-else type="info" style="max-width: 400px">
+          You already joined all the existing channels
+        </v-alert>
       </v-col>
     </v-row>
   </div>

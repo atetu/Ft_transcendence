@@ -1,5 +1,11 @@
 <template>
-  <v-list>
+  <v-alert v-if="isEmpty" type="info" class="ma-4">
+    You havn't joined any channel
+    <v-btn class="mt-2" block small color="primary" to="/channels/discover">
+      discover
+    </v-btn>
+  </v-alert>
+  <v-list v-else>
     <channel-item
       v-for="channel in channels"
       :key="channel.id"
@@ -9,16 +15,16 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { Channel } from '~/models'
 
-export default Vue.extend({
-  props: {
-    channels: {
-      type: Array as PropType<Channel[]>,
-      required: true,
-    },
-  },
-})
+@Component
+export default class CompomentImpl extends Vue {
+  @Prop()
+  channels!: Channel[]
+
+  get isEmpty() {
+    return !this.channels?.length
+  }
+}
 </script>
