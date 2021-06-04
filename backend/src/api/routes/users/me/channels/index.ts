@@ -62,8 +62,14 @@ export default (app: express.Router) => {
           return helpers.forbidden("channel is private");
         }
 
-        if (channel.isProtected() && !(await channel.checkPassword(password))) {
-          return helpers.forbidden("wrong password");
+        if (channel.isProtected()) {
+          if (!password) {
+            return helpers.forbidden("no password provided");
+          }
+
+          if (!await channel.checkPassword(password)) {
+            return helpers.forbidden("wrong password");
+          }
         }
 
         await channelUserService.create(channel, user);
