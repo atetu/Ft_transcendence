@@ -32,4 +32,11 @@ export default class ChannelsAPI {
   static destroy(channel: Channel): Promise<void> {
     return $axios.$delete(`channels/${channel.id}`)
   }
+
+  static unlock(channel: Channel, password: string | null): Promise<Channel> {
+    return $axios.$post(`users/@me/channels`, {
+      channelId: channel.id,
+      password: password?.length ? password : undefined,
+    })
+  }
 }

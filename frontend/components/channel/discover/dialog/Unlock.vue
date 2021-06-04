@@ -8,6 +8,8 @@
       </v-card-title>
       <v-card-text>
         <v-text-field
+          v-model="password"
+          :loading="loading"
           clearable
           cache-items
           class="mx-4 mt-2"
@@ -18,10 +20,18 @@
           item-text="username"
           item-value="id"
           type="password"
+          :error-messages="errorMessage"
           autocomplete="new-password"
         >
           <template #append-outer>
-            <v-btn large color="primary" height="48" class="ml-2">
+            <v-btn
+              :loading="loading"
+              large
+              color="primary"
+              height="48"
+              class="ml-2"
+              @click="submit()"
+            >
               unlock
             </v-btn>
           </template>
@@ -33,6 +43,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import API from '~/api/API'
 import { Channel } from '~/models'
 
 @Component
@@ -41,9 +52,43 @@ export default class ComponentImpl extends Vue {
   channel!: Channel
 
   dialog = false
+  loading = false
+  error: any = null
+
+  get errorMessage() {
+    if (!this.error) {
+      return null
+    }
+
+    return [this.error?.response?.data?.errors?.message || 'could not unlock']
+  }
+
+  password: string | null = null
 
   open() {
     this.dialog = true
+  }
+
+  async submit() {
+    if (this.loading) {
+      return
+    }
+
+    this.loading = true
+    this.error = null
+
+    try {
+      const channel = await API.Channels.unlock(this.channel, this.password)
+
+      this.$emit('unlocked')
+
+      this.$store.dispatch('channels/fetchAll')
+      this.$router.push({ path: `/channels/${channel.id}` })
+    } catch (error) {
+      this.error = error
+    }
+
+    this.loading = false
   }
 }
 </script>
