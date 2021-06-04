@@ -6,8 +6,8 @@
     <v-row>
       <v-col cols="1" align="center" justify="center">
         <user-avatar v-if="player1" :user="player1" />
-        <p class="login" v-if="player1"> {{ player1.username }}</p>
-        <p class="score"> {{ this.score1 }}</p>
+        <p class="login" v-if="player1">{{ player1.username }}</p>
+        <p class="score">{{ this.score1 }}</p>
       </v-col>
 
       <v-col cols="10">
@@ -21,9 +21,12 @@
         ></canvas>
       </v-col>
       <v-col cols="1" align="center" justify="center">
-        <user-avatar v-if="player1" :user="player2" />
-        <p class="login" v-if="player2"> {{ player2.username }}</p>
-        <p class="score"> {{ this.score2 }}</p>
+        <user-avatar v-if="player2" :user="player2" />
+        <p class="login" v-if="player2">{{ player2.username }}</p>
+        <p class="score">{{ this.score2 }}</p>
+        <v-btn v-if="status === 3" :disabled="true" elevation="2" :color="x ? 'primary' : 'green'"
+        @click="restart"
+        > RESTART</v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -45,12 +48,16 @@
   border: 1px solid black;
 }
 
+#custom-disabled.v-btn--disabled {
+    background-color: red !important;
+}
+
 .score {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   font-size: 80px;
 }
 
-.login{
+.login {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   font-size: 20px;
 }
@@ -67,13 +74,15 @@ enum Status {
   over = 3,
 }
 
-enum setStatusEnum{
+enum setStatusEnum {
   playing,
-  over
+  over,
 }
 
 @Component
 export default class Game extends Vue {
+  x = true
+
   canvas: HTMLCanvasElement | null = null
   ctx: CanvasRenderingContext2D | null = null
 
@@ -100,9 +109,9 @@ export default class Game extends Vue {
   status: Status = Status.waiting
   player1: User | null = null
   player2: User | null = null
-  score1:number = 0
+  score1: number = 0
   score2: number = 0
-  setStatus:setStatusEnum = setStatusEnum.playing
+  setStatus: setStatusEnum = setStatusEnum.playing
 
   get id() {
     return this.$route.params.id
@@ -126,6 +135,12 @@ export default class Game extends Vue {
         }
       }
     }
+  }
+
+  restart()
+  {
+    console.log('restart')
+    this.x = false
   }
 
   update_paddle() {
@@ -243,6 +258,8 @@ export default class Game extends Vue {
 
     this.paddleRightY = paddle2.y
     this.timer = state
+    if (this.timer === 3) this.status = Status.waiting
+    console.log('timer: ' + this.timer)
     if (this.timer === -1 && this.status === Status.waiting) {
       this.status = Status.playing
     }
@@ -252,13 +269,12 @@ export default class Game extends Vue {
 
   @Socket('game_over')
   finishGame(data: any) {
-    const{ winner, score1, score2, setStatus } = data
-    if (winner != null)
-    {
-      let winnerFt:User = winner
-      this.message = winnerFt.username + " wins!"
+    const { winner, score1, score2, setStatus } = data
+    if (winner != null) {
+      let winnerFt: User = winner
+      this.message = winnerFt.username + ' wins!'
     }
-    this.score1= score1
+    this.score1 = score1
     this.score2 = score2
     this.setStatus = setStatus
     console.log('OVERRRRR')

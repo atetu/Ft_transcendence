@@ -131,7 +131,7 @@ export default class SocketService {
     console.log('matchMaking')
     const game: Game = this.matchMakingService.addSocket(socket)
     console.log('game : ' + game)
-    if (game)
+    if (game != undefined)
     {
       io.to(game.toRoom()).emit('game_starting', { player1: game.player1.id, player2: game.player2.id, gameId: game.id })
       game.start()

@@ -20,15 +20,6 @@ export default class Match {
     onDelete: "CASCADE",
   })
   player2: User;
-  // @Column({
-  //   default: false,
-  // })
-  // player1: User;
-
-  // @Column({
-  //   default: false,
-  // })
-  // player2: User;
 
   @Column({
     default: false,
