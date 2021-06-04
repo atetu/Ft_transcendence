@@ -6,6 +6,12 @@
 
     <v-list-item-content>
       <v-list-item-title>{{ user.username }}</v-list-item-title>
+      <template v-if="user.muted">
+        <v-list-item-subtitle v-if="user.mutedUntil">
+          muted until {{ user.mutedUntil }}
+        </v-list-item-subtitle>
+        <v-list-item-subtitle v-else>muted infinitly</v-list-item-subtitle>
+      </template>
     </v-list-item-content>
 
     <v-list-item-icon>
