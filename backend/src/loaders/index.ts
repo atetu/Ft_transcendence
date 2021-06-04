@@ -4,6 +4,7 @@ import ormLoader from "./orm";
 import expressLoader from "./express";
 import socketioLoader from "./socket-io";
 import Achievements from "../game/Achievements";
+import cronLoader from "./cron";
 
 export default async ({
   app,
@@ -15,6 +16,7 @@ export default async ({
   await ormLoader();
   await expressLoader({ app });
   await socketioLoader({ server });
+  await cronLoader();
 
-  await Achievements.install()
+  await Achievements.install();
 };

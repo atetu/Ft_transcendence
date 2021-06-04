@@ -84,4 +84,20 @@ export default class ChannelUserService {
   public async delete(channelUser: ChannelUser) {
     this.repository.delete(channelUser);
   }
+
+  public async unmuteAllIfPassed() {
+    const channelUsers =
+      await this.repository.findAllByMutedTrueAndMutedUntilLessThan(new Date());
+
+    if (channelUsers.length) {
+      for (const channelUser of channelUsers) {
+        channelUser.muted = false;
+        channelUser.mutedUntil = null;
+      }
+
+      await this.repository.save(channelUsers);
+
+      console.log(`Unumuted ${channelUsers.length} user(s)`)
+    }
+  }
 }

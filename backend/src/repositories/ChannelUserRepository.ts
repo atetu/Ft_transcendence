@@ -1,5 +1,5 @@
 import { Service } from "typedi";
-import { EntityRepository, Repository } from "typeorm";
+import { EntityRepository, LessThan, Not, Repository } from "typeorm";
 import Channel from "../entities/Channel";
 import ChannelUser from "../entities/ChannelUser";
 import User from "../entities/User";
@@ -17,6 +17,15 @@ export class ChannelUserRepository extends Repository<ChannelUser> {
         banned: false,
       },
       relations: ["channel"],
+    });
+  }
+
+  async findAllByMutedTrueAndMutedUntilLessThan(date: Date) {
+    return await this.find({
+      where: {
+        muted: true,
+        mutedUntil: LessThan(date)
+      },
     });
   }
 }
