@@ -1,6 +1,12 @@
 <template>
   <v-card>
-    <v-card-title>{{ name }}</v-card-title>
+    <v-card-title>
+      {{ name }}
+      <template v-if="icon">
+        <v-spacer />
+        <v-icon>{{ icon }}</v-icon>
+      </template>
+    </v-card-title>
     <v-card-subtitle>{{ description }}</v-card-subtitle>
     <v-progress-linear :value="percentage" height="25">
       <small v-if="isUnlocked">{{ unlockedAt }}</small>
@@ -18,6 +24,8 @@
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { AchievementProgress } from '~/models'
+
+import { Icons } from '~/game/Achievements'
 
 @Component
 export default class Page extends Vue {
@@ -46,6 +54,12 @@ export default class Page extends Vue {
 
   get percentage(): number {
     return (this.progress.value / this.progress.achievement.max) * 100
+  }
+
+  get icon(): string | null {
+    const id = this.progress.achievement.id
+
+    return (Icons as any)[`${id}`] || null
   }
 }
 </script>
