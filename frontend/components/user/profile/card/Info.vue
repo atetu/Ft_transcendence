@@ -17,7 +17,7 @@
     <v-col cols="12">
       <v-row justify="center" align="center">
         <v-col v-if="isMe" cols="12">
-          <v-btn block color="primary">
+          <v-btn block color="primary" to="/profile/settings">
             settings
             <v-icon right>mdi-cog</v-icon>
           </v-btn>

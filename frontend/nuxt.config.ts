@@ -35,6 +35,7 @@ export default {
       ssr: false,
     },
     '~/plugins/vuetify-confirm',
+    '~/plugins/qrcode',
     '~/plugins/virtual-scroller',
     '~/plugins/virtual-scroll-list',
   ],
