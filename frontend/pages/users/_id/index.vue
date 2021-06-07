@@ -17,6 +17,9 @@
           </v-card-text>
         </v-card>
       </v-col>
+      <v-col cols="6">
+        <user-profile-card-info :user="user"></user-profile-card-info>
+      </v-col>
     </v-row>
   </v-main>
 </template>

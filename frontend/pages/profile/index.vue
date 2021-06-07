@@ -2,46 +2,7 @@
   <v-main class="fill-height">
     <v-row class="ma-4">
       <v-col cols="12" md="3">
-        <v-card class="pa-2" outlined>
-          <v-row justify="center" align="center">
-            <v-avatar color="indigo" size="128" class="mt-8 mb-6">
-              <v-icon size="72" dark> mdi-account-circle </v-icon>
-            </v-avatar>
-          </v-row>
-          <v-card-title class="headline">
-            <v-spacer />
-            {{ user.username }}
-            <v-spacer />
-          </v-card-title>
-          <v-card-subtitle class="text-center">
-            joined <br />
-            15 05 2021
-          </v-card-subtitle>
-          <v-col cols="12">
-            <v-row>
-              <v-col cols="12">
-                <v-btn depressed block color="primary">
-                  ask game
-                  <v-icon right>mdi-sword-cross</v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
-            <v-row justify="center" align="center">
-              <v-col cols="12" xl="6">
-                <v-btn depressed block color="primary">
-                  friend
-                  <v-icon right>mdi-account-plus</v-icon>
-                </v-btn>
-              </v-col>
-              <v-col cols="12" xl="6">
-                <v-btn outlined block color="primary">
-                  message
-                  <v-icon right>mdi-message-arrow-right</v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-col>
-        </v-card>
+        <user-profile-card-info :user="user"></user-profile-card-info>
         <v-card class="pa-2 mt-4" outlined>
           <v-card-title>
             <v-spacer />
@@ -73,7 +34,26 @@
       </v-col>
 
       <v-col cols="3">
-        <v-card class="pa-2" outlined tile> achievements </v-card>
+        <v-card class="pa-2" outlined tile> 
+         <v-card-title>
+            <v-spacer />
+            achievements
+            <v-spacer />
+          </v-card-title>
+          <v-list>
+            <v-list-item v-for="achievement in achievements" :key="achievement.name">
+              <v-list-item-content>
+                <v-list-item-title>{{ achievement.name }}</v-list-item-title>
+              </v-list-item-content>
+
+              <v-list-item-icon>
+                {{ achievement.value }}
+              </v-list-item-icon>
+            </v-list-item>
+          </v-list> 
+          
+          
+          </v-card>
         <v-card class="pa-2 mt-4" outlined tile>
           friends
           <v-icon right>mdi-account-group</v-icon>
@@ -112,6 +92,30 @@ export default class Dot extends Vue {
       name: 'games',
       value: 14,
     },
+  ]
+
+  achievements = [
+    {
+      name: 'grand chelem 1',
+      value: 0,
+      max:10
+    },
+    {
+      name: 'grand chelem 2',
+      value: 0,
+      max: 50
+    },
+    {
+      name: 'grand chelem 3',
+      value: 0,
+      max:100
+    },
+    {
+      name: 'community member',
+      value: 0,
+      max:20
+    },
+
   ]
 }
 </script>
