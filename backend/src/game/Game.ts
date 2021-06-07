@@ -55,7 +55,7 @@ export default class Game {
   public score1: number = 0;
   public score2: number = 0;
   public status: setStatus = setStatus.playing;
-
+  public winner: User
   public matchService = Container.get(MatchService);
 
   constructor(public player1: User, public player2: User) {}
@@ -187,8 +187,17 @@ export default class Game {
   }
 
   async stopGame() {
+    const io = Container.get(socketio.Server);
+
     let match = new Match();
-    match = await this.matchService.save(match);
+    match.player1 = this.player1
+    match.player2 = this.player2
+    match.score1 = this.score1
+    match.score2 = this.score2
+    match.winner = this.winner
+    match = await this.matchService.save(match)
+
+    io.to(this.toRoom()).emit("set_over")
     // TODO : enregistrer infos match
     // envoyer infos au front pour dire que c'est la fin des fins
   }
@@ -214,6 +223,10 @@ export default class Game {
       });
       clearInterval(this.interval);
       if (this.score1 === 2 || this.score2 === 2) {
+        if (this.score1 === 2)
+          this.winner = this.player1
+        else
+          this.winner = this.player2
         this.status = setStatus.over;
         this.stopGame();
         return;
