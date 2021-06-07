@@ -19,7 +19,9 @@
       "@nuxt/types",
       "nuxt-i18n",
       "@nuxtjs/axios",
+      "vuetify-dialog",
       "@types/node",
+      "@nuxtjs/vuetify",
       "vuetify"
     ],
 

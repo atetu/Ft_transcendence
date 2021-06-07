@@ -77,7 +77,13 @@ export default {
         },
       },
     ],
+
+    'vuetify-dialog/nuxt',
   ],
+
+  vuetifyDialog: {
+    property: '$dialog',
+  },
 
   proxy: {
     '/api': {

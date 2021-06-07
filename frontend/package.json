@@ -30,6 +30,7 @@
     "vue-virtual-scroll-list": "^2.3.2",
     "vue-virtual-scroller": "^1.0.10",
     "vuetify-confirm": "^2.0.6",
+    "vuetify-dialog": "^2.0.14",
     "vuex-module-decorators": "^1.0.1"
   },
   "devDependencies": {
