@@ -1,9 +1,12 @@
 <template>
   <v-card class="pa-2" outlined>
     <v-row justify="center" align="center">
-      <v-avatar color="indigo" size="128" class="mt-8 mb-6">
-        <v-icon size="72" dark> mdi-account-circle </v-icon>
-      </v-avatar>
+      <user-avatar
+        :user="user"
+        :size="128"
+        :without-state="isMe"
+        class="mt-8 mb-6"
+      />
     </v-row>
     <v-card-title class="headline">
       <v-spacer />
@@ -61,6 +64,10 @@ export default class Dot extends Vue {
 
   get isMe() {
     return this.$store.state.auth.user.id === this.user.id
+  }
+
+  get picture() {
+    return `/api/users/${this.user.id}/avatar`
   }
 }
 </script>

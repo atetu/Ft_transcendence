@@ -11,7 +11,7 @@
               link
               :to="`/users/${user.id}`"
             >
-              <v-list-item-avatar>
+              <v-list-item-avatar size="60">
                 <user-avatar :user="user" />
               </v-list-item-avatar>
               <v-list-item-content>

@@ -3,12 +3,12 @@
     <v-tooltip right>
       <template #activator="{ on, attr }">
         <v-btn icon large nuxt to="/profile" v-bind="attr" v-on="on">
-          <v-avatar color="grey darken-1" size="36">
-            <span v-if="isAuthenticated" class="white--text headline">
-              {{ initial }}
-            </span>
-            <v-icon v-else small>mdi-account-question</v-icon>
-          </v-avatar>
+          <user-avatar
+            v-if="isAuthenticated"
+            :user="user"
+            :size="36"
+            without-state
+          />
         </v-btn>
       </template>
 
@@ -32,8 +32,8 @@ export default class Dot extends Vue {
   @authModule.State('user')
   user!: User
 
-  public get initial() {
-    return this.user.username.charAt(0).toUpperCase()
+  public get picture() {
+    return `/api/users/${this.user.id}/avatar`
   }
 }
 </script>
