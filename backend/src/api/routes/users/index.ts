@@ -10,9 +10,9 @@ export default (app: express.Router) => {
 
   const route = express.Router();
 
-  app.use("/users", middlewares.authorize(false), route);
+  app.use("/users", route);
 
-  route.get("/", async (req, res, next) => {
+  route.get("/", middlewares.authorize(false), async (req, res, next) => {
     res.status(200).send(await userService.all());
   });
 

@@ -8,6 +8,7 @@ import User from "../entities/User";
 import Achievements from "../game/Achievements";
 import AchievementProgressService from "./AchievementProgressService";
 import AuthService from "./AuthService";
+import AvatarService from "./AvatarService";
 import UserService from "./UserService";
 
 @Service()
@@ -15,12 +16,15 @@ export default class OAuthService {
   constructor(
     @Inject()
     private readonly userService: UserService,
-    
+
     @Inject()
     private readonly achievementProgressService: AchievementProgressService,
 
     @Inject()
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+
+    @Inject()
+    private readonly avatarService: AvatarService
   ) {}
 
   public install() {
@@ -30,6 +34,7 @@ export default class OAuthService {
 
   private async verify(
     email: string,
+    picture: string,
     callback: passportGoogleOAuth2.VerifyCallback
   ) {
     try {
@@ -42,10 +47,14 @@ export default class OAuthService {
         user.username = email.split("@")[0];
         user.email = email;
         user.admin = false;
+        user.picture = await this.avatarService.download(picture);
 
         user = await this.userService.save(user);
 
-        await this.achievementProgressService.unlock(Achievements.REGISTERED, user)
+        await this.achievementProgressService.unlock(
+          Achievements.REGISTERED,
+          user
+        );
       }
 
       callback(null, await this.authService.authenticate(user));
@@ -63,9 +72,9 @@ export default class OAuthService {
           callbackURL: "http://localhost:3000/auth/google/callback",
         },
         async (_accessToken, _refreshToken, profile, callback) => {
-          const { email } = profile;
+          const { email, picture } = profile;
 
-          await this.verify(email, callback);
+          await this.verify(email, picture, callback);
         }
       )
     );
@@ -81,9 +90,10 @@ export default class OAuthService {
           callbackURL: "http://localhost:3000/auth/marvin/callback",
         },
         async (_accessToken, _refreshToken, profile, callback) => {
-          const { email } = profile;
+          console.log(profile)
+          const { email, image_url } = profile;
 
-          await this.verify(email, callback);
+          await this.verify(email, image_url, callback);
         }
       )
     );

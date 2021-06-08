@@ -18,6 +18,9 @@ export default class User {
   @Column()
   admin: boolean;
 
+  @Column()
+  picture: string;
+
   public toJSON() {
     return {
       id: this.id,

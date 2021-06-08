@@ -5,6 +5,8 @@ import expressLoader from "./express";
 import socketioLoader from "./socket-io";
 import Achievements from "../game/Achievements";
 import cronLoader from "./cron";
+import { Container } from "typeorm-typedi-extensions";
+import AvatarService from "../services/AvatarService";
 
 export default async ({
   app,
@@ -19,4 +21,5 @@ export default async ({
   await cronLoader();
 
   await Achievements.install();
+  await Container.get(AvatarService).install();
 };
