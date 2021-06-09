@@ -13,7 +13,9 @@ export default (app: express.Router) => {
   app.use("/users", route);
 
   route.get("/", middlewares.authorize(false), async (req, res, next) => {
-    res.status(200).send(await userService.all());
+    const users = await userService.all()
+
+    res.status(200).send(users);
   });
 
   me(route);

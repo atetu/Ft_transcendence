@@ -25,7 +25,8 @@ export default class User {
     return {
       id: this.id,
       username: this.username,
-      admin: this.admin
+      admin: this.admin,
+      picture: this.picture
     }
   }
 }

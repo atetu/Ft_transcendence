@@ -3,6 +3,7 @@ import channels from "./channels";
 import achievements from "./achievements";
 import relationships from "./relationships";
 import middlewares from "../../../middlewares";
+import profile from "./profile";
 
 export default (app: express.Router) => {
   const route = express.Router();
@@ -16,6 +17,7 @@ export default (app: express.Router) => {
   achievements(route);
   relationships(route);
   channels(route);
+  profile(route);
 
   return route;
 };

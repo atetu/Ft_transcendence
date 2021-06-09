@@ -4,8 +4,10 @@ import * as https from "https";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import * as fsExtra from "fs-extra";
-import * as path  from "path";
+import * as path from "path";
+import * as fileType from "file-type";
 import { URL } from "url";
+import fileUpload = require("express-fileupload");
 
 @Service()
 export default class AvatarService {
@@ -16,13 +18,8 @@ export default class AvatarService {
   }
 
   async download(url: string): Promise<string> {
-    const extension = path.extname(url)
-
-    console.log(extension)
-    console.log(url)
-
-    const hash = this.generateRandomFileName() + extension;
-    const dest = this.getDestination(hash)
+    const hash = this.generateRandomFileName();
+    const dest = this.getDestination(hash);
 
     return new Promise((resolve, reject) => {
       const file = fs.createWriteStream(dest, { flags: "wx" });
@@ -69,6 +66,39 @@ export default class AvatarService {
     });
   }
 
+  async store(
+    image: fileUpload.UploadedFile,
+    oldHash: string
+  ): Promise<string> {
+    const hash = this.generateRandomFileName();
+    const dest = this.getDestination(hash);
+
+    const oldDest = this.getDestination(oldHash);
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const type = await fileType.fromBuffer(image.data);
+        if (!type) {
+          throw new Error("unknown file type");
+        }
+        
+        if (!type.mime.startsWith("image/")) {
+          throw new Error("not an image");
+        }
+
+        await image.mv(dest);
+
+        fs.unlink(oldDest, (err) =>
+          console.log(`Could not delete old file: ${err}`)
+        );
+
+        resolve(hash);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
   generateRandomFileName(): string {
     return crypto.randomBytes(20).toString("hex");
   }
@@ -84,10 +114,10 @@ export default class AvatarService {
   }
 
   getDestination(hash: string) {
-   return `${this.baseDirectory}/${hash}`;
+    return `${this.baseDirectory}/${hash}`;
   }
 
   async install() {
-    fsExtra.ensureDirSync(this.baseDirectory)
+    fsExtra.ensureDirSync(this.baseDirectory);
   }
 }
