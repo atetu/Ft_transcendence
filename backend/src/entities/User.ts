@@ -21,12 +21,18 @@ export default class User {
   @Column()
   picture: string;
 
+  @Column({ default: false })
+  otp: boolean;
+
+  @Column({ nullable: true })
+  otpSecret?: string;
+
   public toJSON() {
     return {
       id: this.id,
       username: this.username,
       admin: this.admin,
-      picture: this.picture
-    }
+      picture: this.picture,
+    };
   }
 }
