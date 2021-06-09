@@ -6,7 +6,13 @@
     :color="color"
   >
     <v-avatar :size="avatarSize">
-      <v-img v-if="user" :height="size" :width="size" :src="picture"></v-img>
+      <v-img
+        v-if="user"
+        :key="pictureKey"
+        :height="size"
+        :width="size"
+        :src="url"
+      ></v-img>
       <v-icon v-else small>mdi-account-question</v-icon>
     </v-avatar>
   </v-progress-circular>
@@ -17,7 +23,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { User } from '~/models'
 
 @Component
-export default class Loading extends Vue {
+export default class Avatar extends Vue {
   @Prop({ type: Object })
   user!: User
 
@@ -27,8 +33,15 @@ export default class Loading extends Vue {
   @Prop({ type: Boolean })
   withoutState!: boolean
 
+  @Prop({ type: String })
+  src?: string
+
   get picture() {
     return `/api/users/${this.user.id}/avatar`
+  }
+
+  get pictureKey() {
+    return this.user?.picture || 'null'
   }
 
   get online(): boolean {
@@ -58,6 +71,14 @@ export default class Loading extends Vue {
 
   get avatarSize() {
     return this.size - this.stroke
+  }
+
+  get url() {
+    if (this.src) {
+      return this.src
+    }
+
+    return this.picture
   }
 }
 </script>
