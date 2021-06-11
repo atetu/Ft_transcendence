@@ -1,7 +1,7 @@
 import * as celebrate from "celebrate";
 import * as express from "express";
 import { Container } from "typedi";
-import AuthService from "../../../../services/AuthService";
+import AuthService from "../../../services/AuthService";
 
 export default (app: express.Router) => {
   const authService = Container.get(AuthService);

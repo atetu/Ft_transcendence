@@ -57,7 +57,7 @@ export default class OAuthService {
         );
       }
 
-      callback(null, await this.authService.authenticate(user));
+      callback(null, user);
     } catch (error) {
       callback(error, null);
     }
@@ -90,7 +90,6 @@ export default class OAuthService {
           callbackURL: "http://localhost:3000/auth/marvin/callback",
         },
         async (_accessToken, _refreshToken, profile, callback) => {
-          console.log(profile)
           const { email, image_url } = profile;
 
           await this.verify(email, image_url, callback);

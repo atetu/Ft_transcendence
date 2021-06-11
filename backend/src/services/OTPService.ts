@@ -26,6 +26,14 @@ export default class OTPService {
 
     return await this.userService.save(user);
   }
+  
+  check(user: User, otpToken: string) {
+    if (user.otp) {
+      return otplib.authenticator.check(otpToken, user.otpSecret)
+    }
+
+    return true;
+  }
 
   generateURI(user: User) {
     if (!user.otp) {

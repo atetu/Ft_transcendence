@@ -2,9 +2,16 @@ import * as celebrate from "celebrate";
 import * as express from "express";
 import * as passport from "passport";
 import { Container } from "typedi";
+import { Phase } from "../../../../entities/PhaseToken";
+import User from "../../../../entities/User";
+import AuthService from "../../../../services/AuthService";
 import OAuthService from "../../../../services/OAuthService";
+import PhaseTokenService from "../../../../services/PhaseTokenService";
 
 function oauth(route: express.Router, name: string, scopes: string[]) {
+  const phaseTokenService = Container.get(PhaseTokenService);
+  const authService = Container.get(AuthService);
+
   route.get(
     `/${name}`,
     passport.authenticate(name, {
@@ -21,13 +28,22 @@ function oauth(route: express.Router, name: string, scopes: string[]) {
       },
     }),
     (req, res, next) => {
-      passport.authenticate(name, (err, user, info) => {
-        console.log(err);
-
+      passport.authenticate(name, async (err, user: User, info) => {
         if (err) {
           next(err);
         } else {
-          res.status(200).send(user);
+          if (user.otp) {
+            const phaseToken = await phaseTokenService.create(
+              user,
+              Phase.TWO_FACTOR
+            );
+
+            res.status(402).send(phaseToken);
+          } else {
+            const tokens = await authService.authenticate(user);
+
+            res.status(200).send(tokens);
+          }
         }
       })(req, res, next);
     }

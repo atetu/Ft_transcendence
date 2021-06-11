@@ -22,4 +22,8 @@ export default dotenv.load({
     type: Number,
     default: 40,
   },
+  PHASE_TOKEN_LENGTH: {
+    type: Number,
+    default: 80,
+  },
 } as const);
