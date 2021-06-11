@@ -1,27 +1,35 @@
 <template>
-  <page-loading title="authenticating..." />
+  <auth-2-factor
+    v-if="phase === '2fa'"
+    :user="phaseToken.user"
+    @otp-code="unlock"
+  />
+  <page-loading v-else title="authenticating..." />
 </template>
 
 <script lang="ts">
+import { Context } from '@nuxt/types'
 import { Component, Vue } from 'nuxt-property-decorator'
+import { Phase, PhaseToken } from '~/models'
 
 @Component({
   layout: 'empty',
-  validate({ params, store }) {
-    const { provider } = params
-
-    return provider in store.state.auth.providers
-  },
-  head() {
-    const self: any = this
-
-    return {
-      title: `${self.provider} - Authentication`,
-    }
-  },
 })
 export default class Callback extends Vue {
   profile: any = null
+  phaseToken: PhaseToken | null = null
+
+  validate({ params, store }: Context) {
+    const { provider } = params
+
+    return provider in store.state.auth.providers
+  }
+
+  head() {
+    return {
+      title: `${this.provider} - Authentication`,
+    }
+  }
 
   mounted() {
     if (window.opener) {
@@ -43,15 +51,57 @@ export default class Callback extends Vue {
 
           await this.$store.dispatch('auth/fetch')
 
-          window.opener.postMessage('success', '*')
+          this.post('success')
+          this.closeWindow()
         })
         .catch((error) => {
           console.log(error)
 
-          window.opener.postMessage(`error`, '*')
+          if (error.response?.status === 402) {
+            this.phaseToken = error.response.data
+          } else {
+            this.post(`error`)
+            this.closeWindow()
+          }
         })
-        .then(() => {
-          setTimeout(() => window.close(), 10)
+    } else {
+      this.$router.push('/auth')
+    }
+  }
+
+  unlock(code: string) {
+    if (window.opener) {
+      window.opener.postMessage('unlocking', '*')
+
+      let otp: any
+      if (this.phase === Phase.TWO_FACTOR) {
+        otp = code
+      }
+
+      this.$axios
+        .post('/auth/unlock', {
+          token: this.phaseToken?.token,
+          phase: this.phase,
+          otp,
+        })
+        .then(async (response) => {
+          const { accessToken, refreshToken } = response.data
+
+          await this.$store.dispatch('auth/updateTokens', {
+            accessToken,
+            refreshToken,
+          })
+
+          await this.$store.dispatch('auth/fetch')
+
+          this.post('unlock-success')
+          this.closeWindow()
+        })
+        .catch((error) => {
+          console.log(error)
+
+          this.post(`unlock-error`)
+          this.closeWindow()
         })
     } else {
       this.$router.push('/auth')
@@ -68,6 +118,18 @@ export default class Callback extends Vue {
 
   get callbackUrl() {
     return `/auth/oauth/${this.provider}/callback`
+  }
+
+  get phase() {
+    return this.phaseToken?.phase
+  }
+
+  post(event: string) {
+    window.opener?.postMessage(event, '*')
+  }
+
+  closeWindow() {
+    setTimeout(() => window.close(), 10)
   }
 }
 </script>

@@ -8,7 +8,13 @@
             <v-alert v-if="state === 'error'" type="error">
               failed to authenticate
             </v-alert>
+            <v-alert v-if="state === 'unlock-error'" type="error">
+              failed to unlock
+            </v-alert>
             <v-alert v-if="state === 'success'" type="info"> success </v-alert>
+            <v-alert v-if="state === 'unlock-success'" type="info">
+              unlock success
+            </v-alert>
             <v-progress-linear v-if="loading" indeterminate />
             <v-btn
               v-for="(provider, key) in providers"
@@ -64,16 +70,16 @@ export default class Index extends Vue {
     const onMessage = async (event: MessageEvent) => {
       let done = false
 
-      switch (event.data) {
-        case 'fetching': {
-          console.log('fetching')
+      console.log(event.data)
 
+      switch (event.data) {
+        case 'fetching':
+        case 'unlocking': {
           break
         }
 
-        case 'success': {
-          console.log('success')
-
+        case 'success':
+        case 'unlock-success': {
           await this.$store.dispatch('auth/restoreTokens')
           await this.$store.dispatch('auth/fetch')
 
@@ -83,9 +89,8 @@ export default class Index extends Vue {
           break
         }
 
-        case 'error': {
-          console.log('error')
-
+        case 'error':
+        case 'unlock-error': {
           done = true
           break
         }
