@@ -1,14 +1,14 @@
 import { AuthState } from './types'
 
-const DEFAULT_WIDTH = 500
-const DEFAULT_HEIGHT = 370
+const DEFAULT_WIDTH = 470
+const DEFAULT_HEIGHT = 580
 
 export const initState = (): AuthState => ({
   providers: {
     google: {
       name: 'Google',
-      width: 470,
-      height: 580,
+      width: DEFAULT_WIDTH,
+      height: DEFAULT_HEIGHT,
     },
     marvin: {
       name: '42',
