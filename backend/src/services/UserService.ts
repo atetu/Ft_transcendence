@@ -23,6 +23,10 @@ export default class UserService {
     return this.repository.findByEmail(email);
   }
 
+  async findByUsername(username: string) {
+    return this.repository.findByUsername(username);
+  }
+
   async save(user: User): Promise<User> {
     return this.repository.save(user);
   }
@@ -31,7 +35,25 @@ export default class UserService {
     return this.repository.find();
   }
 
-  async updateAvatar(user: User, image: fileUpload.UploadedFile): Promise<User> {
+  async firstStep(user: User, username: string): Promise<boolean> {
+    const already = await this.findByUsername(username);
+
+    if (already && already.id != user.id) {
+      return false; /* already taken */
+    }
+
+    user.username = username;
+    user.doneFirstStep = true;
+
+    await this.save(user);
+
+    return true;
+  }
+
+  async updateAvatar(
+    user: User,
+    image: fileUpload.UploadedFile
+  ): Promise<User> {
     const hash = await this.avatarService.store(image, user.picture);
 
     user.picture = hash;

@@ -27,12 +27,16 @@ export default class User {
   @Column({ nullable: true })
   otpSecret?: string;
 
+  @Column({ default: false })
+  doneFirstStep: boolean;
+
   public toJSON() {
     return {
       id: this.id,
       username: this.username,
       admin: this.admin,
       picture: this.picture,
+      doneFirstStep: this.doneFirstStep ? undefined : false,
     };
   }
 }
