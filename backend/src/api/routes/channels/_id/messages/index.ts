@@ -17,8 +17,6 @@ export default (app: express.Router) => {
     const channel: Channel = res.locals.channel;
     const messages = await channelMessageService.allByChannel(channel);
 
-    console.log(messages)
-
     res.status(200).send(messages);
   });
 
