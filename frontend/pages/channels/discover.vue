@@ -1,5 +1,17 @@
 <template>
-  <div class="pa-4 fill-height" style="overflow-y: scroll">
+  <v-container v-if="$fetchState.pending" fill-height fluid>
+    <v-row align="center">
+      <v-col align="center">
+        <v-progress-circular indeterminate />
+      </v-col>
+    </v-row>
+  </v-container>
+  <page-error
+    v-else-if="$fetchState.error"
+    :error="$fetchState.error"
+    @click="$fetch()"
+  />
+  <div v-else class="pa-4 fill-height" style="overflow-y: scroll">
     <v-app-bar app clipped-right>
       <v-toolbar-title> {{ $t('channel.discover._') }} </v-toolbar-title>
     </v-app-bar>
