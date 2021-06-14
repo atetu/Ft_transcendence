@@ -109,7 +109,7 @@ export default class Viewer extends Vue {
   }
 
   get hasJoined() {
-    return this.selfChannelUser !== null
+    return !!this.selfChannelUser
   }
 
   get isOwner() {
