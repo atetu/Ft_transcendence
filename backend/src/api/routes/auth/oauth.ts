@@ -2,11 +2,11 @@ import * as celebrate from "celebrate";
 import * as express from "express";
 import * as passport from "passport";
 import { Container } from "typedi";
-import { Phase } from "../../../../entities/PhaseToken";
-import User from "../../../../entities/User";
-import AuthService from "../../../../services/AuthService";
-import OAuthService from "../../../../services/OAuthService";
-import PhaseTokenService from "../../../../services/PhaseTokenService";
+import { Phase } from "../../../entities/PhaseToken";
+import User from "../../../entities/User";
+import AuthService from "../../../services/AuthService";
+import OAuthService from "../../../services/OAuthService";
+import PhaseTokenService from "../../../services/PhaseTokenService";
 
 function oauth(route: express.Router, name: string, scopes: string[]) {
   const phaseTokenService = Container.get(PhaseTokenService);
