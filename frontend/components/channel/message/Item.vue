@@ -1,7 +1,7 @@
 <template>
   <v-list-item style="align-items: unset">
     <v-list-item-avatar style="align-self: unset">
-      <v-avatar color="primary" />
+      <user-avatar :user="message.user" />
     </v-list-item-avatar>
 
     <v-list-item-content class="pt-2 break">
