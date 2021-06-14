@@ -4,4 +4,5 @@ export interface User {
   email?: string
   admin?: boolean
   picture?: string
+  doneFirstStep?: boolean
 }
