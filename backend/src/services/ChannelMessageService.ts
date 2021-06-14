@@ -19,12 +19,10 @@ export default class ChannelMessageService {
     // setInterval(async () => {
     //   const channel = await Container.get(ChannelService).findById(1);
     //   const user = await Container.get(UserService).findById(1);
-
     //   const message = new ChannelMessage();
     //   message.channel = channel
     //   message.user = user
     //   message.content = "Hello: " + Date.now()
-
     //   this.create(message);
     // }, 1000);
   }
@@ -34,11 +32,16 @@ export default class ChannelMessageService {
   }
 
   public async allByChannel(channel: Channel) {
-    return await this.repository.find({ channel });
+    return await this.repository.find({
+      where: { channel },
+      order: {
+        id: "ASC",
+      },
+    });
   }
 
   public async findById(id: number) {
-    return await this.repository.findOne(id)
+    return await this.repository.findOne(id);
   }
 
   public async create(message: ChannelMessage) {
@@ -50,7 +53,7 @@ export default class ChannelMessageService {
   }
 
   public async delete(message: ChannelMessage) {
-    await this.repository.delete(message)
+    await this.repository.delete(message);
 
     // TODO Emit event to socket
   }
