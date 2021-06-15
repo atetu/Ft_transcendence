@@ -39,4 +39,8 @@ export default class User {
       doneFirstStep: this.doneFirstStep ? undefined : false,
     };
   }
+
+  public is(other: User) {
+    return this.id === other?.id;
+  }
 }

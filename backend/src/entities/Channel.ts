@@ -27,7 +27,7 @@ export default class Channel {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
   @Column({
@@ -109,6 +109,6 @@ export default class Channel {
     };
   }
 
-  static Type = Visibility;
+  static Type = Type;
   static Visibility = Visibility;
 }

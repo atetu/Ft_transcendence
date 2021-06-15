@@ -30,17 +30,32 @@ export default class ChannelService {
   }
 
   public async findAllWhereUserIn(user: User): Promise<Channel[]> {
-    const channelUsers = await this.channelUserService.findAllByUserAndNotBanned(user)
+    const channelUsers =
+      await this.channelUserService.findAllByUserAndNotBanned(user);
 
-    return channelUsers.map((x) => x.channel)
+    return channelUsers.map((x) => x.channel);
   }
 
   public async create(channel: Channel) {
+    channel.type = Channel.Type.GROUP;
+
     // TODO: Transactional?
     await this.repository.save(channel);
     await this.channelUserService.createOwner(channel);
 
     this.socketService.broadcastNewChannel(channel);
+
+    return channel;
+  }
+
+  async createDirect(user1: User, user2: User) {
+    const channel = new Channel();
+    channel.type = Channel.Type.DIRECT;
+    channel.visibility = Channel.Visibility.PRIVATE;
+
+    await this.repository.save(channel);
+    await this.channelUserService.create(channel, user1, false);
+    await this.channelUserService.create(channel, user2, false);
 
     return channel;
   }

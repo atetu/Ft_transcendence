@@ -64,8 +64,6 @@ export default (app: express.Router) => {
         channel.visibility = visibility;
         channel.password = password;
 
-        console.log(password);
-
         await channel.updatePasswordHash();
         await channelService.create(channel);
 

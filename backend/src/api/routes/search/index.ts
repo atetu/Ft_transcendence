@@ -12,7 +12,6 @@ export default (app: express.Router) => {
 
   app.use(
     "/search",
-    /*middlewares.authorize(false),*/
     celebrate.celebrate({
       [celebrate.Segments.QUERY]: {
         query: celebrate.Joi.string().required(),
