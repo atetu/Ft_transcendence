@@ -81,6 +81,14 @@ export default class Channel {
     return `channel_${this.id}`;
   }
 
+  public isDirect(): boolean {
+    return this.type === Type.DIRECT;
+  }
+
+  public isGroup(): boolean {
+    return this.type === Type.GROUP;
+  }
+
   public isPublic(): boolean {
     return this.visibility === Visibility.PUBLIC;
   }

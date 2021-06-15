@@ -1,6 +1,6 @@
 import { Container, Inject, Service } from "typedi";
 import { InjectRepository } from "typeorm-typedi-extensions";
-import Channel from "../entities/Channel";
+import Channel, { Type as ChannelType } from "../entities/Channel";
 import ChannelUser from "../entities/ChannelUser";
 import User from "../entities/User";
 import ChannelRepository from "../repositories/ChannelRepository";
@@ -29,11 +29,14 @@ export default class ChannelService {
     return await this.repository.findOne(id);
   }
 
-  public async findAllWhereUserIn(user: User): Promise<Channel[]> {
+  public async findAllWhereUserIn(
+    user: User,
+    type = ChannelType.GROUP
+  ): Promise<Channel[]> {
     const channelUsers =
       await this.channelUserService.findAllByUserAndNotBanned(user);
 
-    return channelUsers.map((x) => x.channel);
+    return channelUsers.map((x) => x.channel).filter((x) => x.type === type);
   }
 
   public async create(channel: Channel) {
@@ -54,8 +57,11 @@ export default class ChannelService {
     channel.visibility = Channel.Visibility.PRIVATE;
 
     await this.repository.save(channel);
+    
     await this.channelUserService.create(channel, user1, false);
-    await this.channelUserService.create(channel, user2, false);
+    if (!user1.is(user2)) {
+      await this.channelUserService.create(channel, user2, false);
+    }
 
     return channel;
   }
