@@ -1,7 +1,14 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from "typeorm";
 import Channel from "./Channel";
 import User from "./User";
 
+@Unique(["channel", "user"])
 @Entity({
   name: "channel_users",
 })
