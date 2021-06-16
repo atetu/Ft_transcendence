@@ -17,7 +17,7 @@ export default (app: express.Router) => {
   app.use("/channels", middlewares.authorize(false), route);
 
   route.get("/", async (req, res, next) => {
-    const channels = await channelService.all();
+    const channels = await channelService.allNotPrivate();
 
     res.status(200).send(channels);
   });
