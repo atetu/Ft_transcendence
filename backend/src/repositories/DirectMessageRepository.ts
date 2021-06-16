@@ -10,4 +10,8 @@ export class DirectMessageRepository extends Repository<DirectMessage> {
   async findByUserAndPeer(user: User, peer: User) {
     return await this.findOne({ user, peer });
   }
+
+  async findAllByUser(user: User): Promise<Array<DirectMessage>> {
+    return await this.find({ user });
+  }
 }

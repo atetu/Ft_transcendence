@@ -4,6 +4,7 @@ import achievements from "./achievements";
 import relationships from "./relationships";
 import middlewares from "../../../middlewares";
 import profile from "./profile";
+import directMessages from "./direct-messages";
 
 export default (app: express.Router) => {
   const route = express.Router();
@@ -18,6 +19,7 @@ export default (app: express.Router) => {
   relationships(route);
   channels(route);
   profile(route);
+  directMessages(route);
 
   return route;
 };

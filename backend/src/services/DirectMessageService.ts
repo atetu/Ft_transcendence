@@ -16,6 +16,10 @@ export default class DirectMessageService {
     private readonly channelService: ChannelService
   ) {}
 
+  async findAllByUser(user: User): Promise<Array<DirectMessage>> {
+    return await this.repository.findAllByUser(user)
+  }
+
   async getOrCreate(user: User, peer: User) {
     let directMessage = await this.repository.findByUserAndPeer(user, peer);
 
