@@ -1,9 +1,9 @@
 import * as celebrate from "celebrate";
 import * as express from "express";
 import { Container } from "typeorm-typedi-extensions";
-import Channel from "../../../entities/Channel";
-import User from "../../../entities/User";
-import SearchService from "../../../services/SearchService";
+import Channel from "../../entities/Channel";
+import User from "../../entities/User";
+import SearchService from "../../services/SearchService";
 
 export default (app: express.Router) => {
   const searchService = Container.get(SearchService);

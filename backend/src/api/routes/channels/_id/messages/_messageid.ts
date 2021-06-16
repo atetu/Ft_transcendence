@@ -1,8 +1,8 @@
 import * as express from "express";
 import Container from "typedi";
-import ChannelMessage from "../../../../../../entities/ChannelMessage";
-import ChannelMessageService from "../../../../../../services/ChannelMessageService";
-import middlewares from "../../../../../middlewares";
+import ChannelMessage from "../../../../../entities/ChannelMessage";
+import ChannelMessageService from "../../../../../services/ChannelMessageService";
+import middlewares from "../../../../middlewares";
 
 export default (app: express.Router) => {
   const channelMessageService = Container.get(ChannelMessageService);

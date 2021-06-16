@@ -1,14 +1,14 @@
 import * as express from "express";
 import { Container } from "typeorm-typedi-extensions";
-import User from "../../../../../../entities/User";
-import OTPService from "../../../../../../services/OTPService";
+import User from "../../../../../entities/User";
+import OTPService from "../../../../../services/OTPService";
 
 export default (app: express.Router) => {
   const otpService = Container.get(OTPService);
 
   const route = express.Router();
 
-  app.use("/otp", route);
+  app.use("/settings/otp", route);
 
   const sendStatus = (user: User, res: express.Response) => {
     const secret = user.otpSecret;

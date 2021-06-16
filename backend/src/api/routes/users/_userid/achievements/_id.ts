@@ -1,11 +1,11 @@
 import * as celebrate from "celebrate";
 import * as express from "express";
 import Container from "typedi";
-import Achievement from "../../../../../../entities/Achievement";
-import AchievementProgress from "../../../../../../entities/AchievementProgress";
-import User from "../../../../../../entities/User";
-import AchievementProgressService from "../../../../../../services/AchievementProgressService";
-import AchievementService from "../../../../../../services/AchievementService";
+import Achievement from "../../../../../entities/Achievement";
+import AchievementProgress from "../../../../../entities/AchievementProgress";
+import User from "../../../../../entities/User";
+import AchievementProgressService from "../../../../../services/AchievementProgressService";
+import AchievementService from "../../../../../services/AchievementService";
 
 export default (app: express.Router) => {
   const achievementService = Container.get(AchievementService);
@@ -22,7 +22,7 @@ export default (app: express.Router) => {
     }),
     async (req, res, next) => {
       const id = Number(req.params.id);
-      const user: User = req.user as any;
+      const user: User = res.locals.user as any;
 
       try {
         const achievement = await achievementService.findById(id);

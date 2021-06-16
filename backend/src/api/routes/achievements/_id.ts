@@ -1,9 +1,9 @@
 import * as celebrate from "celebrate";
 import * as express from "express";
 import Container from "typedi";
-import Achievement from "../../../../entities/Achievement";
-import AchievementService from "../../../../services/AchievementService";
-import middlewares from "../../../middlewares";
+import Achievement from "../../../entities/Achievement";
+import AchievementService from "../../../services/AchievementService";
+import middlewares from "../../middlewares";
 
 export default (app: express.Router) => {
   const achievementService = Container.get(AchievementService);

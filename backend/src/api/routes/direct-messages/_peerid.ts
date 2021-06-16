@@ -1,10 +1,10 @@
 import * as celebrate from "celebrate";
 import * as express from "express";
 import { Container } from "typeorm-typedi-extensions";
-import User from "../../../../entities/User";
-import DirectMessageService from "../../../../services/DirectMessageService";
-import UserService from "../../../../services/UserService";
-import middlewares from "../../../middlewares";
+import User from "../../../entities/User";
+import DirectMessageService from "../../../services/DirectMessageService";
+import UserService from "../../../services/UserService";
+import middlewares from "../../middlewares";
 
 export default (app: express.Router) => {
   const userService = Container.get(UserService);
