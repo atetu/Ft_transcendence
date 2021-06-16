@@ -4,11 +4,13 @@
       <v-col cols="10">
         <slot name="search">
           <v-text-field
+            v-model="query"
             background-color="grey lighten-1"
             dense
             flat
             hide-details
             solo
+            clearable
           />
         </slot>
       </v-col>
@@ -19,29 +21,16 @@
       </v-col>
     </v-row>
 
-    <v-divider />
-
     <v-alert v-if="error" type="error" class="ma-2">
-      {{ error.message || 'error when fetching channels' }}
+      {{ error.message || 'error when fetching' }}
     </v-alert>
 
-    <channel-list :channels="channels" />
+    <v-divider />
+
+    <slot :items="filteredItems" />
 
     <template #append>
-      <v-list>
-        <v-list-item>
-          <v-btn block color="primary" link to="/channels/discover">
-            {{ $t('channel.discover.action') }}
-            <v-icon right>mdi-flare</v-icon>
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn block color="primary" link to="/channels/create">
-            {{ $t('channel.create.action') }}
-            <v-icon right>mdi-plus</v-icon>
-          </v-btn>
-        </v-list-item>
-      </v-list>
+      <slot name="append" />
     </template>
   </drawer-left>
 </template>
@@ -49,10 +38,6 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { Socket } from 'vue-socket.io-extended'
-
-import { channelsModule } from '@/store/channels/const'
-
-import { Channel } from '~/models'
 
 @Component
 export default class Drawer extends Vue {
@@ -62,8 +47,17 @@ export default class Drawer extends Vue {
   @Prop({ type: Object })
   error!: any
 
-  @channelsModule.State('channels')
-  channels!: Channel[]
+  @Prop({ type: Array })
+  items!: Array<any>
+
+  @Prop({ type: Function })
+  filterer!: (query: string, item: any) => boolean
+
+  query = ''
+
+  get filteredItems() {
+    return this.items.filter((item) => this.filterer(this.query, item))
+  }
 
   refresh(): void {
     this.$emit('refresh')

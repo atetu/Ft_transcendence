@@ -1,34 +1,50 @@
 <template>
-  <channel-view-base
-    :loading="$fetchState.pending"
-    :error="$fetchState.error"
-    @refresh="$fetch"
-  >
+  <div>
+    <channel-drawer
+      :loading="$fetchState.pending"
+      :error="$fetchState.error"
+      :items="directMessages"
+      :filterer="filterer"
+      @refresh="$fetch"
+    >
+      <template #default="{ items }">
+        <direct-message-list :direct-messages="items" />
+      </template>
+    </channel-drawer>
+
     <v-main class="fill-height">
       <nuxt-child />
     </v-main>
-  </channel-view-base>
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { DirectMessage } from '~/models'
+import { directMessageStore } from '~/store'
 
-import { channelsModule } from '~/store/channels/const'
-
-import { Channel } from '~/models'
-
-@Component({
-  async fetch() {
-    await this.$store.dispatch('directMessages/fetchAll')
-  },
+@Component
+export default class Index extends Vue {
   head() {
     return {
       title: 'direct messages',
     }
-  },
-})
-export default class Index extends Vue {
-  @channelsModule.State('channels')
-  channels!: Channel[]
+  }
+
+  async fetch() {
+    await directMessageStore.fetchAll()
+  }
+
+  get directMessages(): Array<DirectMessage> {
+    return directMessageStore.list
+  }
+
+  filterer(query: string, item: DirectMessage) {
+    if (!query?.length) {
+      return true
+    }
+
+    return item.peer.username.includes(query)
+  }
 }
 </script>

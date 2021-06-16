@@ -1,34 +1,66 @@
 <template>
-  <channel-view-base
-    :loading="$fetchState.pending"
-    :error="$fetchState.error"
-    @refresh="$fetch"
-  >
+  <div>
+    <channel-drawer
+      :loading="$fetchState.pending"
+      :error="$fetchState.error"
+      :items="channels"
+      :filterer="filterer"
+      @refresh="$fetch"
+    >
+      <template #default="{ items }">
+        <channel-list :channels="items" />
+      </template>
+
+      <template #append>
+        <v-list>
+          <v-list-item>
+            <v-btn block color="primary" link to="/channels/discover">
+              {{ $t('channel.discover.action') }}
+              <v-icon right>mdi-flare</v-icon>
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn block color="primary" link to="/channels/create">
+              {{ $t('channel.create.action') }}
+              <v-icon right>mdi-plus</v-icon>
+            </v-btn>
+          </v-list-item>
+        </v-list>
+      </template>
+    </channel-drawer>
+
     <v-main class="fill-height">
       <nuxt-child />
     </v-main>
-  </channel-view-base>
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Channel } from '~/models'
 import { channelsModule } from '~/store/channels/const'
 
-import { Channel } from '~/models'
+@Component
+export default class Page extends Vue {
+  @channelsModule.State('channels')
+  channels!: Channel[]
 
-@Component({
-  async fetch() {
-    await this.$store.dispatch('channels/fetchAll')
-  },
   head() {
     return {
       title: 'channels',
     }
-  },
-})
-export default class Index extends Vue {
-  @channelsModule.State('channels')
-  channels!: Channel[]
+  }
+
+  async fetch() {
+    await this.$store.dispatch('channels/fetchAll')
+  }
+
+  filterer(query: string, item: Channel) {
+    if (!query?.length) {
+      return true
+    }
+
+    return item.name.includes(query) || item.owner.username.includes(query)
+  }
 }
 </script>
