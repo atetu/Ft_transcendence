@@ -9,6 +9,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import API from '~/api/API'
 
 import { Channel } from '~/models'
+import { authStore } from '~/store'
 
 @Component
 export default class Input extends Vue {
@@ -26,7 +27,7 @@ export default class Input extends Vue {
     this.loading = true
     this.error = null
 
-    const userId = this.$store.state.auth.user.id
+    const userId = authStore.user!.id
 
     try {
       await API.ChannelUsers.create(this.channel, userId)

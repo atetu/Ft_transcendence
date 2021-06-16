@@ -90,6 +90,7 @@
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import API from '~/api/API'
 import { Channel, ChannelUser } from '~/models'
+import { authStore } from '~/store'
 
 @Component
 export default class ComponentImpl extends Vue {
@@ -110,7 +111,7 @@ export default class ComponentImpl extends Vue {
   }
 
   get isSelf() {
-    return this.user.id === this.$store.state.auth.user.id
+    return this.user.id === authStore.user!.id
   }
 
   confirmAction(i18nKey: string, onYes: () => Promise<void>) {

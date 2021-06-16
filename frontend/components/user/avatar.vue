@@ -12,7 +12,7 @@
         :height="size"
         :width="size"
         :src="url"
-      ></v-img>
+      />
       <v-icon v-else small>mdi-account-question</v-icon>
     </v-avatar>
   </v-progress-circular>
@@ -21,6 +21,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { User } from '~/models'
+import { socketStore } from '~/store'
 
 @Component
 export default class Avatar extends Vue {
@@ -45,7 +46,7 @@ export default class Avatar extends Vue {
   }
 
   get online(): boolean {
-    return this.$store.state.socket.connectedUserIds.includes(this.user.id)
+    return socketStore.connectedUserIds.includes(this.user.id)
   }
 
   get color(): string {

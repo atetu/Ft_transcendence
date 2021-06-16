@@ -30,6 +30,7 @@
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import API from '~/api/API'
 import { Channel, User } from '~/models'
+import { authStore } from '~/store'
 
 @Component
 export default class ComponentImpl extends Vue {
@@ -60,7 +61,7 @@ export default class ComponentImpl extends Vue {
     this.error = null
 
     try {
-      const user: User = this.$store.state.auth.user
+      const user: User = authStore.user!
       await API.ChannelUsers.destroy(this.channel, user)
 
       this.$emit('leaved')

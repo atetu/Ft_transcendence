@@ -11,6 +11,7 @@
 import { Context } from '@nuxt/types'
 import { Component, Vue } from 'nuxt-property-decorator'
 import { Phase, PhaseToken } from '~/models'
+import { authStore } from '~/store'
 
 @Component({
   layout: 'empty',
@@ -44,12 +45,12 @@ export default class Callback extends Vue {
         .then(async (response) => {
           const { accessToken, refreshToken } = response.data
 
-          await this.$store.dispatch('auth/updateTokens', {
+          authStore.updateTokens({
             accessToken,
             refreshToken,
           })
 
-          await this.$store.dispatch('auth/fetch')
+          await authStore.fetch()
 
           this.post('success')
           this.closeWindow()
@@ -87,12 +88,12 @@ export default class Callback extends Vue {
         .then(async (response) => {
           const { accessToken, refreshToken } = response.data
 
-          await this.$store.dispatch('auth/updateTokens', {
+          authStore.updateTokens({
             accessToken,
             refreshToken,
           })
 
-          await this.$store.dispatch('auth/fetch')
+          await authStore.fetch()
 
           this.post('unlock-success')
           this.closeWindow()

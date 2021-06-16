@@ -18,12 +18,12 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
-import { uiModule } from '~/store/ui/const'
+import { uiStore } from '~/store'
 
 @Component
 export default class Left extends Vue {
-  @uiModule.State('drawer')
-  drawer!: boolean
+  get drawer(): boolean {
+    return uiStore.drawer
+  }
 }
 </script>

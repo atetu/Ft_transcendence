@@ -4,25 +4,25 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { authStore } from '~/store'
 
-import { authModule } from '~/store/auth/const'
-
-@Component({
+@Component
+export default class Logout extends Vue {
   head() {
     return {
       title: 'Logout',
     }
-  },
-})
-export default class Logout extends Vue {
-  @authModule.Action('logout')
-  logout!: () => void
+  }
 
   mounted() {
     setTimeout(() => {
       this.logout()
       this.$router.push('/auth')
     }, 200)
+  }
+
+  logout() {
+    authStore.logout()
   }
 }
 </script>

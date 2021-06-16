@@ -31,6 +31,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { User } from '~/models'
+import { authStore } from '~/store'
 
 @Component({
   layout: 'empty',
@@ -60,7 +61,7 @@ export default class Callback extends Vue {
         }
       )
 
-      this.$store.commit('auth/setUser', user)
+      authStore.setUser(user)
 
       this.$router.push({ path: '/' })
 

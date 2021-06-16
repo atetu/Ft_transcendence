@@ -25,16 +25,11 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
-import { authModule } from '~/store/auth/const'
-
 import { User } from '~/models'
+import { authStore } from '~/store'
 
 @Component
 export default class Avatar extends Vue {
-  @authModule.State('user')
-  user!: User
-
   image: File | null = null
   url: string | null = null
   loading = false
@@ -61,7 +56,7 @@ export default class Avatar extends Vue {
       formData.append('image', this.image as File)
 
       await this.$axios.post(`/users/@me/profile/avatar`, formData)
-      await this.$store.dispatch('auth/fetch')
+      await authStore.fetch()
 
       this.$dialog.notify.success('Successfully uploaded')
     } catch (error) {
@@ -71,6 +66,10 @@ export default class Avatar extends Vue {
     }
 
     this.loading = false
+  }
+
+  get user(): User | null {
+    return authStore.user
   }
 }
 </script>

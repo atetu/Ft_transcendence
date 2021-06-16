@@ -37,25 +37,21 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
 import { AuthProvider } from '~/models'
-
-import { authModule } from '~/store/auth/const'
+import { authStore } from '~/store'
 
 @Component({
   layout: 'empty',
+})
+export default class Index extends Vue {
+  loading = false
+  state: string | null = null
+
   head() {
     return {
       title: 'Authentication',
     }
-  },
-})
-export default class Index extends Vue {
-  @authModule.State('providers')
-  providers!: { [key: string]: AuthProvider }
-
-  loading = false
-  state: string | null = null
+  }
 
   use(key: string) {
     if (this.loading) {
@@ -80,8 +76,8 @@ export default class Index extends Vue {
 
         case 'success':
         case 'unlock-success': {
-          await this.$store.dispatch('auth/restoreTokens')
-          await this.$store.dispatch('auth/fetch')
+          authStore.restoreTokens()
+          await authStore.fetch()
 
           this.$router.push('/')
 
@@ -139,6 +135,10 @@ export default class Index extends Vue {
         }
       }, 100)
     }
+  }
+
+  get providers(): { [key: string]: AuthProvider } {
+    return authStore.providers
   }
 }
 </script>

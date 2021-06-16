@@ -5,19 +5,20 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { User } from '~/models'
-
-import { authModule } from '~/store/auth/const'
+import { authStore } from '~/store'
 
 @Component({
   layout: 'empty',
+})
+export default class Page extends Vue {
   head() {
     return {
       title: 'First step',
     }
-  },
-})
-export default class Page extends Vue {
-  @authModule.State('user')
-  user!: User
+  }
+
+  get user(): User | null {
+    return authStore.user
+  }
 }
 </script>

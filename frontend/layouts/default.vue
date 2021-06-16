@@ -31,6 +31,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { socketStore, uiStore } from '~/store'
 
 interface Link {
   icon: string
@@ -47,6 +48,11 @@ export default class Default extends Vue {
       title: 'home',
       icon: 'view-dashboard',
       url: '/',
+    },
+    {
+      title: 'direct messages',
+      icon: 'message',
+      url: '/direct-messages',
     },
     {
       title: 'channels',
@@ -81,11 +87,11 @@ export default class Default extends Vue {
   ]
 
   get drawer(): boolean {
-    return this.$store.state.ui.drawer
+    return uiStore.drawer
   }
 
-  set drawer(value) {
-    this.$store.commit('ui/setDrawer', value)
+  set drawer(value: boolean) {
+    uiStore.setDrawer(value)
   }
 
   get classes(): object {
@@ -99,7 +105,7 @@ export default class Default extends Vue {
   }
 
   get connectedCount() {
-    return this.$store.state.socket.connectedUserIds.length
+    return socketStore.connectedUserIds.length
   }
 }
 </script>

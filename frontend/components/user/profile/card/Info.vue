@@ -52,10 +52,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-
-import { authModule } from '~/store/auth/const'
-
 import { User } from '~/models'
+import { authStore } from '~/store'
 
 @Component
 export default class Dot extends Vue {
@@ -63,7 +61,7 @@ export default class Dot extends Vue {
   user!: User
 
   get isMe() {
-    return this.$store.state.auth.user.id === this.user.id
+    return authStore.user!.id === this.user.id
   }
 
   get picture() {

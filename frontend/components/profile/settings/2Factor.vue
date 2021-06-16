@@ -38,10 +38,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
-import { authModule } from '~/store/auth/const'
-
 import { User } from '~/models'
+import { authStore } from '~/store'
 
 interface OTPState {
   enabled: boolean
@@ -50,9 +48,6 @@ interface OTPState {
 
 @Component
 export default class Dot extends Vue {
-  @authModule.State('user')
-  user!: User
-
   dialog = false
 
   loading = false
@@ -121,6 +116,10 @@ export default class Dot extends Vue {
     }
 
     this.loading = false
+  }
+
+  get user(): User | null {
+    return authStore.user
   }
 }
 </script>

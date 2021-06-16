@@ -51,6 +51,7 @@ import { Socket } from 'vue-socket.io-extended'
 import API from '~/api/API'
 import ScrollItem from '~/components/channel/message/ScrollItem.vue'
 import { Channel, ChannelMessage, ChannelUser } from '~/models'
+import { authStore } from '~/store'
 
 @Component
 export default class Viewer extends Vue {
@@ -103,7 +104,7 @@ export default class Viewer extends Vue {
   }
 
   get selfChannelUser() {
-    const userId = this.$store.state.auth.user.id
+    const userId = authStore.user!.id
 
     return this.users.filter((x) => x.id === userId)[0]
   }
@@ -113,7 +114,7 @@ export default class Viewer extends Vue {
   }
 
   get isOwner() {
-    const userId = this.$store.state.auth.user.id
+    const userId = authStore.user!.id
 
     if (this.channel) {
       return this.channel.owner.id === userId

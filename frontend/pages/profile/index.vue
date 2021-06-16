@@ -34,14 +34,17 @@
       </v-col>
 
       <v-col cols="3">
-        <v-card class="pa-2" outlined tile> 
-         <v-card-title>
+        <v-card class="pa-2" outlined tile>
+          <v-card-title>
             <v-spacer />
             achievements
             <v-spacer />
           </v-card-title>
           <v-list>
-            <v-list-item v-for="achievement in achievements" :key="achievement.name">
+            <v-list-item
+              v-for="achievement in achievements"
+              :key="achievement.name"
+            >
               <v-list-item-content>
                 <v-list-item-title>{{ achievement.name }}</v-list-item-title>
               </v-list-item-content>
@@ -50,10 +53,8 @@
                 {{ achievement.value }}
               </v-list-item-icon>
             </v-list-item>
-          </v-list> 
-          
-          
-          </v-card>
+          </v-list>
+        </v-card>
         <v-card class="pa-2 mt-4" outlined tile>
           friends
           <v-icon right>mdi-account-group</v-icon>
@@ -69,16 +70,11 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
-import { authModule } from '~/store/auth/const'
-
 import { User } from '~/models'
+import { authStore } from '~/store'
 
 @Component
 export default class Dot extends Vue {
-  @authModule.State('user')
-  user!: User
-
   statistics = [
     {
       name: 'games won',
@@ -98,24 +94,27 @@ export default class Dot extends Vue {
     {
       name: 'grand chelem 1',
       value: 0,
-      max:10
+      max: 10,
     },
     {
       name: 'grand chelem 2',
       value: 0,
-      max: 50
+      max: 50,
     },
     {
       name: 'grand chelem 3',
       value: 0,
-      max:100
+      max: 100,
     },
     {
       name: 'community member',
       value: 0,
-      max:20
+      max: 20,
     },
-
   ]
+
+  get user(): User | null {
+    return authStore.user
+  }
 }
 </script>

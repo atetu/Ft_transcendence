@@ -19,21 +19,21 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
-import { authModule } from '~/store/auth/const'
-
 import { User } from '~/models'
+import { authStore } from '~/store'
 
 @Component
 export default class Dot extends Vue {
-  @authModule.Getter('isAuthenticated')
-  isAuthenticated!: boolean
+  get user(): User | null {
+    return authStore.user
+  }
 
-  @authModule.State('user')
-  user!: User
+  get isAuthenticated(): boolean {
+    return authStore.isAuthenticated
+  }
 
-  public get picture() {
-    return `/api/users/${this.user.id}/avatar`
+  get picture(): string | null {
+    return authStore.picture
   }
 }
 </script>

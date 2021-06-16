@@ -61,6 +61,7 @@ export default {
     [
       'nuxt-i18n',
       {
+        vuex: false,
         vueI18nLoader: true,
         defaultLocale: 'en',
         locales: [

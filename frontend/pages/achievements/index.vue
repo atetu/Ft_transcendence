@@ -26,7 +26,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { Achievement, AchievementProgress } from '~/models'
 import { meModule } from '~/store/me/const'
-import { achievementsModule } from '~/store/achievements/const'
+import { achievementsStore } from '~/store'
 
 function byId(a: AchievementProgress, b: AchievementProgress) {
   return a.achievement.id - b.achievement.id
@@ -34,9 +34,6 @@ function byId(a: AchievementProgress, b: AchievementProgress) {
 
 @Component
 export default class Page extends Vue {
-  @achievementsModule.State('list')
-  achievements!: Achievement[]
-
   @meModule.State('achievementProgresses')
   achievementProgresses!: AchievementProgress[]
 
@@ -48,10 +45,14 @@ export default class Page extends Vue {
 
   async fetch() {
     if (!this.achievements.length) {
-      await this.$store.dispatch('achievements/fetch')
+      await achievementsStore.fetchAll()
     }
 
     await this.$store.dispatch('me/fetch')
+  }
+
+  get achievements(): Array<Achievement> {
+    return achievementsStore.list
   }
 
   get progresses(): AchievementProgress[] {
