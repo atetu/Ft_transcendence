@@ -11,7 +11,7 @@
   <div v-else class="fill-height">
     <v-app-bar app clipped-right>
       <v-toolbar-title>
-        {{ channel.name }}
+        {{ title }}
       </v-toolbar-title>
     </v-app-bar>
 
@@ -50,23 +50,42 @@ import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import { Socket } from 'vue-socket.io-extended'
 import API from '~/api/API'
 import ScrollItem from '~/components/channel/message/ScrollItem.vue'
-import { Channel, ChannelMessage, ChannelUser } from '~/models'
+import { Channel, ChannelMessage, ChannelUser, DirectMessage } from '~/models'
 import { authStore } from '~/store'
 
 @Component
 export default class Viewer extends Vue {
   @Prop({ type: Number })
-  id!: number
+  id!: number | null
+
+  @Prop({ type: Number })
+  peerId!: number | null
 
   channel: Channel | null = null
+  directMessage: DirectMessage | null = null
   users: Array<ChannelUser> = []
   messages: Array<ChannelMessage> = []
 
   loadingMessage = ''
 
   async fetch() {
-    this.loadingMessage = 'fetching channel'
-    const channel = await API.Channels.show(this.id)
+    let channel!: Channel
+    let directMessage: DirectMessage | null = null
+
+    console.log({
+      id: this.id,
+      peerId: this.peerId,
+    })
+
+    if (this.id != null) {
+      this.loadingMessage = 'fetching channel'
+      channel = await API.Channels.show(this.id)
+    } else if (this.peerId != null) {
+      this.loadingMessage = 'fetching direct messages'
+
+      directMessage = await API.DirectMessages.show(this.peerId)
+      channel = directMessage.channel
+    }
 
     this.loadingMessage = 'fetching users'
     const users = await API.ChannelUsers.index(channel)
@@ -78,6 +97,7 @@ export default class Viewer extends Vue {
     await API.Socket.channelConnect(channel)
 
     this.channel = channel
+    this.directMessage = directMessage
     this.users = users
     this.messages = messages
   }
@@ -114,10 +134,12 @@ export default class Viewer extends Vue {
   }
 
   get isOwner() {
-    const userId = authStore.user!.id
+    if (this.id) {
+      const userId = authStore.user!.id
 
-    if (this.channel) {
-      return this.channel.owner.id === userId
+      if (this.channel) {
+        return this.channel.owner.id === userId
+      }
     }
 
     return false
@@ -125,6 +147,14 @@ export default class Viewer extends Vue {
 
   get isAdmin() {
     return this.selfChannelUser?.admin || false
+  }
+
+  get title() {
+    if (this.peerId != null) {
+      return this.directMessage?.peer.username
+    }
+
+    return this.channel?.name
   }
 
   scrollToBotton() {
