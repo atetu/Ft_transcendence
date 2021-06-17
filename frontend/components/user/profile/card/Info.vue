@@ -39,7 +39,7 @@
             </v-btn>
           </v-col>
           <v-col cols="12" xl="6">
-            <v-btn outlined block color="primary">
+            <v-btn outlined block color="primary" :to="toMessage">
               message
               <v-icon right>mdi-message-arrow-right</v-icon>
             </v-btn>
@@ -66,6 +66,10 @@ export default class Dot extends Vue {
 
   get picture() {
     return `/api/users/${this.user.id}/avatar`
+  }
+
+  get toMessage() {
+    return `/direct-messages/${this.user.id}`
   }
 }
 </script>
