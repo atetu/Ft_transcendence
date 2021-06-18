@@ -1,37 +1,17 @@
 <template>
-  <channel-view-loading
-    v-if="$fetchState.pending && !channel"
-    :message="loadingMessage"
-  />
-  <channel-view-error
-    v-else-if="$fetchState.error"
+  <channel-view-base
+    :loading="$fetchState.pending"
     :error="$fetchState.error"
-    @refresh="$fetch"
-  />
-  <div v-else class="fill-height">
-    <v-app-bar app clipped-right>
-      <v-toolbar-title>
-        {{ title }}
-      </v-toolbar-title>
-    </v-app-bar>
-
-    <v-card class="mx-auto fill-height">
-      <v-list class="fill-height">
-        <virtual-list
-          ref="virtualMessageList"
-          class="fill-height"
-          style="overflow-y: auto"
-          data-key="id"
-          :data-sources="messages"
-          :data-component="itemComponent"
-        />
-      </v-list>
-    </v-card>
-
-    <v-footer app height="72" inset>
+    :loading-message="loadingMessage"
+    :title="title"
+    :channel="channel"
+    :messages="messages"
+    @message="onNewMessage"
+  >
+    <template slot="input">
       <channel-message-input v-if="hasJoined" :channel="channel" />
       <channel-join v-else :channel="channel" @joined="$fetch()" />
-    </v-footer>
+    </template>
 
     <channel-drawer-right
       :channel="channel"
@@ -42,50 +22,29 @@
       :loading="$fetchState.pending"
       @refresh="$fetch()"
     />
-  </div>
+  </channel-view-base>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
-import { Socket } from 'vue-socket.io-extended'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import API from '~/api/API'
-import ScrollItem from '~/components/channel/message/ScrollItem.vue'
-import { Channel, ChannelMessage, ChannelUser, DirectMessage } from '~/models'
+import { Channel, ChannelMessage, ChannelUser } from '~/models'
 import { authStore } from '~/store'
 
 @Component
 export default class Viewer extends Vue {
   @Prop({ type: Number })
-  id!: number | null
-
-  @Prop({ type: Number })
-  peerId!: number | null
+  id!: number
 
   channel: Channel | null = null
-  directMessage: DirectMessage | null = null
   users: Array<ChannelUser> = []
   messages: Array<ChannelMessage> = []
 
   loadingMessage = ''
 
   async fetch() {
-    let channel!: Channel
-    let directMessage: DirectMessage | null = null
-
-    console.log({
-      id: this.id,
-      peerId: this.peerId,
-    })
-
-    if (this.id != null) {
-      this.loadingMessage = 'fetching channel'
-      channel = await API.Channels.show(this.id)
-    } else if (this.peerId != null) {
-      this.loadingMessage = 'fetching direct messages'
-
-      directMessage = await API.DirectMessages.show(this.peerId)
-      channel = directMessage.channel
-    }
+    this.loadingMessage = 'fetching channel'
+    const channel = await API.Channels.show(this.id)
 
     this.loadingMessage = 'fetching users'
     const users = await API.ChannelUsers.index(channel)
@@ -97,30 +56,12 @@ export default class Viewer extends Vue {
     await API.Socket.channelConnect(channel)
 
     this.channel = channel
-    this.directMessage = directMessage
     this.users = users
     this.messages = messages
   }
 
-  @Watch('messages')
-  onNewMessage() {
-    this.scrollToBotton()
-  }
-
-  @Watch('$fetchState.pending')
-  onFetchFinished(val: boolean) {
-    if (!val) {
-      setTimeout(() => this.scrollToBotton(), 100)
-    }
-  }
-
-  @Socket('channel_message')
-  onChannelMessage(message: ChannelMessage) {
+  onNewMessage(message: ChannelMessage) {
     this.messages.push(message)
-  }
-
-  get itemComponent() {
-    return ScrollItem
   }
 
   get selfChannelUser() {
@@ -150,23 +91,7 @@ export default class Viewer extends Vue {
   }
 
   get title() {
-    if (this.peerId != null) {
-      return this.directMessage?.peer.username
-    }
-
     return this.channel?.name
-  }
-
-  scrollToBotton() {
-    for (let _ = 0; _ < 3; _++) {
-      this.$nextTick(() => {
-        const container = this.$refs.virtualMessageList as any
-
-        if (container) {
-          container.scrollToBottom()
-        }
-      })
-    }
   }
 }
 </script>

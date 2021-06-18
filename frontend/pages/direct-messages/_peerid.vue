@@ -1,5 +1,5 @@
 <template>
-  <channel-view-viewer :key="peerId" :peer-id="peerId" />
+  <direct-message-view-viewer :key="peerId" :peer-id="peerId" />
 </template>
 
 <script lang="ts">
