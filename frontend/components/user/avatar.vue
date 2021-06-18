@@ -38,7 +38,7 @@ export default class Avatar extends Vue {
   src?: string
 
   get picture() {
-    return `/api/users/${this.user.id}/avatar`
+    return `/api/users/${this.user.id}/avatar?key=${this.pictureKey}`
   }
 
   get pictureKey() {
