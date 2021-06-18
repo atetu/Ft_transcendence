@@ -9,8 +9,8 @@
       <v-img
         v-if="user"
         :key="pictureKey"
-        :height="size"
-        :width="size"
+        :height="avatarSize"
+        :width="avatarSize"
         :src="url"
       />
       <v-icon v-else small>mdi-account-question</v-icon>
