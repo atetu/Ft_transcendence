@@ -1,7 +1,7 @@
 <template>
   <v-list-item link :to="to">
     <v-list-item-avatar>
-      <user-avatar :user="peer" />
+      <user-avatar :size="40" :user="peer" />
     </v-list-item-avatar>
     <v-list-item-content>
       <v-list-item-title>{{ peer.username }}</v-list-item-title>
