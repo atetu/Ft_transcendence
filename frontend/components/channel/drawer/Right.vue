@@ -10,7 +10,7 @@
             :is-admin="isAdmin"
             :is-owner="isOwner"
             :loading="loading"
-            @refresh="$emit('refresh')"
+            @refresh="refresh"
           >
             <template #activator="{ on, attrs }">
               <v-btn block color="primary" v-bind="attrs" v-on="on">
@@ -25,7 +25,7 @@
           <channel-dialog-invite
             :channel="channel"
             :users="users"
-            @invited="$emit('refresh')"
+            @invited="refresh"
           >
             <template #activator="{ on, attrs }">
               <v-btn block color="primary" v-bind="attrs" v-on="on">
@@ -37,7 +37,7 @@
         </v-list-item>
 
         <v-list-item>
-          <channel-dialog-leave :channel="channel">
+          <channel-dialog-leave :channel="channel" @leaved="onLeaved">
             <template #activator="{ on, attrs }">
               <v-btn block color="primary" v-bind="attrs" v-on="on">
                 {{ $t('channel.leave.button') }}
@@ -53,8 +53,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-
-import { Channel, ChannelUser } from '~/models'
+import { Channel, ChannelUser, ChannelVisibility } from '~/models'
 
 @Component
 export default class Index extends Vue {
@@ -84,6 +83,20 @@ export default class Index extends Vue {
     }
 
     return `/channels/${id}/settings`
+  }
+
+  onLeaved() {
+    if (this.channel.visibility === ChannelVisibility.PUBLIC) {
+      this.refresh()
+    } else {
+      this.$router.push({ path: '/channels' })
+    }
+
+    this.$emit('leaved')
+  }
+
+  refresh() {
+    this.$emit('refresh')
   }
 }
 </script>

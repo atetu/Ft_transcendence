@@ -65,6 +65,7 @@ export default class ComponentImpl extends Vue {
       await API.ChannelUsers.destroy(this.channel, user)
 
       this.$emit('leaved')
+      this.dialog = false
     } catch (error) {
       this.error = error
     }

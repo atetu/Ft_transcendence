@@ -10,7 +10,7 @@
   >
     <template slot="input">
       <channel-message-input v-if="hasJoined" :channel="channel" />
-      <channel-join v-else :channel="channel" @joined="$fetch()" />
+      <channel-join v-else :channel="channel" @joined="onJoined" />
     </template>
 
     <channel-drawer-right
@@ -21,6 +21,7 @@
       :is-admin="isAdmin"
       :loading="$fetchState.pending"
       @refresh="$fetch()"
+      @leaved="onLeaved"
     />
   </channel-view-base>
 </template>
@@ -92,6 +93,15 @@ export default class Viewer extends Vue {
 
   get title() {
     return this.channel?.name
+  }
+
+  onJoined() {
+    this.$store.dispatch('channels/fetchAll')
+    this.$fetch()
+  }
+
+  onLeaved() {
+    this.$store.dispatch('channels/fetchAll')
   }
 }
 </script>
