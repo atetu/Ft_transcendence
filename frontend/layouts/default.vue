@@ -80,6 +80,11 @@ export default class Default extends Vue {
       url: '/logout',
     },
     {
+      title: 'games',
+      icon: 'controller-classic',
+      url: '/games',
+    },
+    {
       title: 'debug',
       icon: 'developer-board',
       url: '/debug',

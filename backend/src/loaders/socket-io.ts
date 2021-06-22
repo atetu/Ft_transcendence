@@ -38,8 +38,13 @@ export default async ({ server }: { server: http.Server }) => {
       socketService.gameConnect(socket, body, callback)
     })
 
-    socket.on('game_movement', (body, callback) => {
+    socket.on('game_move', (body, callback) => {
       socketService.gameMove(socket, body, callback)
+    })
+
+    socket.on('waiting_room', () => {
+      console.log('first step')
+      socketService.matchMaking(socket)
     })
   });
 };

@@ -4,10 +4,20 @@ import User from "../entities/User";
 import ChannelService from "./ChannelService";
 import ChannelMessage from "../entities/ChannelMessage";
 import Channel from "../entities/Channel";
+import Game from "../game/Game";
+import GameService from "./GameService";
+import MatchMakingService from "./MatchMakingService";
+import { Socket } from "socket.io";
+
+
+import { x } from "@hapi/joi";
 
 @Service()
 export default class SocketService {
-  private channelService = Container.get(ChannelService);
+    private gameService = Container.get(GameService);
+    private matchMakingService = Container.get(MatchMakingService);
+
+    private channelService = Container.get(ChannelService);
 
   connectedUserIds = {};
 
@@ -80,5 +90,52 @@ export default class SocketService {
     const io = Container.get(socketio.Server);
 
     io.emit("channel_new", channel.toJSON());
+  }
+
+  async gameConnect(socket, body: any, callback: any) {
+    console.log('Game connect')
+    const { gameId } = body 
+    const io = Container.get(socketio.Server)
+    
+    const game = this.gameService.gameConnect(gameId) 
+    if (game) {
+        callback(null, {
+          player1: game.player1,
+         player2: game.player2})
+    }
+    else {
+      callback(new Error('not enough players'))
+    }
+  }
+
+  async gameMove(socket, body, callback) {
+    console.log('Game move')
+    const io = Container.get(socketio.Server);
+
+    const { gameId, y } = body
+    const success = this.gameService.gameMove({
+      gameId,
+      player: socket.data.user,
+      newY: y
+    })
+
+    if (success) {
+      callback(null, y)
+    } else {
+      callback(new Error('top'), null)
+    }
+
+  }
+  async matchMaking(socket: Socket) {
+    const io = Container.get(socketio.Server);
+    console.log('matchMaking')
+    const game: Game = this.matchMakingService.addSocket(socket)
+    console.log('game : ' + game)
+    if (game != undefined)
+    {
+      io.to(game.toRoom()).emit('game_starting', { player1: game.player1.id, player2: game.player2.id, gameId: game.id })
+      game.start()
+      console.log('starting....')
+    }
   }
 }
