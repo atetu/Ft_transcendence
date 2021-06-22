@@ -50,6 +50,16 @@ export default class UserService {
     return true;
   }
 
+  async setBanned(user: User, newState: boolean): Promise<User> {
+    if (user.banned != newState) {
+      user.banned = newState;
+
+      await this.save(user);
+    }
+
+    return user;
+  }
+
   async updateAvatar(
     user: User,
     image: fileUpload.UploadedFile

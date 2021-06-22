@@ -45,6 +45,27 @@ export default (app: express.Router) => {
     res.status(200).send(user.toJSON());
   });
 
+  route.post(
+    "/",
+    celebrate.celebrate({
+      [celebrate.Segments.BODY]: {
+        banned: celebrate.Joi.boolean().optional(),
+      },
+    }),
+    middlewares.authorize(true),
+    async (req, res, next) => {
+      const user: User = res.locals.user;
+
+      const { banned }: { banned?: boolean } = req.body;
+
+      if (banned !== undefined) {
+        await userService.setBanned(user, banned);
+      }
+
+      res.status(200).send(user.toJSON());
+    }
+  );
+
   achievements(route);
   avatar(route);
 
