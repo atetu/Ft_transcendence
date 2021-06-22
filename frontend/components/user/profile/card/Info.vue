@@ -44,6 +44,9 @@
               <v-icon right>mdi-message-arrow-right</v-icon>
             </v-btn>
           </v-col>
+          <v-col v-if="selfIsSiteAdmin && !isAdmin" cols="12">
+            <user-button-ban :user="user" @refresh="refresh" />
+          </v-col>
         </template>
       </v-row>
     </v-col>
@@ -64,12 +67,24 @@ export default class Dot extends Vue {
     return authStore.user!.id === this.user.id
   }
 
+  get isAdmin() {
+    return this.user.admin
+  }
+
+  get selfIsSiteAdmin() {
+    return authStore.user!.admin
+  }
+
   get picture() {
     return `/api/users/${this.user.id}/avatar`
   }
 
   get toMessage() {
     return `/direct-messages/${this.user.id}`
+  }
+
+  refresh() {
+    this.$emit('refresh')
   }
 }
 </script>

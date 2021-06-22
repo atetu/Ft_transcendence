@@ -18,7 +18,7 @@
         </v-card>
       </v-col>
       <v-col cols="6">
-        <user-profile-card-info :user="user"></user-profile-card-info>
+        <user-profile-card-info :user="user" @refresh="$fetch" />
       </v-col>
     </v-row>
   </v-main>
