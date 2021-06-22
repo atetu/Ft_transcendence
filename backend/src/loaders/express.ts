@@ -52,6 +52,8 @@ export default async ({ app }: { app: express.Application }) => {
       return res.status(400).send({ validation });
     } else if (err.name === "UnauthorizedError") {
       return res.status(err.status).send({ message: err.message });
+    } else if (err.name === "AuthError") {
+      return res.status(401).send({ message: err.message });
     }
 
     return next(err);

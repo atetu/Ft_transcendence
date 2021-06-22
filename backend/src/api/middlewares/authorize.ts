@@ -11,14 +11,15 @@ const authorize = (onlyAdmin = false) => [
     algorithms: [config.JWT_ALGORITHM],
   }),
   async (req: Request, res: Response, next: NextFunction) => {
-    const userService = Container.get(UserService)
+    const userService = Container.get(UserService);
 
     const user = await userService.findById(req.user.id);
 
-    if (!user || (onlyAdmin && !user.admin)) {
+    if (!user || user.banned || (onlyAdmin && !user.admin)) {
       return res.status(401).json({
         message: "unauthorized",
         authenticated: !!user,
+        banned: user?.banned || false,
       });
     }
 

@@ -4,6 +4,7 @@ import { InjectRepository } from "typeorm-typedi-extensions";
 import config from "../config";
 import RefreshToken from "../entities/RefreshToken";
 import User from "../entities/User";
+import AuthError from "../errors/AuthError";
 import { RefreshTokenRepository } from "../repositories/RefreshTokenRepository";
 
 @Service()
@@ -20,15 +21,15 @@ export default class RefreshTokenService {
     });
 
     if (!refreshToken) {
-      throw "invalid token";
+      throw new AuthError("invalid token");
     }
 
     if (!refreshToken.active) {
-      throw "inactive token";
+      throw new AuthError("inactive token");
     }
 
     if (refreshToken.expired) {
-      throw "expired token";
+      throw new AuthError("expired token");
     }
 
     return refreshToken;
