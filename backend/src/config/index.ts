@@ -9,6 +9,10 @@ export default dotenv.load({
   GOOGLE_SECRET: String,
   MARVIN_ID: String,
   MARVIN_SECRET: String,
+  OAUTH_BASE_CALLBACK_URL: {
+    type: String,
+    default: "http://localhost:3000",
+  },
   JWT_SECRET: String,
   JWT_ALGORITHM: {
     type: String,

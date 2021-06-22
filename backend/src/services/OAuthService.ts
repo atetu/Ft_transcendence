@@ -69,7 +69,7 @@ export default class OAuthService {
         {
           clientID: config.GOOGLE_ID,
           clientSecret: config.GOOGLE_SECRET,
-          callbackURL: "http://localhost:3000/auth/google/callback",
+          callbackURL: `${config.OAUTH_BASE_CALLBACK_URL}/auth/google/callback`,
         },
         async (_accessToken, _refreshToken, profile, callback) => {
           const { email, picture } = profile;
@@ -87,7 +87,7 @@ export default class OAuthService {
         {
           clientID: config.MARVIN_ID,
           clientSecret: config.MARVIN_SECRET,
-          callbackURL: "http://localhost:3000/auth/marvin/callback",
+          callbackURL: `${config.OAUTH_BASE_CALLBACK_URL}/auth/marvin/callback`,
         },
         async (_accessToken, _refreshToken, profile, callback) => {
           const { email, image_url } = profile;
