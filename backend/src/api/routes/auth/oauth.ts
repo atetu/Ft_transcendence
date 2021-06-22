@@ -7,6 +7,7 @@ import User from "../../../entities/User";
 import AuthService from "../../../services/AuthService";
 import OAuthService from "../../../services/OAuthService";
 import PhaseTokenService from "../../../services/PhaseTokenService";
+import helpers from "../../helpers";
 
 function oauth(route: express.Router, name: string, scopes: string[]) {
   const phaseTokenService = Container.get(PhaseTokenService);
@@ -29,9 +30,15 @@ function oauth(route: express.Router, name: string, scopes: string[]) {
     }),
     (req, res, next) => {
       passport.authenticate(name, async (err, user: User, info) => {
-        if (err) {
-          next(err);
-        } else {
+        try {
+          if (err) {
+            throw err;
+          }
+
+          if (user.banned) {
+            throw helpers.forbidden("banned");
+          }
+
           if (user.otp) {
             const phaseToken = await phaseTokenService.create(
               user,
@@ -44,6 +51,8 @@ function oauth(route: express.Router, name: string, scopes: string[]) {
 
             res.status(200).send(tokens);
           }
+        } catch (error) {
+          next(error);
         }
       })(req, res, next);
     }

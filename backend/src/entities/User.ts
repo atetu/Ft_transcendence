@@ -15,8 +15,11 @@ export default class User {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ default: false })
   admin: boolean;
+
+  @Column({ default: false })
+  banned: boolean;
 
   @Column()
   picture: string;
@@ -35,6 +38,7 @@ export default class User {
       id: this.id,
       username: this.username,
       admin: this.admin,
+      banned: this.banned,
       picture: this.picture,
       doneFirstStep: this.doneFirstStep ? undefined : false,
     };

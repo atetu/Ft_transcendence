@@ -2,6 +2,7 @@ import * as assert from "assert";
 import * as passport from "passport";
 import * as passportGoogleOAuth2 from "passport-google-oauth2";
 import { Inject, Service } from "typedi";
+import helpers from "../api/helpers";
 import * as marvinOAuth2 from "../auth/marvin";
 import config from "../config";
 import User from "../entities/User";
