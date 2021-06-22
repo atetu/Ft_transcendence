@@ -60,6 +60,9 @@ export default class Callback extends Vue {
 
           if (error.response?.status === 402) {
             this.phaseToken = error.response.data
+          } else if (error.response?.status === 403) {
+            this.post(`banned`)
+            this.closeWindow()
           } else {
             this.post(`error`)
             this.closeWindow()

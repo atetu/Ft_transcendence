@@ -5,16 +5,7 @@
         <v-col align="center">
           <h1>ft-transcendence</h1>
           <div class="text-center mt-16" style="max-width: 400px">
-            <v-alert v-if="state === 'error'" type="error">
-              failed to authenticate
-            </v-alert>
-            <v-alert v-if="state === 'unlock-error'" type="error">
-              failed to unlock
-            </v-alert>
-            <v-alert v-if="state === 'success'" type="info"> success </v-alert>
-            <v-alert v-if="state === 'unlock-success'" type="info">
-              unlock success
-            </v-alert>
+            <auth-state-alert :state="state" />
             <v-progress-linear v-if="loading" indeterminate />
             <v-btn
               v-for="(provider, key) in providers"
@@ -86,7 +77,8 @@ export default class Index extends Vue {
         }
 
         case 'error':
-        case 'unlock-error': {
+        case 'unlock-error':
+        case 'banned': {
           done = true
           break
         }
