@@ -2,6 +2,7 @@ import * as celebrate from "celebrate";
 import * as express from "express";
 import { Container } from "typeorm-typedi-extensions";
 import ChannelUser from "../../../../../../entities/ChannelUser";
+import User from "../../../../../../entities/User";
 import ChannelUserService from "../../../../../../services/ChannelUserService";
 import helpers from "../../../../../helpers";
 
@@ -22,14 +23,17 @@ export default (app: express.Router) => {
       res: express.Response,
       next: express.NextFunction
     ) => {
+      const user: User = req.user as any;
       const selfChannelUser: ChannelUser = res.locals.selfChannelUser;
       const channelUser: ChannelUser = res.locals.channelUser;
 
       const { duration } = req.body as { duration: number | null };
 
       try {
-        if (!selfChannelUser.admin) {
-          return helpers.forbidden(errorNotAdmin);
+        if (!user.admin) {
+          if (!selfChannelUser.admin) {
+            return helpers.forbidden(errorNotAdmin);
+          }
         }
 
         await channelUserService.setMuted(channelUser, to, duration);

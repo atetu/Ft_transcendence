@@ -35,12 +35,18 @@ export default (app: express.Router) => {
           user
         );
 
-        if (selfChannelUser?.banned) {
-          return helpers.forbidden("banned");
-        }
+        if (user.admin) {
+          if (!selfChannelUser && channel.isDirect()) {
+            return helpers.forbidden("direct channel");
+          }
+        } else {
+          if (selfChannelUser?.banned) {
+            return helpers.forbidden("banned");
+          }
 
-        if (!channel.isPublic() && !selfChannelUser) {
-          return helpers.forbidden(channel.visibility);
+          if (!channel.isPublic() && !selfChannelUser) {
+            return helpers.forbidden(channel.visibility);
+          }
         }
 
         res.locals.channel = channel;
@@ -91,8 +97,14 @@ export default (app: express.Router) => {
       };
 
       try {
-        if (channel.owner.id !== user.id) {
-          return helpers.forbidden("only owner can edit channel");
+        if (!user.admin) {
+          if (channel.owner.id !== user.id) {
+            return helpers.forbidden("only owner can edit channel");
+          }
+        }
+
+        if (channel.isDirect()) {
+          return helpers.forbidden("direct channel cannot be edited");
         }
 
         channel.name = name;

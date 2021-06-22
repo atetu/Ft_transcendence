@@ -18,12 +18,16 @@ export default (app: express.Router) => {
 
   app.use(
     "/:userid",
-    middlewares.simplePathVariable("userid", "channelUser", async (id, _req, res) => {
-      const channel: Channel = res.locals.channel;
-      const user: User = { id } as User;
+    middlewares.simplePathVariable(
+      "userid",
+      "channelUser",
+      async (id, _req, res) => {
+        const channel: Channel = res.locals.channel;
+        const user: User = { id } as User;
 
-      return await channelUserService.findByChannelAndUser(channel, user);
-    }),
+        return await channelUserService.findByChannelAndUser(channel, user);
+      }
+    ),
     route
   );
 
@@ -44,17 +48,19 @@ export default (app: express.Router) => {
         return helpers.forbidden("owner cannot leave");
       }
 
-      if (user.id !== channelUser.user.id) {
-        if (!selfChannelUser.admin) {
-          return helpers.forbidden("you are not an admin");
-        }
+      if (!user.admin) {
+        if (user.id !== channelUser.user.id) {
+          if (!selfChannelUser.admin) {
+            return helpers.forbidden("you are not an admin");
+          }
 
-        /* admin kick */
-      } else if (channelUser.banned) {
-        return helpers.forbidden("banned");
-      } /* else {
-        self leave
-      } */
+          /* admin kick */
+        } else if (channelUser.banned) {
+          return helpers.forbidden("banned");
+        } /* else {
+          self leave
+        } */
+      }
 
       channelUserService.delete(channelUser);
 

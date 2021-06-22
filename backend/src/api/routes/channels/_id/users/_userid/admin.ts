@@ -29,12 +29,14 @@ export default (app: express.Router) => {
       const channelUser: ChannelUser = res.locals.channelUser;
 
       try {
-        if (channel.owner.id !== user.id) {
-          return helpers.forbidden(errorNotOwner);
-        }
-
-        if (channel.owner.id === channelUser.user.id) {
-          return helpers.forbidden(errorOwnerItself);
+        if (!user.admin) {
+          if (channel.owner.id !== user.id) {
+            return helpers.forbidden(errorNotOwner);
+          }
+  
+          if (channel.owner.id === channelUser.user.id) {
+            return helpers.forbidden(errorOwnerItself);
+          }
         }
 
         await channelUserService.setAdmin(channelUser, to);
