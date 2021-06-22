@@ -21,40 +21,44 @@ const plugin: Plugin = ({ $axios, store, redirect }) => {
       return response
     },
     async (error) => {
-      if (
-        error.response.status === 401 &&
-        !error.response.data?.authenticated /* if admin only page */
-      ) {
-        let newTokens
-
-        try {
-          newTokens = await $axios.$post('/auth/refresh-token', {
-            accessToken: store.state.auth.accessToken,
-            refreshToken: store.state.auth.refreshToken,
-          })
-        } catch (error2) {
-          console.error(
-            'Another error has happen when trying to refresh the tokens',
-            error2
-          )
-
-          if (error2.response?.data?.message === 'invalid access token') {
-            redirect('/auth')
-          }
-
+      if (error.response.status === 401) {
+        if (error.response.data?.banned) {
+          redirect('/auth')
           return Promise.reject(error)
         }
 
-        const { accessToken, refreshToken } = newTokens
+        if (!error.response.data?.authenticated /* if admin only page */) {
+          let newTokens
 
-        await store.dispatch('auth/updateTokens', {
-          accessToken,
-          refreshToken,
-        })
+          try {
+            newTokens = await $axios.$post('/auth/refresh-token', {
+              accessToken: store.state.auth.accessToken,
+              refreshToken: store.state.auth.refreshToken,
+            })
+          } catch (error2: any) {
+            console.error(
+              'Another error has happen when trying to refresh the tokens',
+              error2
+            )
 
-        error.config.headers.Authorization = `Bearer ${accessToken}`
+            if (error2.response?.data?.message === 'invalid access token') {
+              redirect('/auth')
+            }
 
-        return $axios.request(error.config)
+            return Promise.reject(error)
+          }
+
+          const { accessToken, refreshToken } = newTokens
+
+          await store.dispatch('auth/updateTokens', {
+            accessToken,
+            refreshToken,
+          })
+
+          error.config.headers.Authorization = `Bearer ${accessToken}`
+
+          return $axios.request(error.config)
+        }
       }
 
       return Promise.reject(error)
