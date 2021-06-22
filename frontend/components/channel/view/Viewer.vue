@@ -9,7 +9,10 @@
     @message="onNewMessage"
   >
     <template slot="input">
-      <channel-message-input v-if="hasJoined" :channel="channel" />
+      <channel-message-input
+        v-if="hasJoined || isSiteAdmin"
+        :channel="channel"
+      />
       <channel-join v-else :channel="channel" @joined="onJoined" />
     </template>
 
@@ -17,10 +20,12 @@
       :channel="channel"
       :users="users"
       :has-joined="hasJoined"
+      :is-site-admin="isSiteAdmin"
       :is-owner="isOwner"
       :is-admin="isAdmin"
       :loading="$fetchState.pending"
       @refresh="$fetch()"
+      @joined="onJoined"
       @leaved="onLeaved"
     />
   </channel-view-base>
@@ -72,23 +77,29 @@ export default class Viewer extends Vue {
   }
 
   get hasJoined() {
-    return !!this.selfChannelUser
+    return !!this.selfChannelUser || false
   }
 
   get isOwner() {
-    if (this.id) {
-      const userId = authStore.user!.id
+    const user = authStore.user!
 
-      if (this.channel) {
-        return this.channel.owner.id === userId
-      }
+    if (user.admin) {
+      return true
+    }
+
+    if (this.id && this.channel) {
+      return this.channel.owner.id === user.id
     }
 
     return false
   }
 
   get isAdmin() {
-    return this.selfChannelUser?.admin || false
+    return this.selfChannelUser?.admin || authStore.user!.admin
+  }
+
+  get isSiteAdmin() {
+    return authStore.user!.admin
   }
 
   get title() {

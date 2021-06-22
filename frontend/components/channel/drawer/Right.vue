@@ -1,7 +1,7 @@
 <template>
   <drawer-right>
     <channel-user-list :channel="channel" :users="users" />
-    <template v-if="hasJoined" #append>
+    <template v-if="hasJoined || isSiteAdmin" #append>
       <v-list>
         <v-list-item v-if="isAdmin">
           <channel-dialog-settings
@@ -36,7 +36,7 @@
           </channel-dialog-invite>
         </v-list-item>
 
-        <v-list-item>
+        <v-list-item v-if="hasJoined">
           <channel-dialog-leave :channel="channel" @leaved="onLeaved">
             <template #activator="{ on, attrs }">
               <v-btn block color="primary" v-bind="attrs" v-on="on">
@@ -45,6 +45,10 @@
               </v-btn>
             </template>
           </channel-dialog-leave>
+        </v-list-item>
+
+        <v-list-item v-else-if="isSiteAdmin">
+          <channel-join :channel="channel" @joined="onJoined" />
         </v-list-item>
       </v-list>
     </template>
@@ -65,6 +69,9 @@ export default class Index extends Vue {
 
   @Prop({ type: Boolean })
   hasJoined!: boolean
+
+  @Prop({ type: Boolean })
+  isSiteAdmin!: boolean
 
   @Prop({ type: Boolean, default: false })
   isOwner!: boolean
@@ -93,6 +100,10 @@ export default class Index extends Vue {
     }
 
     this.$emit('leaved')
+  }
+
+  onJoined() {
+    this.$emit('joined')
   }
 
   refresh() {
