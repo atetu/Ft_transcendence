@@ -7,7 +7,15 @@
   />
   <v-main v-else class="fill-height" style="overflow: auto">
     <v-row class="ma-2">
+      <v-col cols="12" md="3">
+        <user-profile-card-info :user="user"></user-profile-card-info>
+      </v-col>
+
       <v-col cols="6">
+        <user-profile-card-matches :user="user" />
+      </v-col>
+      
+      <v-col cols="3">
         <v-card>
           <v-card-title>info</v-card-title>
           <v-card-text>
@@ -16,9 +24,6 @@
             </code>
           </v-card-text>
         </v-card>
-      </v-col>
-      <v-col cols="6">
-        <user-profile-card-info :user="user" @refresh="$fetch" />
       </v-col>
     </v-row>
   </v-main>

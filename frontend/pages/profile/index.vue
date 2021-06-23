@@ -24,13 +24,7 @@
       </v-col>
 
       <v-col cols="6">
-        <v-card outlined tile>
-          <v-card-title>
-            match history ueuyuiyrpup uywpry ppuyru ehfjkkdssncjkb
-            0002654455464465456465 8979==/745132565
-            65565656556565656565656446546546546545645456465456
-          </v-card-title>
-        </v-card>
+        <user-profile-card-matches :user="user" />
       </v-col>
 
       <v-col cols="3">
