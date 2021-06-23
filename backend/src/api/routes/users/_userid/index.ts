@@ -8,6 +8,7 @@ import middlewares from "../../../middlewares";
 import matches from "./matches";
 import achievements from "./achievements";
 import avatar from "./avatar";
+import statistics from "./statistics";
 
 export default (app: express.Router) => {
   const userService = Container.get(UserService);
@@ -70,6 +71,7 @@ export default (app: express.Router) => {
   achievements(route);
   avatar(route);
   matches(route);
+  statistics(route);
 
   return route;
 };
