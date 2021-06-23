@@ -16,7 +16,8 @@
       </v-col>
       
       <v-col cols="3">
-        <v-card>
+        <user-profile-card-last-achievements :user="user" />
+        <v-card class="pa-2 mt-4" >
           <v-card-title>info</v-card-title>
           <v-card-text>
             <code style="display: block">

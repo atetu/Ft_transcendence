@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card :outlined="outlined">
     <v-card-title>
       {{ name }}
       <template v-if="icon">
@@ -31,6 +31,9 @@ import { Icons } from '~/game/Achievements'
 export default class Page extends Vue {
   @Prop()
   progress!: AchievementProgress
+
+  @Prop({ type: Boolean, default: false })
+  outlined!: boolean
 
   get name(): string {
     return this.progress.achievement.name

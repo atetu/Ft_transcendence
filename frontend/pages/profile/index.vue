@@ -28,27 +28,7 @@
       </v-col>
 
       <v-col cols="3">
-        <v-card class="pa-2" outlined tile>
-          <v-card-title>
-            <v-spacer />
-            achievements
-            <v-spacer />
-          </v-card-title>
-          <v-list>
-            <v-list-item
-              v-for="achievement in achievements"
-              :key="achievement.name"
-            >
-              <v-list-item-content>
-                <v-list-item-title>{{ achievement.name }}</v-list-item-title>
-              </v-list-item-content>
-
-              <v-list-item-icon>
-                {{ achievement.value }}
-              </v-list-item-icon>
-            </v-list-item>
-          </v-list>
-        </v-card>
+        <user-profile-card-last-achievements :user="user" />
         <v-card class="pa-2 mt-4" outlined tile>
           friends
           <v-icon right>mdi-account-group</v-icon>
