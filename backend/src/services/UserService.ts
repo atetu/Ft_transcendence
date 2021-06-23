@@ -35,6 +35,23 @@ export default class UserService {
     return this.repository.find();
   }
 
+  async fitUsername(input: string): Promise<string> {
+    let suffix: string | number = "";
+    let username: string;
+
+    do {
+      username = `${input}${suffix}`;
+
+      if (typeof suffix === "number") {
+        suffix++;
+      } else {
+        suffix = 1;
+      }
+    } while (await this.repository.existsByUsername(username));
+
+    return username;
+  }
+
   async firstStep(user: User, username: string): Promise<boolean> {
     const already = await this.findByUsername(username);
 

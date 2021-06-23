@@ -45,7 +45,7 @@ export default class OAuthService {
 
       if (!user) {
         user = new User();
-        user.username = email.split("@")[0];
+        user.username = await this.userService.fitUsername(email.split("@")[0]);
         user.email = email;
         user.admin = false;
         user.picture = await this.avatarService.download(picture);

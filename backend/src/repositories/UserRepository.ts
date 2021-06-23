@@ -5,11 +5,15 @@ import User from "../entities/User";
 @Service()
 @EntityRepository(User)
 export default class UserRepository extends Repository<User> {
-  public findByUsername(username: string) {
-    return this.findOne({ username });
+  async findByUsername(username: string): Promise<User> {
+    return await this.findOne({ username });
   }
 
-  public findByEmail(email: string) {
-    return this.findOne({ email });
+  async findByEmail(email: string): Promise<User> {
+    return await this.findOne({ email });
+  }
+
+  async existsByUsername(username: string): Promise<boolean> {
+    return (await this.count({ username })) !== 0;
   }
 }
