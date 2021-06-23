@@ -25,6 +25,10 @@ export default class ChannelService {
     return await this.repository.findAllNotPrivate()
   }
 
+  public async allNotDirect() {
+    return await this.repository.findAllNotDirect()
+  }
+
   public async findById(id: number) {
     return await this.repository.findOne(id);
   }

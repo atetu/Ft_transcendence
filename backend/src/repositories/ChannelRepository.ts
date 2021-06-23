@@ -8,4 +8,8 @@ export default class ChannelRepository extends Repository<Channel> {
   async findAllNotPrivate(): Promise<Array<Channel>> {
     return await this.find({ visibility: Not(Channel.Visibility.PRIVATE) });
   }
+
+  async findAllNotDirect(): Promise<Array<Channel>> {
+    return await this.find({ type: Not(Channel.Type.DIRECT) });
+  }
 }
