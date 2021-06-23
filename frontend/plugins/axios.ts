@@ -27,6 +27,11 @@ const plugin: Plugin = ({ $axios, store, redirect }) => {
           return Promise.reject(error)
         }
 
+        if (error.response.data?.message === 'invalid token') {
+          redirect('/auth')
+          return Promise.reject(error)
+        }
+
         if (!error.response.data?.authenticated /* if admin only page */) {
           let newTokens
 
