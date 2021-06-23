@@ -18,7 +18,7 @@
         />
       </v-col>
 
-      <v-col cols="6">
+      <v-col cols="12" md="6">
         <user-profile-card-matches
           :user="user"
           :matches="matches"
@@ -27,7 +27,7 @@
         />
       </v-col>
 
-      <v-col cols="3">
+      <v-col cols="12" md="3">
         <user-profile-card-last-achievements
           :user="user"
           :progresses="progresses"
