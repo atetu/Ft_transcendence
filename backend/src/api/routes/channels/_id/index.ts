@@ -122,11 +122,26 @@ export default (app: express.Router) => {
   );
 
   route.delete("/", async (req, res, next) => {
+    const user: User = req.user as any;
     const channel: Channel = res.locals.channel;
 
-    await channelService.delete(channel);
+    try {
+      if (!user.admin) {
+        if (channel.owner.id !== user.id) {
+          return helpers.forbidden("only owner can delete channel");
+        }
+      }
 
-    res.status(204).end();
+      if (channel.isDirect()) {
+        return helpers.forbidden("direct channel cannot be deleted");
+      }
+
+      await channelService.delete(channel);
+
+      res.status(204).end();
+    } catch (error) {
+      next(error);
+    }
   });
 
   users(route);
