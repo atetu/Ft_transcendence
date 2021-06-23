@@ -2,25 +2,8 @@
   <v-main class="fill-height">
     <v-row class="ma-4">
       <v-col cols="12" md="3">
-        <user-profile-card-info :user="user"></user-profile-card-info>
-        <v-card class="pa-2 mt-4" outlined>
-          <v-card-title>
-            <v-spacer />
-            statistics
-            <v-spacer />
-          </v-card-title>
-          <v-list>
-            <v-list-item v-for="statistic in statistics" :key="statistic.name">
-              <v-list-item-content>
-                <v-list-item-title>{{ statistic.name }}</v-list-item-title>
-              </v-list-item-content>
-
-              <v-list-item-icon>
-                {{ statistic.value }}
-              </v-list-item-icon>
-            </v-list-item>
-          </v-list>
-        </v-card>
+        <user-profile-card-info :user="user" />
+        <user-profile-card-statistics :user="user" class="mt-4" />
       </v-col>
 
       <v-col cols="6">
