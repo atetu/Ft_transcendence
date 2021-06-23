@@ -1,8 +1,8 @@
 import { Service, Inject } from "typedi";
 import { InjectRepository } from "typeorm-typedi-extensions";
 import Match from "../entities/Match";
+import User from "../entities/User";
 import MatchRepository from "../repositories/MatchRepository";
-
 
 @Service()
 export default class MatchService {
@@ -10,20 +10,16 @@ export default class MatchService {
     @InjectRepository()
     private readonly repository: MatchRepository
   ) {}
+  
+  async findById(id: number): Promise<Match> {
+    return await this.repository.findById(id)
+  }
 
-//   async findById(id: number): Promise<User> {
-//     return this.repository.findOne(id);
-//   }
-
-//   async findByEmail(email: string): Promise<User> {
-//     return this.repository.findByEmail(email);
-//   }
+  async findAllByUser(user: User): Promise<Array<Match>> {
+    return await this.repository.findAllByUser(user);
+  }
 
   async save(match: Match): Promise<Match> {
     return this.repository.save(match);
   }
-
-//   async all(): Promise<User[]> {
-//     return this.repository.find();
-//   }
 }

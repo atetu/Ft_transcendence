@@ -5,6 +5,7 @@ import User from "../../../../entities/User";
 import UserService from "../../../../services/UserService";
 import helpers from "../../../helpers";
 import middlewares from "../../../middlewares";
+import matches from "./matches";
 import achievements from "./achievements";
 import avatar from "./avatar";
 
@@ -68,6 +69,7 @@ export default (app: express.Router) => {
 
   achievements(route);
   avatar(route);
+  matches(route);
 
   return route;
 };
