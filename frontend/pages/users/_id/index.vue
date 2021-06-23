@@ -1,50 +1,14 @@
 <template>
-  <page-loading v-if="$fetchState.pending" />
-  <page-error
-    v-else-if="$fetchState.error"
-    :error="$fetchState.error"
-    @click="$fetch()"
-  />
-  <v-main v-else class="fill-height" style="overflow: auto">
-    <v-row class="ma-2">
-      <v-col cols="12" md="3">
-        <user-profile-card-info :user="user"></user-profile-card-info>
-      </v-col>
-
-      <v-col cols="6">
-        <user-profile-card-matches :user="user" />
-      </v-col>
-      
-      <v-col cols="3">
-        <user-profile-card-last-achievements :user="user" />
-        <v-card class="pa-2 mt-4" >
-          <v-card-title>info</v-card-title>
-          <v-card-text>
-            <code style="display: block">
-              <pre>{{ JSON.stringify(user, null, 4) }}</pre>
-            </code>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-main>
+  <profile-page :user-id="id" />
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import API from '~/api/API'
-import { User } from '~/models'
 
 @Component
-export default class Loading extends Vue {
-  user: User | null = null
-
+export default class Page extends Vue {
   get id(): number {
     return parseInt(this.$route.params.id)
-  }
-
-  async fetch() {
-    this.user = await API.Users.show(this.id)
   }
 }
 </script>

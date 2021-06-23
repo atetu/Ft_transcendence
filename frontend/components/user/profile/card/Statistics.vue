@@ -1,15 +1,14 @@
 <template>
-  <v-card outlined :loading="$fetchState.pending">
+  <v-card outlined :loading="loading">
     <v-card-title>
       Statistics
       <v-spacer />
-      <v-btn icon :loading="$fetchState.pending" @click="$fetch">
+      <v-btn icon :loading="loading" @click="refresh">
         <v-icon>mdi-refresh</v-icon>
       </v-btn>
     </v-card-title>
     <v-list>
-      <match-error v-if="$fetchState.error" @retry="$fetch" />
-      <template v-else-if="statistics != null">
+      <template v-if="statistics != null">
         <user-statistics-list-item
           icon="mdi-crown"
           name="Win Count"
@@ -34,12 +33,14 @@ export default class Dot extends Vue {
   @Prop()
   user!: User
 
-  statistics: UserStatistics | null = null
+  @Prop()
+  statistics!: UserStatistics | null
 
-  async fetch() {
-    this.statistics = await this.$axios.$get(
-      `/users/${this.user.id}/statistics`
-    )
+  @Prop({ type: Boolean })
+  loading!: boolean
+
+  refresh() {
+    this.$emit('refresh')
   }
 }
 </script>

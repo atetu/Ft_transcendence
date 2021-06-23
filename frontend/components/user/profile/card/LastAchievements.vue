@@ -1,25 +1,22 @@
 <template>
-  <v-card outlined :loading="$fetchState.pending">
+  <v-card outlined :loading="loading">
     <v-card-title>
       Achievements
       <v-spacer />
-      <v-btn icon :loading="$fetchState.pending" @click="$fetch">
+      <v-btn icon :loading="loading" @click="refresh">
         <v-icon>mdi-refresh</v-icon>
       </v-btn>
     </v-card-title>
     <v-list>
-      <match-error v-if="$fetchState.error" @retry="$fetch" />
-      <template v-else>
-        <match-empty v-if="!progresses.length" />
-        <v-list-item
-          v-for="progress in progresses"
-          :key="progress.achievement.id"
-        >
-          <v-list-item-content>
-            <achievement-card outlined :progress="progress" />
-          </v-list-item-content>
-        </v-list-item>
-      </template>
+      <match-empty v-if="!progresses.length" />
+      <v-list-item
+        v-for="progress in progresses"
+        :key="progress.achievement.id"
+      >
+        <v-list-item-content>
+          <achievement-card outlined :progress="progress" />
+        </v-list-item-content>
+      </v-list-item>
     </v-list>
   </v-card>
 </template>
@@ -33,12 +30,14 @@ export default class Dot extends Vue {
   @Prop()
   user!: User
 
-  progresses: Array<AchievementProgress> = []
+  @Prop({ type: Array })
+  progresses!: Array<AchievementProgress>
 
-  async fetch() {
-    this.progresses = await this.$axios.$get(
-      `/users/${this.user.id}/achievements`
-    )
+  @Prop({ type: Boolean })
+  loading!: boolean
+
+  refresh() {
+    this.$emit('refresh')
   }
 }
 </script>
