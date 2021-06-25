@@ -124,8 +124,23 @@ export default class SocketService {
     } else {
       callback(new Error('top'), null)
     }
-
   }
+
+  async gameRestart(socket, body, callback){
+    const io = Container.get(socketio.Server);
+    const { gameId } = body
+    const game = this.gameService.gameRestartWaitingRoom({
+      gameId,
+      player: socket.data.user,
+    })
+    if (game != undefined)
+    {
+      io.to(game.toRoom()).emit('game_restart', { gameId: game.id })
+      game.restart()
+      console.log('starting....')
+    }
+  }
+
   async matchMaking(socket: Socket) {
     const io = Container.get(socketio.Server);
     console.log('matchMaking')

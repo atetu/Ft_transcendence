@@ -5,7 +5,7 @@ import io from 'socket.io-client'
 import VueSocketIOExt from 'vue-socket.io-extended'
 import { initializeSocket } from '~/utils/api'
 
-const socket = io('http://localhost:3001/', {
+const socket = io('http://localhost:3001', {
   path: '/socket.io',
   autoConnect: false,
 })

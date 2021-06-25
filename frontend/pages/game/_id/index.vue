@@ -141,6 +141,16 @@ export default class Game extends Vue {
   {
     console.log('restart')
     this.x = false
+    this.$socket.client.emit(
+        'game_restart',
+        {
+          gameId: this.id,
+        },
+        (err: any, body: any) => {
+          if (err) {
+          } else console.log('ok')
+        }
+    )
   }
 
   update_paddle() {

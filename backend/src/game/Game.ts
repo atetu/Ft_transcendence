@@ -60,6 +60,8 @@ export default class Game {
 
   public matchService = Container.get(MatchService);
   public userStatisticsService = Container.get(UserStatisticsService);
+  public waitingRoom: User[];
+
 
   constructor(public player1: User, public player2: User) {}
 
@@ -268,5 +270,19 @@ export default class Game {
       }
     }
     return true;
+  }
+
+  restartWaitingRoom(player: User) {
+    let found = this.waitingRoom.find(function (element) {
+      return (element === player);
+    });
+    if (found != undefined)
+      return false;
+    else
+      this.waitingRoom.push(player)
+    if (Object.keys(this.waitingRoom).length === 2)
+      return true
+    else
+      return false
   }
 }

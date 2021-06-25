@@ -44,16 +44,19 @@ export default class GameService {
   }
 
   public gameMove({ gameId, player, newY }) {
-   
-    console.log('game moooooove')
     const game = this.matchMakingService.games["" + gameId]
-    // console.log('inside game move')
     if (game === undefined) {
-      console.log('undefined')
       return (false)
     }
- console.log('new Y ' + newY)
     return(game.movePaddle(player, newY))
+  }
+
+  public gameRestartWaitingRoom(gameId, player){
+    const game = this.matchMakingService.games["" + gameId]
+    if (game === undefined) {
+      return (false)
+    }
+    return(game.restartWaitingRoom(player))
   }
 
 }
