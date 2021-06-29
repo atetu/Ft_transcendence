@@ -33,12 +33,18 @@
             </v-btn>
           </v-col>
           <v-col cols="12" xl="6">
-            <v-btn depressed block color="primary">
+            <v-btn depressed block color="primary" @click="askFriend">
               friend
               <v-icon right>mdi-account-plus</v-icon>
             </v-btn>
           </v-col>
           <v-col cols="12" xl="6">
+            <v-btn depressed block color="primary" @click="askBlock">
+              block
+              <v-icon right>mdi-cancel</v-icon>
+            </v-btn>
+          </v-col>
+          <v-col cols="12">
             <v-btn outlined block color="primary" :to="toMessage">
               message
               <v-icon right>mdi-message-arrow-right</v-icon>
@@ -85,6 +91,69 @@ export default class Dot extends Vue {
 
   refresh() {
     this.$emit('refresh')
+  }
+
+  askFriend() {
+    this.$dialog.warning({
+      title: 'Friendship confirmation',
+      text: 'Are you sure',
+      actions: [
+        {
+          key: 'yes',
+          text: 'Yes',
+          color: 'error',
+          handler: async () => {
+            try {
+              await this.$axios.$post(`/users/@me/relationships`, {
+                peerId: this.user.id,
+                type: 'friend',
+              })
+
+              this.$dialog.notify.success('friendship request send')
+
+              this.$emit('refresh')
+            } catch (error) {
+              this.$dialog.notify.error('could not send friendship request')
+            }
+          },
+        },
+        {
+          key: 'cancel',
+          text: 'Cancel',
+        },
+      ],
+    })
+  }
+  askBlock() {
+    this.$dialog.warning({
+      title: 'Blocking confirmation',
+      text: 'Are you sure',
+      actions: [
+        {
+          key: 'yes',
+          text: 'Yes',
+          color: 'error',
+          handler: async () => {
+            try {
+              await this.$axios.$post(`/users/@me/relationships`, {
+                peerId: this.user.id,
+                type: 'block',
+              })
+
+              this.$dialog.notify.success('user blocked')
+
+              this.$emit('refresh')
+            } catch (error) {
+              this.$dialog.notify.error('could not block user')
+            }
+          },
+        },
+        {
+          key: 'cancel',
+          text: 'Cancel',
+        },
+      ],
+    })
   }
 }
 </script>

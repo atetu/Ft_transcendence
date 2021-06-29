@@ -36,6 +36,7 @@
         />
         <v-card class="pa-2 mt-4" outlined tile>
           friends
+          {{relationship}}
           <v-icon right>mdi-account-group</v-icon>
           <v-btn outlined block color="red">
             block
@@ -49,7 +50,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { AchievementProgress, Match, User, UserStatistics } from '~/models'
+import { AchievementProgress, Match, Relationship, User, UserStatistics } from '~/models'
 
 @Component
 export default class ComponentImpl extends Vue {
@@ -59,6 +60,7 @@ export default class ComponentImpl extends Vue {
   user: User | null = null
   matches: Array<Match> = []
   progresses: Array<AchievementProgress> = []
+  relationship: Relationship | null = null
   statistics: UserStatistics | null = null
 
   async fetch() {
@@ -67,6 +69,7 @@ export default class ComponentImpl extends Vue {
     this.progresses = await this.$axios.$get(
       `/users/${this.userId}/achievements`
     )
+    this.relationship = await this.$axios.$get(`/users/@me/relationships/${this.userId}`)
     this.statistics = await this.$axios.$get(`/users/${this.userId}/statistics`)
   }
 }
