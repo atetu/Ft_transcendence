@@ -38,7 +38,7 @@ export default class Input extends Vue {
     }
   }
 
-  public async submit() {
+  async submit() {
     if (this.loading) {
       return
     }
@@ -54,6 +54,10 @@ export default class Input extends Vue {
       this.content = ''
     } catch (error) {
       console.log(error) // TODO
+      const reason =
+        error.response?.data?.errors?.message || 'could not send message'
+
+      this.$dialog.notify.error(reason)
     }
 
     this.loading = false
