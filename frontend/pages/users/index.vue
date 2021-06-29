@@ -20,6 +20,9 @@
                   <v-icon v-if="user.admin" right>
                     mdi-account-supervisor
                   </v-icon>
+                  <v-icon v-if="user.playing" right>
+                    controller-classic
+                  </v-icon>
                 </v-list-item-title>
               </v-list-item-content>
             </v-list-item>

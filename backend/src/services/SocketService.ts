@@ -126,13 +126,15 @@ export default class SocketService {
     }
   }
 
-  async gameRestart(socket, body, callback){
+  async gameRestart(socket, body){
+    console.log ('game restrt back')
     const io = Container.get(socketio.Server);
     const { gameId } = body
-    const game = this.gameService.gameRestartWaitingRoom({
+    const game: Game = this.gameService.gameRestartWaitingRoom({
       gameId,
-      player: socket.data.user,
+      player: socket.data.user
     })
+    console.log('game restart : ' + game)
     if (game != undefined)
     {
       io.to(game.toRoom()).emit('game_restart', { gameId: game.id })

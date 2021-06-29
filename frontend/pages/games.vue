@@ -10,7 +10,6 @@ import { Socket } from 'vue-socket.io-extended'
 export default class WaitingRoom extends Vue {
 
  mounted() {
-   console.log('ici')
     this.$socket.client.emit('waiting_room')
  } 
   
@@ -20,9 +19,7 @@ export default class WaitingRoom extends Vue {
   launchGame(data: any)
   {
     const { player1, player2, gameId } = data
-    console.log('launch game')
     this.$router.push('/game/' + gameId)
-
   }
 }
 </script>

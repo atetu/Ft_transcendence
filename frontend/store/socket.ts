@@ -8,6 +8,7 @@ import { ChannelMessage } from '~/models'
 })
 class SocketModule extends VuexModule {
   connectedUserIds: Array<number> = []
+  playingUserIds: Array<number> = []
 
   @Mutation
   SOCKET_CLIENT_CONNECTED_LIST(ids: Array<string>) {
@@ -25,6 +26,25 @@ class SocketModule extends VuexModule {
 
     if (index !== -1) {
       this.connectedUserIds.splice(index, 1)
+    }
+  }
+
+  @Mutation
+  SOCKET_CLIENT_PLAYING_LIST(ids: Array<string>) {
+    this.playingUserIds = ids.map((x) => parseInt(x, 10))
+  }
+
+  @Mutation
+  SOCKET_CLIENT_PLAYING_JOIN(id: number) {
+    this.playingUserIds.push(id)
+  }
+
+  @Mutation
+  SOCKET_CLIENT_PLAYING_QUIT(id: number) {
+    const index = this.playingUserIds.indexOf(id)
+
+    if (index !== -1) {
+      this.playingUserIds.splice(index, 1)
     }
   }
 

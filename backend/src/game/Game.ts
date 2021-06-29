@@ -60,7 +60,7 @@ export default class Game {
 
   public matchService = Container.get(MatchService);
   public userStatisticsService = Container.get(UserStatisticsService);
-  public waitingRoom: User[];
+  public waitingRoom: User[] = new Array(2);
 
 
   constructor(public player1: User, public player2: User) {}
@@ -97,7 +97,7 @@ export default class Game {
   }
 
   async restart() {
-    await this.sleep(3000);
+    // await this.sleep(3000);
     this.ball.x = 300;
     this.ball.y = 200;
     this.paddle1.y = 15;
@@ -242,7 +242,7 @@ export default class Game {
         this.stopGame();
         return;
       }
-      this.restart();
+      // this.restart();
     }
     io.to(this.toRoom()).emit("game_state", {
       player1: this.player1,
@@ -273,16 +273,30 @@ export default class Game {
   }
 
   restartWaitingRoom(player: User) {
-    let found = this.waitingRoom.find(function (element) {
-      return (element === player);
-    });
-    if (found != undefined)
-      return false;
-    else
+    console.log('restartWaitingRoom')
+    let found:User | null
+    if (this.waitingRoom)
+    {
+        found = this.waitingRoom.find(function (element) {
+        return (element === player);
+      });
+      console.log('restartWaitingRoom2')
+    if (found === undefined)
       this.waitingRoom.push(player)
-    if (Object.keys(this.waitingRoom).length === 2)
-      return true
+    console.log('restartWaitingRoom3')
+    }
     else
-      return false
+    {
+      this.waitingRoom.push(player)
+      console.log('restartWaitingRoom3 bis')
+    }
+    if (this.waitingRoom)
+    {
+    if (Object.keys(this.waitingRoom).length === 2)
+      return this
+    console.log('restartWaitingRoom4')
+    }
+    console.log('restartWaitingRoom5')
+
   }
 }

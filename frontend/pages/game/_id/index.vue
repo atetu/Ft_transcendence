@@ -8,6 +8,9 @@
         <user-avatar v-if="player1" :user="player1" />
         <p class="login" v-if="player1">{{ player1.username }}</p>
         <p class="score">{{ this.score1 }}</p>
+        <v-btn v-if="status === 3" :disabled="mySide == 1 ? false : true" elevation="2" :color="x ? 'primary' : 'green'"
+        @click="restart"
+        > RESTART</v-btn>
       </v-col>
 
       <v-col cols="10">
@@ -24,7 +27,7 @@
         <user-avatar v-if="player2" :user="player2" />
         <p class="login" v-if="player2">{{ player2.username }}</p>
         <p class="score">{{ this.score2 }}</p>
-        <v-btn v-if="status === 3" :disabled="true" elevation="2" :color="x ? 'primary' : 'green'"
+         <v-btn v-if="status === 3" :disabled="mySide == 2 ? false : true" elevation="2" :color="x ? 'primary' : 'green'"
         @click="restart"
         > RESTART</v-btn>
       </v-col>
@@ -146,10 +149,6 @@ export default class Game extends Vue {
         {
           gameId: this.id,
         },
-        (err: any, body: any) => {
-          if (err) {
-          } else console.log('ok')
-        }
     )
   }
 
@@ -294,5 +293,23 @@ export default class Game extends Vue {
     // if (this.autoSaveInterval)
     //   clearInterval(this.autoSaveInterval)
   }
+
+//   @Socket('game_over')
+//  gameRestart() {
+  
+//     if (winner != null) {
+//       let winnerFt: User = winner
+//       this.message = winnerFt.username + ' wins!'
+//     }
+//     this.score1 = score1
+//     this.score2 = score2
+//     this.setStatus = setStatus
+//     console.log('OVERRRRR')
+//     // this.timer = -2
+//     this.status = Status.over
+//     console.log('status after over: ' + this.status)
+//     // if (this.autoSaveInterval)
+//     //   clearInterval(this.autoSaveInterval)
+//   }
 }
 </script>

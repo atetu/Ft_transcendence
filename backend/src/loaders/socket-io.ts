@@ -42,6 +42,10 @@ export default async ({ server }: { server: http.Server }) => {
       socketService.gameMove(socket, body, callback)
     })
 
+    socket.on('game_restart', (body) => {
+      socketService.gameRestart(socket, body)
+    })
+
     socket.on('waiting_room', () => {
       console.log('first step')
       socketService.matchMaking(socket)
