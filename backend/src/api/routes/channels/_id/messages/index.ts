@@ -3,8 +3,10 @@ import * as express from "express";
 import Container from "typedi";
 import Channel from "../../../../../entities/Channel";
 import ChannelMessage from "../../../../../entities/ChannelMessage";
+import ChannelUser from "../../../../../entities/ChannelUser";
 import User from "../../../../../entities/User";
 import ChannelMessageService from "../../../../../services/ChannelMessageService";
+import helpers from "../../../../helpers";
 
 export default (app: express.Router) => {
   const channelMessageService = Container.get(ChannelMessageService);
@@ -30,11 +32,16 @@ export default (app: express.Router) => {
     }),
     async (req, res, next) => {
       const channel: Channel = res.locals.channel;
+      const selfChannelUser: ChannelUser = res.locals.selfChannelUser;
       const user: User = req.user as any;
 
-      const { type, content } = req.body;
-
       try {
+        if (selfChannelUser.muted) {
+          return helpers.forbidden("muted");
+        }
+
+        const { type, content } = req.body;
+
         const message = new ChannelMessage();
         message.channel = channel;
         message.user = user;
