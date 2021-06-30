@@ -108,6 +108,10 @@ export default class SocketService {
     this.broadcastToChannel(channel, "channel_user_update", channelUser);
   }
 
+  async broadcastChannelOwnerTransfer(channel: Channel) {
+    this.broadcastToChannel(channel, "channel_owner_transfer", channel.owner);
+  }
+
   async broadcastNewChannel(channel: Channel) {
     const io = Container.get(socketio.Server);
 

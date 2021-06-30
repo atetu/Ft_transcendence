@@ -80,6 +80,8 @@ export default class ChannelService {
     await this.channelUserService.setAdmin(channelUser, true);
     await this.repository.save(channel);
 
+    this.socketService.broadcastChannelOwnerTransfer(channel)
+
     return channel;
   }
 
