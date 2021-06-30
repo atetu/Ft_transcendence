@@ -9,15 +9,15 @@ import GameService from "./GameService";
 import MatchMakingService from "./MatchMakingService";
 import { Socket } from "socket.io";
 
-
 import { x } from "@hapi/joi";
+import ChannelUser from "../entities/ChannelUser";
 
 @Service()
 export default class SocketService {
-    private gameService = Container.get(GameService);
-    private matchMakingService = Container.get(MatchMakingService);
+  private gameService = Container.get(GameService);
+  private matchMakingService = Container.get(MatchMakingService);
 
-    private channelService = Container.get(ChannelService);
+  private channelService = Container.get(ChannelService);
 
   connectedUserIds = {};
 
@@ -78,12 +78,28 @@ export default class SocketService {
     }
   }
 
-  async broadcastMessage(message: ChannelMessage) {
+  broadcastToChannel(channel: Channel, event: string, message: any) {
     const io = Container.get(socketio.Server);
 
+    io.to(channel.toRoom()).emit(event, message?.toJSON());
+  }
+
+  broadcastChannelMessage(message: ChannelMessage) {
     const channel = message.channel;
 
-    io.to(channel.toRoom()).emit("channel_message", message.toJSON());
+    this.broadcastToChannel(channel, "channel_message", message);
+  }
+
+  async broadcastChannelUserJoin(channelUser: ChannelUser) {
+    const channel = channelUser.channel;
+
+    this.broadcastToChannel(channel, "channel_user_join", channelUser);
+  }
+
+  async broadcastChannelUserLeave(channelUser: ChannelUser) {
+    const channel = channelUser.channel;
+
+    this.broadcastToChannel(channel, "channel_user_leave", channelUser);
   }
 
   async broadcastNewChannel(channel: Channel) {
@@ -93,49 +109,51 @@ export default class SocketService {
   }
 
   async gameConnect(socket, body: any, callback: any) {
-    console.log('Game connect')
-    const { gameId } = body 
-    const io = Container.get(socketio.Server)
-    
-    const game = this.gameService.gameConnect(gameId) 
+    console.log("Game connect");
+    const { gameId } = body;
+    const io = Container.get(socketio.Server);
+
+    const game = this.gameService.gameConnect(gameId);
     if (game) {
-        callback(null, {
-          player1: game.player1,
-         player2: game.player2})
-    }
-    else {
-      callback(new Error('not enough players'))
+      callback(null, {
+        player1: game.player1,
+        player2: game.player2,
+      });
+    } else {
+      callback(new Error("not enough players"));
     }
   }
 
   async gameMove(socket, body, callback) {
-    console.log('Game move')
+    console.log("Game move");
     const io = Container.get(socketio.Server);
 
-    const { gameId, y } = body
+    const { gameId, y } = body;
     const success = this.gameService.gameMove({
       gameId,
       player: socket.data.user,
-      newY: y
-    })
+      newY: y,
+    });
 
     if (success) {
-      callback(null, y)
+      callback(null, y);
     } else {
-      callback(new Error('top'), null)
+      callback(new Error("top"), null);
     }
-
   }
   async matchMaking(socket: Socket) {
     const io = Container.get(socketio.Server);
-    console.log('matchMaking')
-    const game: Game = this.matchMakingService.addSocket(socket)
-    console.log('game : ' + game)
-    if (game != undefined)
-    {
-      io.to(game.toRoom()).emit('game_starting', { player1: game.player1.id, player2: game.player2.id, gameId: game.id })
-      game.start()
-      console.log('starting....')
+    console.log("matchMaking");
+    const game: Game = this.matchMakingService.addSocket(socket);
+    console.log("game : " + game);
+    if (game != undefined) {
+      io.to(game.toRoom()).emit("game_starting", {
+        player1: game.player1.id,
+        player2: game.player2.id,
+        gameId: game.id,
+      });
+      game.start();
+      console.log("starting....");
     }
   }
 }

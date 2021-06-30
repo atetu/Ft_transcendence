@@ -1,12 +1,17 @@
 import { Inject, Service } from "typedi";
-import { InjectRepository } from "typeorm-typedi-extensions";
+import { Container, InjectRepository } from "typeorm-typedi-extensions";
 import Channel from "../entities/Channel";
 import ChannelUser from "../entities/ChannelUser";
 import User from "../entities/User";
 import { ChannelUserRepository } from "../repositories/ChannelUserRepository";
+import SocketService from "./SocketService";
 
 @Service()
 export default class ChannelUserService {
+  private get socketService() {
+    return Container.get(SocketService);
+  }
+
   constructor(
     @InjectRepository()
     private repository: ChannelUserRepository
@@ -78,6 +83,8 @@ export default class ChannelUserService {
 
     await this.repository.save(channelUser);
 
+    this.socketService.broadcastChannelUserJoin(channelUser);
+
     return channelUser;
   }
 
@@ -97,7 +104,7 @@ export default class ChannelUserService {
 
       await this.repository.save(channelUsers);
 
-      console.log(`Unumuted ${channelUsers.length} user(s)`)
+      console.log(`Unumuted ${channelUsers.length} user(s)`);
     }
   }
 }

@@ -47,7 +47,7 @@ export default class ChannelMessageService {
   public async create(message: ChannelMessage) {
     await this.repository.save(message);
 
-    this.socketService.broadcastMessage(message);
+    this.socketService.broadcastChannelMessage(message);
 
     return message;
   }
