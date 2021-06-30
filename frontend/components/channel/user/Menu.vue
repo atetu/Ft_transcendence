@@ -4,7 +4,7 @@
       <slot name="activator" :on="on" :attrs="attrs" />
     </template>
 
-    <v-card>
+    <v-card :loading="loading">
       <v-list>
         <v-list-item>
           <v-list-item-avatar>
@@ -19,8 +19,18 @@
 
       <v-divider />
 
+      <template v-if="statistics">
+        <user-statistics :statistics="statistics" />
+        <v-divider />
+      </template>
+
+      <template v-else-if="error">
+        <v-card-text> could not fetch user statistics </v-card-text>
+        <v-divider />
+      </template>
+
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
 
         <v-btn text :to="toProfile" color="primary"> profile </v-btn>
         <v-btn text :to="toMessage"> message </v-btn>
@@ -30,9 +40,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 
-import { Channel, ChannelUser } from '~/models'
+import { Channel, ChannelUser, UserStatistics } from '~/models'
 
 @Component
 export default class ComponentImpl extends Vue {
@@ -43,6 +53,29 @@ export default class ComponentImpl extends Vue {
   user!: ChannelUser
 
   menu = false
+  statistics: UserStatistics | null = null
+
+  loading = false
+  error: any = null
+
+  async fetchStatistics() {
+    if (this.loading) {
+      return
+    }
+
+    this.loading = true
+    this.error = null
+
+    try {
+      this.statistics = await this.$axios.$get(
+        `/users/${this.user.id}/statistics`
+      )
+    } catch (error) {
+      this.error = error
+    }
+
+    this.loading = false
+  }
 
   get toProfile() {
     return `/users/${this.user.id}`
@@ -50,6 +83,13 @@ export default class ComponentImpl extends Vue {
 
   get toMessage() {
     return `/direct-messages/${this.user.id}`
+  }
+
+  @Watch('menu')
+  onMenuOpenStateUpdate(val: boolean) {
+    if (val) {
+      this.fetchStatistics()
+    }
   }
 }
 </script>
