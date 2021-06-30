@@ -8,6 +8,7 @@
     :messages="messages"
     @message="onNewMessage"
     @joined="onUserJoin"
+    @leaved="onUserLeave"
   >
     <template slot="input">
       <channel-message-input
@@ -73,6 +74,14 @@ export default class Viewer extends Vue {
 
   onUserJoin(channelUser: ChannelUser) {
     this.users.push(channelUser)
+  }
+
+  onUserLeave(channelUser: ChannelUser) {
+    const index = this.users.map((x) => x.id).indexOf(channelUser.id)
+
+    if (index !== -1) {
+      this.users.splice(index, 1)
+    }
   }
 
   get selfChannelUser() {
