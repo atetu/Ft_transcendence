@@ -35,7 +35,7 @@
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import { Socket } from 'vue-socket.io-extended'
 import ScrollItem from '~/components/channel/message/ScrollItem.vue'
-import { Channel, ChannelMessage, ChannelUser } from '~/models'
+import { Channel, ChannelMessage, ChannelUser, User } from '~/models'
 
 @Component
 export default class Viewer extends Vue {
@@ -87,6 +87,11 @@ export default class Viewer extends Vue {
   @Socket('channel_user_update')
   onChannelUserUpdate(channelUser: ChannelUser) {
     this.$emit('update', channelUser)
+  }
+
+  @Socket('channel_owner_transfer')
+  onChannelOwnerTransfer(user: User) {
+    this.$emit('transfer', user)
   }
 
   get itemComponent() {

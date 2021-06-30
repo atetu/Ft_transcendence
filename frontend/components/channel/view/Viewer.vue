@@ -10,6 +10,7 @@
     @joined="onUserJoin"
     @leaved="onUserLeave"
     @update="onUserUpdate"
+    @transfer="onOwnerTransfer"
   >
     <template slot="input">
       <channel-message-input
@@ -37,7 +38,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import API from '~/api/API'
-import { Channel, ChannelMessage, ChannelUser } from '~/models'
+import { Channel, ChannelMessage, ChannelUser, User } from '~/models'
 import { authStore } from '~/store'
 
 @Component
@@ -113,6 +114,20 @@ export default class Viewer extends Vue {
             this.$dialog.notify.warning('demoted')
           }
         }
+      }
+    }
+  }
+
+  onOwnerTransfer(user: User) {
+    const previous = this.channel!.owner
+
+    if (previous.id !== user.id) {
+      this.channel!.owner = user
+
+      if (user.id === authStore.user!.id) {
+        this.$dialog.notify.success('ownership transfered to you')
+      } else if (previous.id === authStore.user!.id) {
+        this.$dialog.notify.warning('ownership transfered')
       }
     }
   }
