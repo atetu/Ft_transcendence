@@ -90,6 +90,7 @@ export default class ChannelUserService {
     await this.repository.save(channelUser);
 
     this.socketService.broadcastChannelUserJoin(channelUser);
+    this.socketService.notifyAdded(user, channel)
 
     return channelUser;
   }

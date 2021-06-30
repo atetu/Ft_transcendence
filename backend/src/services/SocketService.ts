@@ -127,6 +127,13 @@ export default class SocketService {
     io.emit("channel_new", channel.toJSON());
   }
 
+  notifyAdded(user: User, channel: Channel) {
+    const io = Container.get(socketio.Server);
+
+    const event = channel.isDirect() ? 'direct_message_add' : 'channel_add'
+    io.to(user.toRoom()).emit(event, channel.toJSON());
+  }
+
   async gameConnect(socket, body: any, callback: any) {
     console.log("Game connect");
     const { gameId } = body;
