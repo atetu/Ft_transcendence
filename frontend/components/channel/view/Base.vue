@@ -35,7 +35,7 @@
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import { Socket } from 'vue-socket.io-extended'
 import ScrollItem from '~/components/channel/message/ScrollItem.vue'
-import { Channel, ChannelMessage } from '~/models'
+import { Channel, ChannelMessage, ChannelUser } from '~/models'
 
 @Component
 export default class Viewer extends Vue {
@@ -72,6 +72,16 @@ export default class Viewer extends Vue {
   @Socket('channel_message')
   onChannelMessage(message: ChannelMessage) {
     this.$emit('message', message)
+  }
+
+  @Socket('channel_user_join')
+  onChannelUserJoin(channelUser: ChannelUser) {
+    this.$emit('joined', channelUser)
+  }
+
+  @Socket('channel_user_leave')
+  onChannelUserLeave(channelUser: ChannelUser) {
+    this.$emit('leaved', channelUser)
   }
 
   get itemComponent() {

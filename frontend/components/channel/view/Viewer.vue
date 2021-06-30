@@ -7,6 +7,7 @@
     :channel="channel"
     :messages="messages"
     @message="onNewMessage"
+    @joined="onUserJoin"
   >
     <template slot="input">
       <channel-message-input
@@ -68,6 +69,10 @@ export default class Viewer extends Vue {
 
   onNewMessage(message: ChannelMessage) {
     this.messages.push(message)
+  }
+
+  onUserJoin(channelUser: ChannelUser) {
+    this.users.push(channelUser)
   }
 
   get selfChannelUser() {
