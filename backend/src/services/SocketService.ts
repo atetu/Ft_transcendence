@@ -1,16 +1,14 @@
-import Container, { Service, Inject } from "typedi";
 import * as socketio from "socket.io";
-import User from "../entities/User";
-import ChannelService from "./ChannelService";
-import ChannelMessage from "../entities/ChannelMessage";
+import { Socket } from "socket.io";
+import Container, { Service } from "typedi";
 import Channel from "../entities/Channel";
+import ChannelMessage from "../entities/ChannelMessage";
+import ChannelUser from "../entities/ChannelUser";
+import User from "../entities/User";
 import Game from "../game/Game";
+import ChannelService from "./ChannelService";
 import GameService from "./GameService";
 import MatchMakingService from "./MatchMakingService";
-import { Socket } from "socket.io";
-
-import { x } from "@hapi/joi";
-import ChannelUser from "../entities/ChannelUser";
 
 @Service()
 export default class SocketService {
@@ -32,7 +30,8 @@ export default class SocketService {
   // }
 
   connect(socket: any) {
-    const { id } = socket.data.user;
+    const { user } = socket.data as { user: User };
+    const { id } = user;
 
     if (this.connectedUserIds[id]) {
       this.connectedUserIds[id] += 1;
@@ -43,6 +42,8 @@ export default class SocketService {
     }
 
     socket.emit("client_connected_list", Object.keys(this.connectedUserIds));
+
+    socket.join(user.toRoom());
   }
 
   disconnect(socket: any) {
@@ -60,7 +61,7 @@ export default class SocketService {
   }
 
   async channelConnect(socket: any, body: any, callnack: any) {
-    const user: User = socket.data.user;
+    const { currentChannelRoom } = socket.data;
     const { channelId } = body;
 
     try {
@@ -70,7 +71,15 @@ export default class SocketService {
         throw new Error("channel not found");
       }
 
-      socket.join(channel.toRoom());
+      if (currentChannelRoom !== undefined) {
+        socket.leave(currentChannelRoom);
+      }
+
+      const newChannelRoom = channel.toRoom();
+
+      socket.join(newChannelRoom);
+      socket.data.currentChannelRoom = newChannelRoom;
+
       callnack(null, 1);
     } catch (error) {
       console.log(error);
