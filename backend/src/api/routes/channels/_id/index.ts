@@ -35,6 +35,10 @@ export default (app: express.Router) => {
           user
         );
 
+        if (selfChannelUser) {
+          selfChannelUser.channel = channel; /* cache channel instance */
+        }
+
         if (user.admin) {
           if (!selfChannelUser && channel.isDirect()) {
             return helpers.forbidden("direct channel");

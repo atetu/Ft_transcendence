@@ -89,6 +89,8 @@ export default class ChannelUserService {
   }
 
   public async delete(channelUser: ChannelUser) {
+    this.socketService.broadcastChannelUserLeave(channelUser);
+
     this.repository.delete(channelUser);
   }
 

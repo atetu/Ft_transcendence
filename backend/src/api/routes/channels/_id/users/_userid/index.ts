@@ -25,7 +25,14 @@ export default (app: express.Router) => {
         const channel: Channel = res.locals.channel;
         const user: User = { id } as User;
 
-        return await channelUserService.findByChannelAndUser(channel, user);
+        const channelUser: ChannelUser =
+          await channelUserService.findByChannelAndUser(channel, user);
+
+        if (channelUser) {
+          channelUser.channel = channel; /* cache channel instance */
+        }
+
+        return channelUser;
       }
     ),
     route
