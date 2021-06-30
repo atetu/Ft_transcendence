@@ -38,6 +38,8 @@ export default class ChannelUserService {
       channelUser.admin = state;
 
       await this.repository.save(channelUser);
+
+      this.socketService.broadcastChannelUserUpdate(channelUser);
     }
   }
 
@@ -46,6 +48,8 @@ export default class ChannelUserService {
       channelUser.banned = state;
 
       await this.repository.save(channelUser);
+
+      this.socketService.broadcastChannelUserUpdate(channelUser);
     }
   }
 
@@ -63,6 +67,8 @@ export default class ChannelUserService {
     }
 
     await this.repository.save(channelUser);
+
+    this.socketService.broadcastChannelUserUpdate(channelUser);
   }
 
   public async createOwner(channel: Channel) {
