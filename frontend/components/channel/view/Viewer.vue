@@ -9,6 +9,7 @@
     @message="onNewMessage"
     @joined="onUserJoin"
     @leaved="onUserLeave"
+    @update="onUserUpdate"
   >
     <template slot="input">
       <channel-message-input
@@ -77,11 +78,47 @@ export default class Viewer extends Vue {
   }
 
   onUserLeave(channelUser: ChannelUser) {
-    const index = this.users.map((x) => x.id).indexOf(channelUser.id)
+    const index = this.getChannelUserIndex(channelUser)
 
     if (index !== -1) {
       this.users.splice(index, 1)
     }
+  }
+
+  onUserUpdate(channelUser: ChannelUser) {
+    const index = this.getChannelUserIndex(channelUser)
+
+    if (index !== -1) {
+      const previous = this.users[index]
+      this.$set(this.users, index, channelUser)
+
+      if (channelUser.id === authStore.user!.id) {
+        if (channelUser.banned) {
+          this.$router.push({ path: '/channels' })
+          this.$dialog.notify.error('banned')
+        }
+
+        if (channelUser.muted !== previous.muted) {
+          if (channelUser.muted) {
+            this.$dialog.notify.warning('muted')
+          } else {
+            this.$dialog.notify.success('unmuted')
+          }
+        }
+
+        if (channelUser.admin !== previous.admin) {
+          if (channelUser.admin) {
+            this.$dialog.notify.success('promoted')
+          } else {
+            this.$dialog.notify.warning('demoted')
+          }
+        }
+      }
+    }
+  }
+
+  getChannelUserIndex(channelUser: ChannelUser) {
+    return this.users.map((x) => x.id).indexOf(channelUser.id)
   }
 
   get selfChannelUser() {

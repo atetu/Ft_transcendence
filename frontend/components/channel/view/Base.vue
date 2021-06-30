@@ -84,6 +84,11 @@ export default class Viewer extends Vue {
     this.$emit('leaved', channelUser)
   }
 
+  @Socket('channel_user_update')
+  onChannelUserUpdate(channelUser: ChannelUser) {
+    this.$emit('update', channelUser)
+  }
+
   get itemComponent() {
     return ScrollItem
   }
