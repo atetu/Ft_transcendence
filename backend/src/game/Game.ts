@@ -51,7 +51,7 @@ export default class Game {
   private velX: number = 2;
   private velY: number = 1;
   public connected: number = 0;
-  public id = ++nbGames;
+  public id: number | null = null;
   public state: number = 3;
   public score1: number = 0;
   public score2: number = 0;
