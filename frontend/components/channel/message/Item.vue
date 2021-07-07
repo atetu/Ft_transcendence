@@ -14,16 +14,7 @@
       <v-list-item-title>Hidden message</v-list-item-title>
     </v-list-item-content>
   </v-list-item>
-  <v-list-item v-else style="align-items: unset">
-    <v-list-item-avatar style="align-self: unset">
-      <user-avatar :size="40" :user="message.user" without-state />
-    </v-list-item-avatar>
-
-    <v-list-item-content class="pt-2 break">
-      <v-list-item-title>{{ message.user.username }}</v-list-item-title>
-      <p class="text--secondary">{{ message.content }}</p>
-    </v-list-item-content>
-  </v-list-item>
+  <component :is="componentImpl" v-else :message="message" />
 </template>
 
 <script lang="ts">
@@ -49,6 +40,10 @@ export default class Item extends Vue {
 
   mounted() {
     this.display = !this.hidden
+  }
+
+  get componentImpl() {
+    return `channel-message-impl-${this.message.type}`
   }
 }
 </script>

@@ -6,6 +6,10 @@
       <v-toolbar-title>
         {{ title }}
       </v-toolbar-title>
+      <template v-if="$scopedSlots['toolbar-right']">
+        <v-spacer />
+        <slot name="toolbar-right" />
+      </template>
     </v-app-bar>
 
     <v-card class="mx-auto fill-height">

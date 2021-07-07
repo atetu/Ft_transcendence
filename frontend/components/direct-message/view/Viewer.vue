@@ -7,7 +7,11 @@
     :channel="channel"
     :messages="messages"
     @message="onNewMessage"
-  />
+  >
+    <template #toolbar-right>
+      <direct-message-button-challenge :direct-message="directMessage" />
+    </template>
+  </channel-view-base>
 </template>
 
 <script lang="ts">
