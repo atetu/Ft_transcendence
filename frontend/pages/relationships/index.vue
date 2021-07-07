@@ -26,15 +26,11 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
 import { Relationship } from '~/models'
-import { meModule } from '~/store/me/const'
+import { relationshipsStore } from '~/store'
 
 @Component
 export default class Page extends Vue {
-  @meModule.State('relationships')
-  relationships!: Relationship[]
-
   head() {
     return {
       title: 'Relationships',
@@ -42,7 +38,11 @@ export default class Page extends Vue {
   }
 
   async fetch() {
-    await this.$store.dispatch('me/fetchRelationships')
+    await relationshipsStore.fetchAll()
+  }
+
+  get relationships(): Array<Relationship> {
+    return relationshipsStore.list
   }
 }
 </script>

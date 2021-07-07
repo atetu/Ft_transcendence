@@ -1,6 +1,7 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators'
 import { AuthProvider, User } from '~/models'
 import { $axios } from '~/utils/api'
+import { relationshipsStore } from '~/utils/store-accessor'
 
 const DEFAULT_WIDTH = 470
 const DEFAULT_HEIGHT = 580
@@ -123,6 +124,8 @@ class AuthModule extends VuexModule {
   @Action({ commit: 'setUser', rawError: true })
   async fetch(): Promise<User> {
     const user: User = await $axios.$get('/users/@me')
+
+    await relationshipsStore.fetchAll()
 
     return user
   }
