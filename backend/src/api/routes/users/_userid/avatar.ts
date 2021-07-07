@@ -19,6 +19,7 @@ export default (app: express.Router) => {
     res.sendFile(avatarService.getDestination(user.picture), {
       root: ".",
       headers: {
+        "Cache-Control": "max-age=3600",
         "Content-Type": "image/png",
       },
     });
