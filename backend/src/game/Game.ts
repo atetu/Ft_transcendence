@@ -57,10 +57,15 @@ export default class Game {
   public score2: number = 0;
   public status: setStatus = setStatus.playing;
   public winner: User;
+  public sprite1X: number = 0;
+  public sprite1Y: number = 0;
+
 
   public matchService = Container.get(MatchService);
   public userStatisticsService = Container.get(UserStatisticsService);
   public waitingRoom: User[] = new Array(2);
+  public waitingRoomOption: number[] = new Array(2);
+
 
 
   constructor(public player1: User, public player2: User) {}
@@ -96,14 +101,36 @@ export default class Game {
     console.log("end of start");
   }
 
+  getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+  
+
   async restart() {
     // await this.sleep(3000);
-    this.ball.x = 300;
-    this.ball.y = 200;
+    if (this.waitingRoomOption)
+    console.log('restartWaitingRoom')
+    let found:number = 0
+      found = this.waitingRoomOption.find(function (element) {
+      return (element === 1);
+    });
+    if (found === 1)
+    {
+      console.log('sprite found')
+      this.sprite1X = this.getRandomArbitrary(10, 200)
+      this.sprite1Y = this.getRandomArbitrary(40, 100)
+
+    }
+    this.ball.x = this.getRandomArbitrary(10, 600);
+    this.ball.y = this.getRandomArbitrary(10, 400);
     this.paddle1.y = 15;
     this.paddle2.y = 10;
 
-    this.direction = 1;
+    this.direction = this.getRandomInt(1) ? 1 : -1
     this.state = 3;
 
     this.status = setStatus.playing;
@@ -252,6 +279,8 @@ export default class Game {
       ballX: this.ball.x,
       ballY: this.ball.y,
       state: this.state,
+      sprite1X: this.sprite1X,
+      sprite1Y: this.sprite1Y
     });
   }
 
@@ -272,7 +301,7 @@ export default class Game {
     return true;
   }
 
-  restartWaitingRoom(player: User) {
+  restartWaitingRoom(player: User, option: number) {
     console.log('restartWaitingRoom')
     let found:User | null
     if (this.waitingRoom)
@@ -282,12 +311,15 @@ export default class Game {
       });
       console.log('restartWaitingRoom2')
     if (found === undefined)
+    {
       this.waitingRoom.push(player)
-    console.log('restartWaitingRoom3')
+      this.waitingRoomOption.push(option)
     }
+  }
     else
     {
       this.waitingRoom.push(player)
+      this.waitingRoomOption.push(option)
       console.log('restartWaitingRoom3 bis')
     }
     if (this.waitingRoom)

@@ -51,11 +51,11 @@ export default class GameService {
     return(game.movePaddle(player, newY))
   }
 
-  public gameRestartWaitingRoom({ gameId, player} ){
+  public gameRestartWaitingRoom({ gameId, player, option} ){
     const game = this.matchMakingService.games["" + gameId]
     console.log('first step game restart: ' + game)
     if (game != undefined) {
-      return(game.restartWaitingRoom(player))
+      return(game.restartWaitingRoom(player, option))
     }
   }
 

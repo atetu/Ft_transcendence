@@ -129,10 +129,11 @@ export default class SocketService {
   async gameRestart(socket, body){
     console.log ('game restrt back')
     const io = Container.get(socketio.Server);
-    const { gameId } = body
+    const { gameId, option } = body
     const game: Game = this.gameService.gameRestartWaitingRoom({
       gameId,
-      player: socket.data.user
+      player: socket.data.user,
+      option
     })
     console.log('game restart : ' + game)
     if (game != undefined)
