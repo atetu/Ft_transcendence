@@ -130,6 +130,7 @@ export default class SocketService {
     console.log ('game restrt back')
     const io = Container.get(socketio.Server);
     const { gameId, option } = body
+    console.log("option first : " + option)
     const game: Game = this.gameService.gameRestartWaitingRoom({
       gameId,
       player: socket.data.user,

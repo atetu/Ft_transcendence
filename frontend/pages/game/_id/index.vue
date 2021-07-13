@@ -8,14 +8,16 @@
         <user-avatar v-if="player1" :user="player1" />
         <p class="login" v-if="player1">{{ player1.username }}</p>
         <p class="score">{{ this.score1 }}</p>
-       
-        <v-btn v-if="status === 3" :disabled="mySide == 1 ? false : true" elevation="2" :color="x ? 'primary' : 'green'"
+        <p>
+        <v-btn v-if="status === 3" :disabled="(mySide == 1 && activeBtn == true)? false : true" elevation="2" :color= "primary"
         @click="restart"
         > RESTART</v-btn>
-        <br>
-         <v-btn v-if="status === 3 && roundWinner === 1" :disabled="mySide == 1 ? false : true" elevation="1" :color="x ? 'primary' : 'green'"
+        </p>
+        <p>
+         <v-btn v-if="status === 3 && roundWinner === 1" :disabled="(mySide == 1 && activeBtn == true)? false : true" elevation="1" :color= "primary"
         @click="restart"
         > RESTART WITH OPTIONS</v-btn>
+        </p>
       </v-col>
 
       <v-col cols="10">
@@ -33,13 +35,13 @@
         <p class="login" v-if="player2">{{ player2.username }}</p>
         <p class="score">{{ this.score2 }}</p>
         <p>
-         <v-btn v-if="status === 3" :disabled="mySide === 2 ? false : true" elevation="2" :color="x ? 'primary' : 'green'"
+         <v-btn v-if="status === 3" :disabled="(mySide === 2 && activeBtn == true)? false : true" elevation="2" :color= "primary"
         @click="restart"
         > RESTART</v-btn>
         </p>
         <p>
-         <v-btn v-if="status === 3 && roundWinner === 2" :disabled="mySide === 2 ? false : true" elevation="1" :color="x ? 'primary' : 'green'"
-        @click="restart"
+         <v-btn v-if="status === 3 && roundWinner === 2" :disabled="(mySide === 2 && activeBtn == true) ? false : true" elevation="1" :color= "primary"
+        @click="restartWithOption"
         > RESTART WITH OPTIONS</v-btn>
         </p>
       </v-col>
@@ -60,6 +62,7 @@
   bottom: 0;
   left: 0;
   right: 0;
+  width: 50%;
   border: 1px solid black;
 }
 
@@ -130,6 +133,8 @@ export default class Game extends Vue {
   roundWinner: number = 1
   sprite1X: number = 0
   sprite1Y: number = 0
+  activeBtn: boolean = true
+  primary = this.$vuetify.theme.themes.dark.primary
 
   get id() {
     return this.$route.params.id
@@ -158,7 +163,8 @@ export default class Game extends Vue {
   restart()
   {
     console.log('restart')
-    this.x = false
+    // this.x = false
+    this.activeBtn = false
     this.$socket.client.emit(
         'game_restart',
         {
@@ -172,6 +178,7 @@ export default class Game extends Vue {
   {
     console.log('restart')
     this.x = false
+    this.activeBtn = false
     this.$socket.client.emit(
         'game_restart',
         {
@@ -303,14 +310,14 @@ export default class Game extends Vue {
     this.timer = state
     this.sprite1X = sprite1X
     this.sprite1Y = sprite1Y
-    // console.log('SPRITE : ' + this.sprite1X)
+    console.log('SPRITE : ' + this.sprite1X)
     if (this.timer === 3) this.status = Status.waiting
-          this.x = true
+      this.activeBtn = true
 
-    console.log('timer: ' + this.timer)
+    // console.log('timer: ' + this.timer)
     if (this.timer === -1 && this.status === Status.waiting) {
       this.status = Status.playing
-          this.x = true
+        this.activeBtn = true
     }
     // console.log('game statae left: ' + this.paddleLeftY)
     // console.log('game state right: ' + this.paddleRightY)
@@ -331,11 +338,11 @@ export default class Game extends Vue {
     else
       this.roundWinner = 2
     this.setStatus = setStatus
-    console.log('OVERRRRR')
-    console.log('roundWinner = ' + this.roundWinner)
+    // console.log('OVERRRRR')
+    // console.log('roundWinner = ' + this.roundWinner)
     // this.timer = -2
     this.status = Status.over
-    console.log('status after over: ' + this.status)
+    // console.log('status after over: ' + this.status)
     // if (this.autoSaveInterval)
     //   clearInterval(this.autoSaveInterval)
   }

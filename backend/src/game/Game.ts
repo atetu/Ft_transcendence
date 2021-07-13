@@ -38,6 +38,15 @@ class Ball {
   }
 }
 
+class Sprite {
+  constructor(
+    public x: number,
+    public y: number,
+    public width: number,
+    public height: number
+  ) {}
+}
+
 export default class Game {
   private interval?: ReturnType<typeof setInterval>;
   // private users: User[]
@@ -59,6 +68,7 @@ export default class Game {
   public winner: User;
   public sprite1X: number = 0;
   public sprite1Y: number = 0;
+  public sprites: Sprite[] = new Array(3);
 
 
   public matchService = Container.get(MatchService);
@@ -101,23 +111,24 @@ export default class Game {
     console.log("end of start");
   }
 
-  getRandomArbitrary(min, max) {
+  getRandomArbitrary(min: number, max: number) {
     return Math.random() * (max - min) + min;
   }
 
-  getRandomInt(max) {
+  getRandomInt(max: number) {
     return Math.floor(Math.random() * max);
   }
   
 
   async restart() {
     // await this.sleep(3000);
-    if (this.waitingRoomOption)
-    console.log('restartWaitingRoom')
+    // if (this.waitingRoomOption)
+    // console.log('restartWaitingRoom')
     let found:number = 0
       found = this.waitingRoomOption.find(function (element) {
       return (element === 1);
     });
+    console.log('Found: ' + found)
     if (found === 1)
     {
       console.log('sprite found')
@@ -125,6 +136,9 @@ export default class Game {
       this.sprite1Y = this.getRandomArbitrary(40, 100)
 
     }
+    console.log('SPRITE1X : ' + this.sprite1X)
+    console.log('SPRITE1Y : ' + this.sprite1Y)
+
     this.ball.x = this.getRandomArbitrary(10, 600);
     this.ball.y = this.getRandomArbitrary(10, 400);
     this.paddle1.y = 15;
@@ -134,7 +148,8 @@ export default class Game {
     this.state = 3;
 
     this.status = setStatus.playing;
-
+    this.waitingRoomOption.length = 0
+    this.waitingRoom.length = 0
     this.interval = setInterval(() => this.loop(), 1000 / 20);
     this.decount();
   }
@@ -314,6 +329,16 @@ export default class Game {
     {
       this.waitingRoom.push(player)
       this.waitingRoomOption.push(option)
+      let found2: User | null
+      found2 = this.waitingRoom.find(function (element) {
+        return (element === player);
+      });
+      if (found2 === player)
+        console.log ('find working')
+      else 
+        console.log ('find not working')
+      console.log ('option : ' + option)
+
     }
   }
     else
