@@ -37,8 +37,12 @@ export default async ({ server }: { server: http.Server }) => {
       socketService.askGameMove(socket, body, callback);
     });
 
-    socket.on(MatchMakingEvent.WAITING_ROOM, () => {
-      socketService.askMatchMaking(socket);
+    socket.on(MatchMakingEvent.WAITING_ROOM_JOIN, (body, callback) => {
+      socketService.askMatchMakingJoin(socket, body, callback);
+    });
+
+    socket.on(MatchMakingEvent.WAITING_ROOM_LEAVE, (body) => {
+      socketService.askMatchMakingLeave(socket, body);
     });
   });
 };

@@ -20,6 +20,10 @@ export default class PendingGameService {
     private readonly channelMessageService: ChannelMessageService
   ) {}
 
+  async findById(id: number): Promise<PendingGame> {
+    return await this.repository.findOne({ id })
+  }
+
   public async create(user: User, peer: User): Promise<PendingGame> {
     const pendingGame = new PendingGame();
     pendingGame.user = user;

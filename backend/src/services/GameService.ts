@@ -29,6 +29,8 @@ export default class GameService {
 
     this.save(game);
 
+    game.start();
+
     return game;
   }
 

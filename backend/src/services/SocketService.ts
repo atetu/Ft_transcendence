@@ -9,7 +9,6 @@ import User from "../entities/User";
 import Game from "../game/Game";
 import ChannelService from "./ChannelService";
 import GameService from "./GameService";
-import MatchMakingService from "./MatchMakingService";
 
 export type Callback = (err: Error, answer: any) => void;
 
@@ -41,7 +40,8 @@ export enum GameEvent {
 }
 
 export enum MatchMakingEvent {
-  WAITING_ROOM = "waiting_room",
+  WAITING_ROOM_JOIN = "waiting_room_join",
+  WAITING_ROOM_LEAVE = "waiting_room_leave",
 }
 
 export type Event = ClientEvent | ChannelEvent | DirectMessageEvent | GameEvent;
@@ -49,8 +49,9 @@ export type Event = ClientEvent | ChannelEvent | DirectMessageEvent | GameEvent;
 @Service()
 export default class SocketService {
   private gameService = Container.get(GameService);
-  private matchMakingService = Container.get(MatchMakingService);
-
+  private get matchMakingService(): any {
+    return Container.get(require("./MatchMakingService").default);
+  }
   private channelService = Container.get(ChannelService);
 
   get io() {
@@ -92,6 +93,8 @@ export default class SocketService {
         delete this.connectedUserSessionCounts[id];
       }
     }
+
+    this.matchMakingService.remove(socket);
   }
 
   async askChannelConnect(socket: Socket, body: any, callback: Callback) {
@@ -168,15 +171,48 @@ export default class SocketService {
     this.broadcastToUser(user, event, channel);
   }
 
-  async askMatchMaking(socket: Socket) {
-    const game: Game | null = this.matchMakingService.add(socket);
+  async askMatchMakingJoin(
+    socket: Socket,
+    body: { id: number },
+    callback: Callback
+  ) {
+    const pendingGameService = Container.get(
+      require("./PendingGameService").default
+    ) as any;
 
-    if (game) {
-      this.broadcastToGame(game, GameEvent.STARTING, {
-        player1: game.player1.id,
-        player2: game.player2.id,
-        gameId: game.id,
-      });
+    try {
+      this.ensureBody(body);
+      const { id } = body;
+
+      let pendingGame = undefined;
+      if (id) {
+        pendingGame = await pendingGameService.findById(id);
+
+        if (!pendingGame) {
+          throw new Error(`no pending game found for id = '${id}'`);
+        }
+      }
+
+      const game: Game | null = this.matchMakingService.add(
+        socket,
+        pendingGame
+      );
+
+      callback(null, 1);
+    } catch (error) {
+      console.log(error);
+      callback(error, null);
+    }
+  }
+
+  async askMatchMakingLeave(socket: Socket, body: { id: number }) {
+    try {
+      this.ensureBody(body);
+      const { id } = body;
+
+      this.matchMakingService.remove(socket, id);
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -223,6 +259,14 @@ export default class SocketService {
     }
   }
 
+  public broadcastGameStarting(game: Game) {
+    this.broadcastToGame(game, GameEvent.STARTING, {
+      id: game.id,
+      player1: game.player2,
+      player2: game.player2,
+    });
+  }
+
   private broadcastToChannel(
     channel: Channel,
     event: ChannelEvent,
@@ -240,7 +284,9 @@ export default class SocketService {
   }
 
   private broadcastToRoom(room: string, event: Event, message?: any) {
-    this.io.to(room).emit(event, message?.toJSON?.());
+    this.io.to(room).emit(event, message?.toJSON?.() || message);
+
+    console.log(`[io]: {${room}} -> ${event}: ${JSON.stringify(message)}`);
   }
 
   private ensureBody(body: any) {
