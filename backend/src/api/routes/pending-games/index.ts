@@ -6,10 +6,11 @@ import UserService from "../../../services/UserService";
 import { Container } from "typeorm-typedi-extensions";
 import helpers from "../../helpers";
 import PendingGameService from "../../../services/PendingGameService";
+import _id from "./_id";
 
 export default (app: express.Router) => {
   const userService = Container.get(UserService);
-  const pendingGameService = Container.get(PendingGameService)
+  const pendingGameService = Container.get(PendingGameService);
 
   const route = express.Router();
 
@@ -40,7 +41,7 @@ export default (app: express.Router) => {
           return helpers.notFound(`peer not found`);
         }
 
-        const pendingGame = await pendingGameService.create(user, peer)
+        const pendingGame = await pendingGameService.create(user, peer);
 
         res.status(200).send(pendingGame.toJSON());
       } catch (error) {
@@ -48,6 +49,8 @@ export default (app: express.Router) => {
       }
     }
   );
+
+  _id(route);
 
   return route;
 };
