@@ -25,7 +25,7 @@ enum PendinGameState {
 }
 
 @Component
-export default class Text extends Vue {
+export default class XInvite extends Vue {
   @Prop({ type: Object })
   message!: ChannelMessage
 

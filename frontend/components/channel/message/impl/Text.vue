@@ -16,7 +16,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { ChannelMessage } from '~/models'
 
 @Component
-export default class Text extends Vue {
+export default class XText extends Vue {
   @Prop({ type: Object })
   message!: ChannelMessage
 }
