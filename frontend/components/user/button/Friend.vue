@@ -1,5 +1,13 @@
 <template>
-  <v-btn :disabled="isDisabled" depressed block color="primary" @click="click">
+  <v-btn
+    :disabled="isDisabled"
+    :text="isFriend"
+    :outlined="isFriend"
+    depressed
+    block
+    :color="color"
+    @click="click"
+  >
     {{ action }}
     <v-icon right>{{ icon }}</v-icon>
   </v-btn>
@@ -39,6 +47,14 @@ export default class Dot extends Vue {
     return this.isOutcoming || this.isBlocked
   }
 
+  get color() {
+    if (this.isFriend) {
+      return 'red'
+    }
+
+    return 'primary'
+  }
+
   get action(): string {
     if (this.relationship) {
       if (this.isBlocked) {
@@ -62,7 +78,7 @@ export default class Dot extends Vue {
   }
 
   get icon(): string {
-    if (this.relationship) {
+    if (this.relationship && this.isFriend) {
       return 'mdi-account-remove'
     }
 
@@ -146,7 +162,9 @@ export default class Dot extends Vue {
 
               this.$dialog.notify.success(success)
 
-              //this.$emit('refresh')
+              if (!this.$socket.connected) {
+                this.$emit('refresh')
+              }
             } catch (err) {
               this.$dialog.notify.error(
                 error(err?.response?.data?.errors?.message || err)
