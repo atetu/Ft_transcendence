@@ -29,6 +29,10 @@ export default async ({ server }: { server: http.Server }) => {
       socketService.askChannelConnect(socket, body, callback);
     });
 
+    socket.on(ChannelEvent.DISCONNECT, () => {
+      socketService.askChannelDisconnect(socket);
+    });
+
     socket.on(GameEvent.CONNECT, (body, callback) => {
       socketService.askGameConnect(socket, body, callback);
     });

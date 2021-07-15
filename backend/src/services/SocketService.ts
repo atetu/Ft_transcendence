@@ -21,6 +21,7 @@ export enum ClientEvent {
 
 export enum ChannelEvent {
   CONNECT = "channel_connect",
+  DISCONNECT = "channel_disconnect",
   DELETE = "channel_delete",
   MESSAGE = "channel_message",
   USER_JOIN = "channel_user_join",
@@ -137,6 +138,16 @@ export default class SocketService {
     } catch (error) {
       callback(error, null);
     }
+  }
+
+  askChannelDisconnect(socket: Socket) {
+    const { currentChannelRoom } = socket.data;
+
+    if (currentChannelRoom !== undefined) {
+      socket.leave(currentChannelRoom);
+    }
+
+    delete socket.data.currentChannelRoom;
   }
 
   public broadcastChannelDelete(channel: Channel) {
