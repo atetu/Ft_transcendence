@@ -5,11 +5,6 @@ import User from "../../../../../entities/User";
 import RelationshipService from "../../../../../services/RelationshipService";
 import UserService from "../../../../../services/UserService";
 import helpers from "../../../../helpers";
-import middlewares from "../../../../middlewares";
-import matches from "../../_userid/matches";
-import statistics from "../../_userid/statistics";
-import achievements from "../achievements";
-import avatar from "../profile/avatar";
 
 export default (app: express.Router) => {
   const userService = Container.get(UserService);
@@ -64,15 +59,7 @@ export default (app: express.Router) => {
     const peer: User = res.locals.peer;
 
     try {
-      const [a, b] = await relationshipService.findRelationships(user, peer);
-
-      if (a) {
-        await relationshipService.delete(a);
-      }
-
-      if (b) {
-        await relationshipService.delete(b);
-      }
+      await relationshipService.delete(user, peer);
 
       res.status(204).end();
     } catch (error) {

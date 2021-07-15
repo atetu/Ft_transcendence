@@ -5,6 +5,7 @@ import { isObject } from "util";
 import Channel from "../entities/Channel";
 import ChannelMessage from "../entities/ChannelMessage";
 import ChannelUser from "../entities/ChannelUser";
+import Relationship from "../entities/Relationship";
 import User from "../entities/User";
 import Game from "../game/Game";
 import ChannelService from "./ChannelService";
@@ -44,7 +45,18 @@ export enum MatchMakingEvent {
   WAITING_ROOM_LEAVE = "waiting_room_leave",
 }
 
-export type Event = ClientEvent | ChannelEvent | DirectMessageEvent | GameEvent;
+export enum UserEvent {
+  RELATIONSHIP_NEW = "relationship_new",
+  RELATIONSHIP_UPDATE = "relationship_update",
+  RELATIONSHIP_DELETE = "relationship_delete",
+}
+
+export type Event =
+  | ClientEvent
+  | ChannelEvent
+  | DirectMessageEvent
+  | GameEvent
+  | UserEvent;
 
 @Service()
 export default class SocketService {
@@ -156,6 +168,26 @@ export default class SocketService {
       ChannelEvent.OWNER_TRANSFER,
       channel.owner
     );
+  }
+
+  public broadcastUserRelationshipNew(relationship: Relationship) {
+    this.broadcastToUser(
+      relationship.user,
+      UserEvent.RELATIONSHIP_NEW,
+      relationship
+    );
+  }
+
+  public broadcastUserRelationshipUpdate(relationship: Relationship) {
+    this.broadcastToUser(
+      relationship.user,
+      UserEvent.RELATIONSHIP_UPDATE,
+      relationship
+    );
+  }
+
+  public broadcastUserRelationshipDelete(user: User, peer: User) {
+    this.broadcastToUser(user, UserEvent.RELATIONSHIP_DELETE, peer);
   }
 
   public broadcastNewChannel(channel: Channel) {
@@ -279,7 +311,7 @@ export default class SocketService {
     this.broadcastToRoom(game.toRoom(), event, message);
   }
 
-  private broadcastToUser(user: User, event: Event, message?: any) {
+  private broadcastToUser(user: User, event: UserEvent | Event, message?: any) {
     this.broadcastToRoom(user.toRoom(), event, message);
   }
 
