@@ -71,4 +71,8 @@ export default class RelationshipService {
 
     return a;
   }
+
+  async delete(relationship: Relationship) {
+    await this.repository.delete(relationship);
+  }
 }

@@ -52,8 +52,29 @@ export default (app: express.Router) => {
         user,
         peer
       );
-      
+
       res.status(200).send(relationship);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  route.delete("/", async (req, res, next) => {
+    const user: User = req.user as any;
+    const peer: User = res.locals.peer;
+
+    try {
+      const [a, b] = await relationshipService.findRelationships(user, peer);
+
+      if (a) {
+        await relationshipService.delete(a);
+      }
+
+      if (b) {
+        await relationshipService.delete(b);
+      }
+
+      res.status(204).end();
     } catch (error) {
       next(error);
     }
