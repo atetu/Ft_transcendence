@@ -33,19 +33,20 @@
             </v-btn>
           </v-col>
           <v-col cols="12" xl="6">
-            <v-btn depressed block color="primary" @click="askFriend">
-              friend
-              <v-icon right>mdi-account-plus</v-icon>
-            </v-btn>
+            <user-button-friend
+              :user="user"
+              :relationship="relationship"
+              @refresh="refresh"
+            />
           </v-col>
           <v-col cols="12" xl="6">
-            <v-btn depressed block color="primary" @click="askBlock">
+            <v-btn depressed block color="error" @click="askBlock">
               block
-              <v-icon right>mdi-cancel</v-icon>
+              <v-icon right>mdi-account-cancel</v-icon>
             </v-btn>
           </v-col>
           <v-col cols="12">
-            <v-btn outlined block color="primary" :to="toMessage">
+            <v-btn depressed block color="primary" :to="toMessage">
               message
               <v-icon right>mdi-message-arrow-right</v-icon>
             </v-btn>
@@ -61,13 +62,16 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { User } from '~/models'
+import { Relationship, User } from '~/models'
 import { authStore } from '~/store'
 
 @Component
 export default class Dot extends Vue {
   @Prop()
   user!: User
+
+  @Prop()
+  relationship!: Relationship
 
   get isMe() {
     return authStore.user!.id === this.user.id
@@ -93,37 +97,6 @@ export default class Dot extends Vue {
     this.$emit('refresh')
   }
 
-  askFriend() {
-    this.$dialog.warning({
-      title: 'Friendship confirmation',
-      text: 'Are you sure',
-      actions: [
-        {
-          key: 'yes',
-          text: 'Yes',
-          color: 'error',
-          handler: async () => {
-            try {
-              await this.$axios.$post(`/users/@me/relationships`, {
-                peerId: this.user.id,
-                type: 'friend',
-              })
-
-              this.$dialog.notify.success('friendship request send')
-
-              this.$emit('refresh')
-            } catch (error) {
-              this.$dialog.notify.error('could not send friendship request')
-            }
-          },
-        },
-        {
-          key: 'cancel',
-          text: 'Cancel',
-        },
-      ],
-    })
-  }
   askBlock() {
     this.$dialog.warning({
       title: 'Blocking confirmation',
