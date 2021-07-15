@@ -6,6 +6,7 @@
     :title="title"
     :channel="channel"
     :messages="messages"
+    @deleted="onDeleted"
     @message="onNewMessage"
     @joined="onUserJoin"
     @leaved="onUserLeave"
@@ -39,7 +40,7 @@
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import API from '~/api/API'
 import { Channel, ChannelMessage, ChannelUser, User } from '~/models'
-import { authStore } from '~/store'
+import { authStore, channelsStore } from '~/store'
 
 @Component
 export default class Viewer extends Vue {
@@ -68,6 +69,13 @@ export default class Viewer extends Vue {
     this.channel = channel
     this.users = users
     this.messages = messages
+  }
+
+  onDeleted(channel: Channel) {
+    channelsStore.deleteItem(channel)
+
+    this.$router.push({ path: '/channels' })
+    this.$dialog.notify.info('The channel has been deleted')
   }
 
   onNewMessage(message: ChannelMessage) {

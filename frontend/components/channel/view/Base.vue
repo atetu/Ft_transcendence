@@ -75,6 +75,11 @@ export default class Viewer extends Vue {
     }
   }
 
+  @Socket('channel_delete')
+  onChannelDelete(channel: Channel) {
+    this.$emit('deleted', channel)
+  }
+
   @Socket('channel_message')
   onChannelMessage(message: ChannelMessage) {
     this.$emit('message', message)

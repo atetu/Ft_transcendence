@@ -20,6 +20,16 @@ class ChannelsModule extends VuexModule {
     this.list.push(channel)
   }
 
+  @Mutation
+  deleteItem(channel: Channel) {
+    const { id } = channel
+    const index = this.list.findIndex((x) => x.id === id)
+
+    if (index !== -1) {
+      this.list.splice(index, 1)
+    }
+  }
+
   @Action({ commit: 'set', rawError: true })
   async fetchAll() {
     const channels: Channel[] = await $axios.$get('/users/@me/channels')
