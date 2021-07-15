@@ -9,6 +9,7 @@
 import { Method } from 'axios'
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { Relationship, RelationshipType, User } from '~/models'
+import { relationshipsStore } from '~/store'
 
 @Component
 export default class Dot extends Vue {
@@ -131,15 +132,21 @@ export default class Dot extends Vue {
           color: 'error',
           handler: async () => {
             try {
-              await this.$axios.$request({
+              const response = await this.$axios.$request({
                 url: endpoint,
                 method,
                 data: body,
               })
 
+              if (method === 'DELETE') {
+                relationshipsStore.deleteItem(this.user)
+              } else {
+                relationshipsStore.updateItem(response)
+              }
+
               this.$dialog.notify.success(success)
 
-              this.$emit('refresh')
+              //this.$emit('refresh')
             } catch (err) {
               this.$dialog.notify.error(
                 error(err?.response?.data?.errors?.message || err)

@@ -63,15 +63,18 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { Relationship, User } from '~/models'
-import { authStore } from '~/store'
+import { authStore, relationshipsStore } from '~/store'
 
 @Component
 export default class Dot extends Vue {
   @Prop()
   user!: User
 
-  @Prop()
-  relationship!: Relationship
+  get relationship(): Relationship | null {
+    const { id } = this.user
+
+    return relationshipsStore.list.find((x) => x.peer.id === id) || null
+  }
 
   get isMe() {
     return authStore.user!.id === this.user.id

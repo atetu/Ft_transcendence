@@ -8,11 +8,7 @@
   <v-main v-else class="fill-height" style="overflow-y: auto">
     <v-row class="ma-4">
       <v-col cols="12" md="3">
-        <user-profile-card-info
-          :user="user"
-        :relationship="relationship"
-          @refresh="$fetch"
-        />
+        <user-profile-card-info :user="user" @refresh="$fetch" />
         <user-profile-card-statistics
           :user="user"
           :statistics="statistics"
@@ -61,6 +57,7 @@ import {
   User,
   UserStatistics,
 } from '~/models'
+import { relationshipsStore } from '~/store'
 
 @Component
 export default class ComponentImpl extends Vue {
@@ -79,10 +76,11 @@ export default class ComponentImpl extends Vue {
     this.progresses = await this.$axios.$get(
       `/users/${this.userId}/achievements`
     )
-    this.relationship = await this.$axios.$get(
-      `/users/@me/relationships/${this.userId}`
-    )
     this.statistics = await this.$axios.$get(`/users/${this.userId}/statistics`)
+
+    this.$axios
+      .$get(`/users/@me/relationships/${this.userId}`)
+      .then(relationshipsStore.updateItem)
   }
 }
 </script>
