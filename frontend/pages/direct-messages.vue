@@ -43,7 +43,9 @@ export default class Index extends Vue {
   get unblockedDirectMessages(): Array<DirectMessage> {
     const blockedUserIds = relationshipsStore.blockedPeerIds
 
-    return this.directMessages.filter((x) => !blockedUserIds.includes(x.peer.id))
+    return this.directMessages.filter(
+      (x) => !blockedUserIds.includes(x.peer.id)
+    )
   }
 
   filterer(query: string, item: DirectMessage) {
