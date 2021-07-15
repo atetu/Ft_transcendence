@@ -47,7 +47,7 @@
           </channel-dialog-leave>
         </v-list-item>
 
-        <v-list-item v-if="isSiteAdmin">
+        <v-list-item v-if="isSiteAdmin && !hasJoined">
           <channel-join :channel="channel" @joined="onJoined" />
         </v-list-item>
       </v-list>
