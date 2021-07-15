@@ -21,6 +21,7 @@ export enum ClientEvent {
 
 export enum ChannelEvent {
   CONNECT = "channel_connect",
+  DELETE = "channel_delete",
   MESSAGE = "channel_message",
   USER_JOIN = "channel_user_join",
   USER_LEAVE = "channel_user_leave",
@@ -136,6 +137,10 @@ export default class SocketService {
     } catch (error) {
       callback(error, null);
     }
+  }
+
+  public broadcastChannelDelete(channel: Channel) {
+    this.broadcastToChannel(channel, ChannelEvent.DELETE, channel);
   }
 
   public broadcastChannelMessage(message: ChannelMessage) {
