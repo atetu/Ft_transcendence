@@ -1,12 +1,5 @@
 <template>
-  <v-btn
-    v-if="!isBlocked"
-    :disabled="isOutcoming"
-    depressed
-    block
-    color="primary"
-    @click="click"
-  >
+  <v-btn :disabled="isDisabled" depressed block color="primary" @click="click">
     {{ action }}
     <v-icon right>{{ icon }}</v-icon>
   </v-btn>
@@ -41,8 +34,16 @@ export default class Dot extends Vue {
     return this.relationship?.type === RelationshipType.OUTCOMING
   }
 
+  get isDisabled() {
+    return this.isOutcoming || this.isBlocked
+  }
+
   get action(): string {
     if (this.relationship) {
+      if (this.isBlocked) {
+        return 'blocked'
+      }
+
       if (this.isFriend) {
         return 'unfriend'
       }
