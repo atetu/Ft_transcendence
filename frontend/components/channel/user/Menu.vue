@@ -1,5 +1,11 @@
 <template>
-  <v-menu v-model="menu" :close-on-content-click="false" offset-x left>
+  <v-menu
+    v-model="menu"
+    :close-on-content-click="false"
+    :offset-y="bottom"
+    :offset-x="!bottom"
+    :left="!bottom"
+  >
     <template #activator="{ on, attrs }">
       <slot name="activator" :on="on" :attrs="attrs" />
     </template>
@@ -51,6 +57,9 @@ export default class ComponentImpl extends Vue {
 
   @Prop({ type: Object })
   user!: ChannelUser
+
+  @Prop({ type: Boolean })
+  bottom!: boolean
 
   menu = false
   statistics: UserStatistics | null = null

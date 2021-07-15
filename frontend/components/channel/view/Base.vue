@@ -4,7 +4,9 @@
   <div v-else class="fill-height">
     <v-app-bar app clipped-right>
       <v-toolbar-title>
-        {{ title }}
+        <slot name="title">
+          {{ title }}
+        </slot>
       </v-toolbar-title>
       <template v-if="$scopedSlots['toolbar-right']">
         <v-spacer />
