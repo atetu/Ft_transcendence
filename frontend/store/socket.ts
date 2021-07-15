@@ -1,5 +1,5 @@
 import { Module, Action, VuexModule, Mutation } from 'vuex-module-decorators'
-import { Channel, ChannelMessage } from '~/models'
+import { Channel, User, ChannelMessage, Relationship } from '~/models'
 
 @Module({
   stateFactory: true,
@@ -44,6 +44,30 @@ class SocketModule extends VuexModule {
   // eslint-disable-next-line camelcase
   socket_channelAdd(channel: Channel) {
     this.context.commit('channels/add', channel, { root: true })
+  }
+
+  @Action({ rawError: true })
+  // eslint-disable-next-line camelcase
+  socket_relationshipNew(relationship: Relationship) {
+    this.context.commit('relationships/updateItem', relationship, {
+      root: true,
+    })
+  }
+
+  @Action({ rawError: true })
+  // eslint-disable-next-line camelcase
+  socket_relationshipUpdate(relationship: Relationship) {
+    this.context.commit('relationships/updateItem', relationship, {
+      root: true,
+    })
+  }
+
+  @Action({ rawError: true })
+  // eslint-disable-next-line camelcase
+  socket_relationshipDelete(user: User) {
+    this.context.commit('relationships/deleteItem', user, {
+      root: true,
+    })
   }
 }
 
