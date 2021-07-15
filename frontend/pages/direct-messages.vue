@@ -13,7 +13,8 @@
     </channel-drawer>
 
     <v-main class="fill-height">
-      <nuxt-child />
+      <page-socket-not-connected v-if="!$socket.connected" />
+      <nuxt-child v-else />
     </v-main>
   </div>
 </template>
