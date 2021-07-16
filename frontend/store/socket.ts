@@ -50,12 +50,6 @@ class SocketModule extends VuexModule {
 
   @Action({ rawError: true })
   // eslint-disable-next-line camelcase
-  socket_channelMessage(message: ChannelMessage) {
-    this.context.commit('channels/current/addMessage', message, { root: true })
-  }
-
-  @Action({ rawError: true })
-  // eslint-disable-next-line camelcase
   socket_channelAdd(channel: Channel) {
     this.context.commit('channels/add', channel, { root: true })
   }
