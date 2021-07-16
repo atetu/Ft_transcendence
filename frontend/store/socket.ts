@@ -50,12 +50,6 @@ class SocketModule extends VuexModule {
 
   @Action({ rawError: true })
   // eslint-disable-next-line camelcase
-  socket_clientConnectedList(ids: any) {
-    console.log(ids)
-  }
-
-  @Action({ rawError: true })
-  // eslint-disable-next-line camelcase
   socket_channelMessage(message: ChannelMessage) {
     this.context.commit('channels/current/addMessage', message, { root: true })
   }
