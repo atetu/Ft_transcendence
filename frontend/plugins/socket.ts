@@ -10,12 +10,14 @@ const socket = io({
   autoConnect: false,
 })
 
-const plugin: Plugin = ({ store }) => {
+const plugin: Plugin = ({ store, isDev }) => {
   initializeSocket(socket)
 
-  socket.onAny((event, ...args) => {
-    console.log(`got ${event}:`, args)
-  })
+  if (isDev) {
+    socket.onAny((event, ...args) => {
+      console.log(`got ${event}:`, args)
+    })
+  }
 
   let retried = false
 
