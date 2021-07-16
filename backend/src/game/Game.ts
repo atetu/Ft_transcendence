@@ -200,20 +200,17 @@ export default class Game {
 
   collisionSprite()
   {
-    let paddle: Paddle;
     let xSide: number;
     if (this.direction == -1) {
-      paddle = this.paddle1;
-      xSide = this.paddle1.x + 20;
+      xSide = this.sprite.x + this.sprite.width;
     } else {
-      paddle = this.paddle2;
-      xSide = this.paddle2.x;
+      xSide = this.sprite.x;
     }
 
     if (
-      this.check_up_and_down(paddle.x, paddle.y) === 1 ||
-      this.check_up_and_down(paddle.x, paddle.y + 100) === 1 ||
-      this.check_side(xSide, paddle.y) === 1
+      this.check_up_and_down(this.sprite.x, this.sprite.y) === 1 ||
+      this.check_up_and_down(this.sprite.x, this.sprite.y + this.sprite.height) === 1 ||
+      this.check_side(xSide, this.sprite.y) === 1
     )
       return 1;
   }
@@ -237,7 +234,7 @@ export default class Game {
       return 1;
     
       if (this.sprite != null)
-        collisionSprite()
+        this.collisionSprite()
     return 0;
   }
 
