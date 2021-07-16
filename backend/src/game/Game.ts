@@ -121,12 +121,13 @@ export default class Game {
   }
   
   defineSprite() {
-    this.sprite = new Sprite(
-      this.getRandomArbitrary(200, 600),
-      this.getRandomArbitrary(150, 450),
-      this.getRandomArbitrary(50,200),
-      this.getRandomArbitrary(50,200)
-    )
+    // this.sprite = new Sprite(
+    //   this.getRandomArbitrary(200, 600),
+    //   this.getRandomArbitrary(150, 450),
+    //   this.getRandomArbitrary(50,200),
+    //   this.getRandomArbitrary(50,200)
+    // )
+    this.sprite = new Sprite(100,0,20,600)
   }
 
   async restart() {
@@ -144,8 +145,8 @@ export default class Game {
       this.defineSprite()
     }
 
-    this.ball.x = this.getRandomArbitrary(200, 400);
-    this.ball.y = this.getRandomArbitrary(200, 600);
+    this.ball.x = this.getRandomArbitrary(350, 450);
+    this.ball.y = this.getRandomArbitrary(250, 350);
     this.paddle1.y = 15;
     this.paddle2.y = 10;
 
@@ -198,6 +199,28 @@ export default class Game {
     return 0;
   }
 
+  check_up_and_downSprite(x: number, y: number, w:number) {
+    let i: number = x;
+    while (i <= x + w) {
+      let ret: number = this.check_collision(i, y);
+      if (ret === 1) return 1;
+      i = i + 1;
+    }
+    return 0;
+  }
+
+  check_sideSprite(x: number, y: number, h: number) {
+    let i: number = y;
+    while (i <= y + h) {
+      let ret: number = this.check_collision(x, i);
+
+      if (ret === 1) return 1;
+
+      i = i + 1;
+    }
+    return 0;
+  }
+
   collisionSprite()
   {
     let xSide: number;
@@ -208,11 +231,13 @@ export default class Game {
     }
 
     if (
-      this.check_up_and_down(this.sprite.x, this.sprite.y) === 1 ||
-      this.check_up_and_down(this.sprite.x, this.sprite.y + this.sprite.height) === 1 ||
-      this.check_side(xSide, this.sprite.y) === 1
+      this.check_up_and_downSprite(xSide, this.sprite.y, this.sprite.width) === 1 ||
+      this.check_up_and_downSprite(xSide, this.sprite.y + this.sprite.height, this.sprite.width) === 1 ||
+      this.check_sideSprite(xSide, this.sprite.y, this.sprite.height) === 1
     )
       return 1;
+    else
+      return 0;
   }
 
   collision() {
@@ -234,7 +259,7 @@ export default class Game {
       return 1;
     
       if (this.sprite != null)
-        this.collisionSprite()
+        return(this.collisionSprite())
     return 0;
   }
 

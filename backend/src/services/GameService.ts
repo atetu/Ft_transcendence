@@ -6,8 +6,13 @@ import Game from "../game/Game";
 @Service()
 export default class GameService {
   private repository: { [key: string]: Game } = {};
+  private players: { [key: number]: Game } = {};
 
   private incrementalId = 0;
+
+  public findByUser(user: User) {
+
+  }
 
   public gameMove(gameId: number, player: User, newY: number) {
     const game = this.findById(gameId);
