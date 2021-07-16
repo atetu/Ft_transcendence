@@ -7,7 +7,26 @@
     :channel="channel"
     :messages="messages"
     @message="onNewMessage"
-  />
+  >
+    <template v-if="peer" #title>
+      <channel-user-menu :channel="channel" :user="peer" bottom>
+        <template #activator="{ on, attrs }">
+          <v-list-item rounded shaped v-bind="attrs" v-on="on">
+            <v-list-item-avatar>
+              <user-avatar :user="peer" />
+            </v-list-item-avatar>
+
+            <v-list-item-title>
+              {{ title }}
+            </v-list-item-title>
+          </v-list-item>
+        </template>
+      </channel-user-menu>
+    </template>
+    <template #toolbar-right>
+      <direct-message-button-challenge :direct-message="directMessage" />
+    </template>
+  </channel-view-base>
 </template>
 
 <script lang="ts">
@@ -48,8 +67,12 @@ export default class Viewer extends Vue {
     return this.directMessage?.channel || null
   }
 
+  get peer() {
+    return this.directMessage?.peer
+  }
+
   get title() {
-    return this.directMessage?.peer.username
+    return this.peer?.username
   }
 
   onNewMessage(message: ChannelMessage) {

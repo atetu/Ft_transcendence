@@ -1,7 +1,7 @@
 <template>
   <drawer-right>
     <channel-user-list :channel="channel" :users="users" />
-    <template v-if="hasJoined || isSiteAdmin" #append>
+    <template #append>
       <v-list>
         <v-list-item v-if="isAdmin">
           <channel-dialog-settings
@@ -36,8 +36,8 @@
           </channel-dialog-invite>
         </v-list-item>
 
-        <v-list-item v-if="hasJoined">
-          <channel-dialog-leave :channel="channel" @leaved="onLeaved">
+        <v-list-item v-show="hasJoined">
+          <channel-dialog-leave :channel="channel" @leaved="onLeaved()">
             <template #activator="{ on, attrs }">
               <v-btn block color="primary" v-bind="attrs" v-on="on">
                 {{ $t('channel.leave.button') }}
@@ -47,7 +47,7 @@
           </channel-dialog-leave>
         </v-list-item>
 
-        <v-list-item v-else-if="isSiteAdmin">
+        <v-list-item v-if="isSiteAdmin && !hasJoined">
           <channel-join :channel="channel" @joined="onJoined" />
         </v-list-item>
       </v-list>

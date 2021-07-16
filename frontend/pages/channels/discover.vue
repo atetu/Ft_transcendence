@@ -52,15 +52,15 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 import API from '~/api/API'
 import { Channel } from '~/models'
-
-import { channelsModule } from '~/store/channels/const'
+import { channelsStore } from '~/store'
 
 @Component
 export default class Page extends Vue {
   channels: Channel[] = []
 
-  @channelsModule.State('channels')
-  addedChannels!: Channel[]
+  get addedChannels(): Array<Channel> {
+    return channelsStore.list
+  }
 
   async fetch() {
     await this.$store.dispatch('channels/fetchAll')

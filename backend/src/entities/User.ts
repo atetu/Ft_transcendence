@@ -44,6 +44,10 @@ export default class User {
     };
   }
 
+  public toRoom() {
+    return `user_${this.id}`;
+  }
+
   public is(other: User) {
     return this.id === other?.id;
   }

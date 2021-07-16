@@ -3,7 +3,7 @@
     <channel-drawer
       :loading="$fetchState.pending"
       :error="$fetchState.error"
-      :items="directMessages"
+      :items="unblockedDirectMessages"
       :filterer="filterer"
       @refresh="$fetch"
     >
@@ -13,7 +13,8 @@
     </channel-drawer>
 
     <v-main class="fill-height">
-      <nuxt-child />
+      <page-socket-not-connected v-if="!$socket.connected" />
+      <nuxt-child v-else />
     </v-main>
   </div>
 </template>
@@ -21,7 +22,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { DirectMessage } from '~/models'
-import { directMessageStore } from '~/store'
+import { directMessageStore, relationshipsStore } from '~/store'
 
 @Component
 export default class Index extends Vue {
@@ -37,6 +38,14 @@ export default class Index extends Vue {
 
   get directMessages(): Array<DirectMessage> {
     return directMessageStore.list
+  }
+
+  get unblockedDirectMessages(): Array<DirectMessage> {
+    const blockedUserIds = relationshipsStore.blockedPeerIds
+
+    return this.directMessages.filter(
+      (x) => !blockedUserIds.includes(x.peer.id)
+    )
   }
 
   filterer(query: string, item: DirectMessage) {

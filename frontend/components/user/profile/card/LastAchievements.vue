@@ -8,7 +8,7 @@
       </v-btn>
     </v-card-title>
     <v-list>
-      <match-empty v-if="!progresses.length" />
+      <achievement-empty v-if="!progresses.length" />
       <v-list-item
         v-for="progress in progresses"
         :key="progress.achievement.id"

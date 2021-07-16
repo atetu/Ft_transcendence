@@ -1,128 +1,309 @@
-import Container, { Service, Inject } from "typedi";
 import * as socketio from "socket.io";
-import User from "../entities/User";
-import ChannelService from "./ChannelService";
-import ChannelMessage from "../entities/ChannelMessage";
-import Channel from "../entities/Channel";
-import Game from "../game/Game";
-import GameService from "./GameService";
-import MatchMakingService from "./MatchMakingService";
 import { Socket } from "socket.io";
+import Container, { Service } from "typedi";
+import { isObject } from "util";
+import Channel from "../entities/Channel";
+import ChannelMessage from "../entities/ChannelMessage";
+import ChannelUser from "../entities/ChannelUser";
+import Relationship from "../entities/Relationship";
+import User from "../entities/User";
+import Game from "../game/Game";
+import ChannelService from "./ChannelService";
+import GameService from "./GameService";
 
+export type Callback = (err: Error, answer: any) => void;
 
-import { x } from "@hapi/joi";
+export enum ClientEvent {
+  CONNECTED_JOIN = "client_connected_join",
+  CONNECTED_QUIT = "client_connected_quit",
+  CONNECTED_LIST = "client_connected_list",
+}
+
+export enum ChannelEvent {
+  CONNECT = "channel_connect",
+  DISCONNECT = "channel_disconnect",
+  DELETE = "channel_delete",
+  MESSAGE = "channel_message",
+  USER_JOIN = "channel_user_join",
+  USER_LEAVE = "channel_user_leave",
+  USER_UPDATE = "channel_user_update",
+  OWNER_TRANSFER = "channel_owner_transfer",
+  NEW = "channel_new",
+  ADD = "channel_add",
+}
+
+export enum DirectMessageEvent {
+  ADD = "direct_message_add",
+}
+
+export enum GameEvent {
+  CONNECT = "game_connect",
+  MOVE = "game_move",
+  STARTING = "game_starting",
+}
+
+export enum MatchMakingEvent {
+  WAITING_ROOM_JOIN = "waiting_room_join",
+  WAITING_ROOM_LEAVE = "waiting_room_leave",
+}
+
+export enum UserEvent {
+  RELATIONSHIP_NEW = "relationship_new",
+  RELATIONSHIP_UPDATE = "relationship_update",
+  RELATIONSHIP_DELETE = "relationship_delete",
+}
+
+export type Event =
+  | ClientEvent
+  | ChannelEvent
+  | DirectMessageEvent
+  | GameEvent
+  | UserEvent;
 
 @Service()
 export default class SocketService {
-    private gameService = Container.get(GameService);
-    private matchMakingService = Container.get(MatchMakingService);
+  private gameService = Container.get(GameService);
+  private get matchMakingService(): any {
+    return Container.get(require("./MatchMakingService").default);
+  }
+  private channelService = Container.get(ChannelService);
 
-    private channelService = Container.get(ChannelService);
-
-  connectedUserIds = {};
-
-  constructor() {}
-
-  // constructor() {
-  //   const io = Container.get(socketio.Server)
-
-  //   setInterval(() => {
-  //     io.emit('client_connected_list', Object.keys(this.connectedUserIds))
-  //   }, 8000)
-  // }
-
-  connect(socket: any) {
-    const { id } = socket.data.user;
-
-    if (this.connectedUserIds[id]) {
-      this.connectedUserIds[id] += 1;
-    } else {
-      socket.broadcast.emit("client_connected_join", id);
-
-      this.connectedUserIds[id] = 1;
-    }
-
-    socket.emit("client_connected_list", Object.keys(this.connectedUserIds));
+  get io() {
+    return Container.get(socketio.Server);
   }
 
-  disconnect(socket: any) {
+  connectedUserSessionCounts: { [key: number]: number } = {};
+
+  get connectedUserIds() {
+    return Object.keys(this.connectedUserSessionCounts);
+  }
+
+  onConnect(socket: Socket) {
+    const { user } = socket.data as { user: User };
+    const { id } = user;
+
+    if (this.connectedUserSessionCounts[id]) {
+      this.connectedUserSessionCounts[id] += 1;
+    } else {
+      socket.broadcast.emit(ClientEvent.CONNECTED_JOIN, id);
+
+      this.connectedUserSessionCounts[id] = 1;
+    }
+
+    socket.emit(ClientEvent.CONNECTED_LIST, this.connectedUserIds);
+
+    socket.join(user.toRoom());
+  }
+
+  onDisconnect(socket: any) {
     const { id } = socket.data.user;
 
-    if (this.connectedUserIds[id]) {
-      const now = (this.connectedUserIds[id] -= 1);
+    if (this.connectedUserSessionCounts[id]) {
+      const now = (this.connectedUserSessionCounts[id] -= 1);
 
       if (now === 0) {
-        socket.broadcast.emit("client_connected_quit", id);
+        socket.broadcast.emit(ClientEvent.CONNECTED_QUIT, id);
 
-        delete this.connectedUserIds[id];
+        delete this.connectedUserSessionCounts[id];
       }
     }
+
+    this.matchMakingService.remove(socket);
   }
 
-  async channelConnect(socket: any, body: any, callnack: any) {
-    const user: User = socket.data.user;
-    const { channelId } = body;
+  async askChannelConnect(socket: Socket, body: any, callback: Callback) {
+    const { currentChannelRoom } = socket.data;
 
     try {
+      this.ensureBody(body);
+
+      const { channelId } = body;
+
       const channel = await this.channelService.findById(channelId);
 
       if (!channel) {
         throw new Error("channel not found");
       }
 
-      socket.join(channel.toRoom());
-      callnack(null, 1);
+      if (currentChannelRoom !== undefined) {
+        socket.leave(currentChannelRoom);
+      }
+
+      const newChannelRoom = channel.toRoom();
+
+      socket.join(newChannelRoom);
+      socket.data.currentChannelRoom = newChannelRoom;
+
+      callback(null, 1);
     } catch (error) {
-      console.log(error);
-      callnack(error, null);
+      callback(error, null);
     }
   }
 
-  async broadcastMessage(message: ChannelMessage) {
-    const io = Container.get(socketio.Server);
+  askChannelDisconnect(socket: Socket) {
+    const { currentChannelRoom } = socket.data;
 
+    if (currentChannelRoom !== undefined) {
+      socket.leave(currentChannelRoom);
+    }
+
+    delete socket.data.currentChannelRoom;
+  }
+
+  public broadcastChannelDelete(channel: Channel) {
+    this.broadcastToChannel(channel, ChannelEvent.DELETE, channel);
+  }
+
+  public broadcastChannelMessage(message: ChannelMessage) {
     const channel = message.channel;
 
-    io.to(channel.toRoom()).emit("channel_message", message.toJSON());
+    this.broadcastToChannel(channel, ChannelEvent.MESSAGE, message);
   }
 
-  async broadcastNewChannel(channel: Channel) {
-    const io = Container.get(socketio.Server);
+  public broadcastChannelUserJoin(channelUser: ChannelUser) {
+    const channel = channelUser.channel;
 
-    io.emit("channel_new", channel.toJSON());
+    this.broadcastToChannel(channel, ChannelEvent.USER_JOIN, channelUser);
   }
 
-  async gameConnect(socket, body: any, callback: any) {
-    console.log('Game connect')
-    const { gameId } = body 
-    const io = Container.get(socketio.Server)
-    
-    const game = this.gameService.gameConnect(gameId) 
-    if (game) {
-        callback(null, {
-          player1: game.player1,
-         player2: game.player2})
+  public broadcastChannelUserLeave(channelUser: ChannelUser) {
+    const channel = channelUser.channel;
+
+    this.broadcastToChannel(channel, ChannelEvent.USER_LEAVE, channelUser);
+  }
+
+  public broadcastChannelUserUpdate(channelUser: ChannelUser) {
+    const channel = channelUser.channel;
+
+    this.broadcastToChannel(channel, ChannelEvent.USER_UPDATE, channelUser);
+  }
+
+  public broadcastChannelOwnerTransfer(channel: Channel) {
+    this.broadcastToChannel(
+      channel,
+      ChannelEvent.OWNER_TRANSFER,
+      channel.owner
+    );
+  }
+
+  public broadcastUserRelationshipNew(relationship: Relationship) {
+    this.broadcastToUser(
+      relationship.user,
+      UserEvent.RELATIONSHIP_NEW,
+      relationship
+    );
+  }
+
+  public broadcastUserRelationshipUpdate(relationship: Relationship) {
+    this.broadcastToUser(
+      relationship.user,
+      UserEvent.RELATIONSHIP_UPDATE,
+      relationship
+    );
+  }
+
+  public broadcastUserRelationshipDelete(user: User, peer: User) {
+    this.broadcastToUser(user, UserEvent.RELATIONSHIP_DELETE, peer);
+  }
+
+  public broadcastNewChannel(channel: Channel) {
+    // TODO need rework, like only for publics?
+    this.io.emit(ChannelEvent.NEW, channel.toJSON());
+  }
+
+  public notifyAdded(user: User, channel: Channel) {
+    const event = channel.isDirect()
+      ? DirectMessageEvent.ADD
+      : ChannelEvent.ADD;
+
+    this.broadcastToUser(user, event, channel);
+  }
+
+  async askMatchMakingJoin(
+    socket: Socket,
+    body: { id: number },
+    callback: Callback
+  ) {
+    const pendingGameService = Container.get(
+      require("./PendingGameService").default
+    ) as any;
+
+    try {
+      this.ensureBody(body);
+      const { id } = body;
+
+      let pendingGame = undefined;
+      if (id) {
+        pendingGame = await pendingGameService.findById(id);
+
+        if (!pendingGame) {
+          throw new Error(`no pending game found for id = '${id}'`);
+        }
+      }
+
+      const game: Game | null = this.matchMakingService.add(
+        socket,
+        pendingGame
+      );
+
+      callback(null, 1);
+    } catch (error) {
+      console.log(error);
+      callback(error, null);
     }
-    else {
-      callback(new Error('not enough players'))
+  }
+
+  async askMatchMakingLeave(socket: Socket, body: { id: number }) {
+    try {
+      this.ensureBody(body);
+      const { id } = body;
+
+      this.matchMakingService.remove(socket, id);
+    } catch (error) {
+      console.log(error);
     }
   }
 
-  async gameMove(socket, body, callback) {
-    console.log('Game move')
-    const io = Container.get(socketio.Server);
+  async askGameConnect(socket: Socket, body: any, callback: Callback) {
+    try {
+      this.ensureBody(body);
 
-    const { gameId, y } = body
-    const success = this.gameService.gameMove({
-      gameId,
-      player: socket.data.user,
-      newY: y
-    })
+      const { gameId } = body;
 
-    if (success) {
-      callback(null, y)
-    } else {
-      callback(new Error('top'), null)
+      const game = this.gameService.findById(gameId);
+
+      if (!game) {
+        throw new Error("game not found");
+      }
+
+      callback(null, {
+        player1: game.player1,
+        player2: game.player2,
+      });
+    } catch (error) {
+      callback(error, null);
+    }
+  }
+
+  async askGameMove(socket: Socket, body: any, callback: Callback) {
+    try {
+      this.ensureBody(body);
+
+      const { gameId, y } = body;
+
+      if ([gameId, y].includes(undefined)) {
+        return callback(new Error("invalid value"), null);
+      }
+
+      const success = this.gameService.gameMove(gameId, socket.data.user, y);
+
+      if (!success) {
+        throw new Error("invalid position");
+      }
+
+      callback(null, y);
+    } catch (error) {
+      callback(error, null);
     }
   }
 
@@ -131,13 +312,13 @@ export default class SocketService {
     const io = Container.get(socketio.Server);
     const { gameId, option } = body
     console.log("option first : " + option)
-    const game: Game = this.gameService.gameRestartWaitingRoom({
+    const game: Game | false = this.gameService.gameRestartWaitingRoom(
       gameId,
-      player: socket.data.user,
+      socket.data.user,
       option
-    })
+    )
     console.log('game restart : ' + game)
-    if (game != undefined)
+    if (game !== false)
     {
       io.to(game.toRoom()).emit('game_restart', { gameId: game.id })
       game.restart()
@@ -155,6 +336,42 @@ export default class SocketService {
       io.to(game.toRoom()).emit('game_starting', { player1: game.player1.id, player2: game.player2.id, gameId: game.id })
       game.start()
       console.log('starting....')
+    }
+  }
+
+  public broadcastGameStarting(game: Game) {
+    this.broadcastToGame(game, GameEvent.STARTING, {
+      id: game.id,
+      player1: game.player2,
+      player2: game.player2,
+    });
+  }
+
+  private broadcastToChannel(
+    channel: Channel,
+    event: ChannelEvent,
+    message?: any
+  ) {
+    this.broadcastToRoom(channel.toRoom(), event, message);
+  }
+
+  private broadcastToGame(game: Game, event: GameEvent, message?: any) {
+    this.broadcastToRoom(game.toRoom(), event, message);
+  }
+
+  private broadcastToUser(user: User, event: UserEvent | Event, message?: any) {
+    this.broadcastToRoom(user.toRoom(), event, message);
+  }
+
+  private broadcastToRoom(room: string, event: Event, message?: any) {
+    this.io.to(room).emit(event, message?.toJSON?.() || message);
+
+    console.log(`[io]: {${room}} -> ${event}: ${JSON.stringify(message)}`);
+  }
+
+  private ensureBody(body: any) {
+    if (!body || !isObject(body)) {
+      throw new Error("bad body");
     }
   }
 }

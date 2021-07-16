@@ -23,6 +23,7 @@ export default class Relationship {
   id: number;
 
   @ManyToOne(() => User, {
+    eager: true,
     onDelete: "CASCADE",
   })
   user: User;
@@ -38,6 +39,10 @@ export default class Relationship {
     enum: Type,
   })
   type: Type;
+
+  public isBlock() {
+    return this.type === Type.BLOCK;
+  }
 
   public toJSON() {
     return {

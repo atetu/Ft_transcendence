@@ -30,7 +30,8 @@
     </channel-drawer>
 
     <v-main class="fill-height">
-      <nuxt-child />
+      <page-socket-not-connected v-if="!$socket.connected" />
+      <nuxt-child v-else />
     </v-main>
   </div>
 </template>
@@ -38,13 +39,10 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { Channel } from '~/models'
-import { channelsModule } from '~/store/channels/const'
+import { channelsStore } from '~/store'
 
 @Component
 export default class Page extends Vue {
-  @channelsModule.State('channels')
-  channels!: Channel[]
-
   head() {
     return {
       title: 'channels',
@@ -61,6 +59,10 @@ export default class Page extends Vue {
     }
 
     return item.name.includes(query) || item.owner.username.includes(query)
+  }
+
+  get channels(): Array<Channel> {
+    return channelsStore.list
   }
 }
 </script>

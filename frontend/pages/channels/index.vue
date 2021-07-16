@@ -1,3 +1,3 @@
 <template>
-  <div />
+  <page-nothing-selected text="no channel selected" />
 </template>

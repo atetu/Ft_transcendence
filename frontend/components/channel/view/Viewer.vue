@@ -6,7 +6,12 @@
     :title="title"
     :channel="channel"
     :messages="messages"
+    @deleted="onDeleted"
     @message="onNewMessage"
+    @joined="onUserJoin"
+    @leaved="onUserLeave"
+    @update="onUserUpdate"
+    @transfer="onOwnerTransfer"
   >
     <template slot="input">
       <channel-message-input
@@ -34,8 +39,8 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import API from '~/api/API'
-import { Channel, ChannelMessage, ChannelUser } from '~/models'
-import { authStore } from '~/store'
+import { Channel, ChannelMessage, ChannelUser, User } from '~/models'
+import { authStore, channelsStore } from '~/store'
 
 @Component
 export default class Viewer extends Vue {
@@ -66,8 +71,77 @@ export default class Viewer extends Vue {
     this.messages = messages
   }
 
+  onDeleted(channel: Channel) {
+    channelsStore.deleteItem(channel)
+
+    this.$router.push({ path: '/channels' })
+    this.$dialog.notify.info('The channel has been deleted')
+  }
+
   onNewMessage(message: ChannelMessage) {
     this.messages.push(message)
+  }
+
+  onUserJoin(channelUser: ChannelUser) {
+    this.users.push(channelUser)
+  }
+
+  onUserLeave(channelUser: ChannelUser) {
+    const index = this.getChannelUserIndex(channelUser)
+
+    if (index !== -1) {
+      this.users.splice(index, 1)
+    }
+  }
+
+  onUserUpdate(channelUser: ChannelUser) {
+    const index = this.getChannelUserIndex(channelUser)
+
+    if (index !== -1) {
+      const previous = this.users[index]
+      this.$set(this.users, index, channelUser)
+
+      if (channelUser.id === authStore.user!.id) {
+        if (channelUser.banned) {
+          this.$router.push({ path: '/channels' })
+          this.$dialog.notify.error('banned')
+        }
+
+        if (channelUser.muted !== previous.muted) {
+          if (channelUser.muted) {
+            this.$dialog.notify.warning('muted')
+          } else {
+            this.$dialog.notify.success('unmuted')
+          }
+        }
+
+        if (channelUser.admin !== previous.admin) {
+          if (channelUser.admin) {
+            this.$dialog.notify.success('promoted')
+          } else {
+            this.$dialog.notify.warning('demoted')
+          }
+        }
+      }
+    }
+  }
+
+  onOwnerTransfer(user: User) {
+    const previous = this.channel!.owner
+
+    if (previous.id !== user.id) {
+      this.channel!.owner = user
+
+      if (user.id === authStore.user!.id) {
+        this.$dialog.notify.success('ownership transfered to you')
+      } else if (previous.id === authStore.user!.id) {
+        this.$dialog.notify.warning('ownership transfered')
+      }
+    }
+  }
+
+  getChannelUserIndex(channelUser: ChannelUser) {
+    return this.users.map((x) => x.id).indexOf(channelUser.id)
   }
 
   get selfChannelUser() {

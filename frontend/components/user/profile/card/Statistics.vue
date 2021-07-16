@@ -7,20 +7,7 @@
         <v-icon>mdi-refresh</v-icon>
       </v-btn>
     </v-card-title>
-    <v-list>
-      <template v-if="statistics != null">
-        <user-statistics-list-item
-          icon="mdi-crown"
-          name="Win Count"
-          :value="statistics.winCount"
-        />
-        <user-statistics-list-item
-          icon="mdi-trophy-broken"
-          name="Loss Count"
-          :value="statistics.lossCount"
-        />
-      </template>
-    </v-list>
+    <user-statistics :statistics="statistics" />
   </v-card>
 </template>
 

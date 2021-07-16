@@ -22,11 +22,11 @@ export default class ChannelService {
   ) {}
 
   public async allNotPrivate() {
-    return await this.repository.findAllNotPrivate()
+    return await this.repository.findAllNotPrivate();
   }
 
   public async allNotDirect() {
-    return await this.repository.findAllNotDirect()
+    return await this.repository.findAllNotDirect();
   }
 
   public async findById(id: number) {
@@ -61,7 +61,7 @@ export default class ChannelService {
     channel.visibility = Channel.Visibility.PRIVATE;
 
     await this.repository.save(channel);
-    
+
     await this.channelUserService.create(channel, user1, false);
     if (!user1.is(user2)) {
       await this.channelUserService.create(channel, user2, false);
@@ -80,10 +80,14 @@ export default class ChannelService {
     await this.channelUserService.setAdmin(channelUser, true);
     await this.repository.save(channel);
 
+    this.socketService.broadcastChannelOwnerTransfer(channel);
+
     return channel;
   }
 
   async delete(channel: Channel) {
     await this.repository.delete(channel);
+
+    this.socketService.broadcastChannelDelete(channel);
   }
 }

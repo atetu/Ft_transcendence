@@ -2,7 +2,7 @@
   <v-card link :to="to" @click="click()">
     <v-card-title>
       {{ channel.name }}
-      <template v-if="isAdmin && (isProtected || isPrivate)">
+      <template v-if="!isAdmin && (isProtected || isPrivate)">
         <v-spacer />
         <channel-visibility-icon :channel="channel" />
         <channel-discover-dialog-unlock ref="unlock" :channel="channel" />
@@ -44,7 +44,7 @@ export default class CompomentImpl extends Vue {
 
   click() {
     if (this.isProtected && !this.isAdmin) {
-      ;(this.$refs.unlock as any).open()
+      ;(this.$refs.unlock as any)?.open()
     }
   }
 }

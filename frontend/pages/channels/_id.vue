@@ -10,5 +10,9 @@ export default class Page extends Vue {
   get id(): number {
     return parseInt(this.$route.params.id)
   }
+
+  destroyed() {
+    this.$socket.client.emit('channel_disconnect')
+  }
 }
 </script>

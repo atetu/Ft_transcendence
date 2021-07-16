@@ -4,8 +4,14 @@
   <div v-else class="fill-height">
     <v-app-bar app clipped-right>
       <v-toolbar-title>
-        {{ title }}
+        <slot name="title">
+          {{ title }}
+        </slot>
       </v-toolbar-title>
+      <template v-if="$scopedSlots['toolbar-right']">
+        <v-spacer />
+        <slot name="toolbar-right" />
+      </template>
     </v-app-bar>
 
     <v-card class="mx-auto fill-height">
@@ -35,7 +41,7 @@
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import { Socket } from 'vue-socket.io-extended'
 import ScrollItem from '~/components/channel/message/ScrollItem.vue'
-import { Channel, ChannelMessage } from '~/models'
+import { Channel, ChannelMessage, ChannelUser, User } from '~/models'
 
 @Component
 export default class Viewer extends Vue {
@@ -69,9 +75,34 @@ export default class Viewer extends Vue {
     }
   }
 
+  @Socket('channel_delete')
+  onChannelDelete(channel: Channel) {
+    this.$emit('deleted', channel)
+  }
+
   @Socket('channel_message')
   onChannelMessage(message: ChannelMessage) {
     this.$emit('message', message)
+  }
+
+  @Socket('channel_user_join')
+  onChannelUserJoin(channelUser: ChannelUser) {
+    this.$emit('joined', channelUser)
+  }
+
+  @Socket('channel_user_leave')
+  onChannelUserLeave(channelUser: ChannelUser) {
+    this.$emit('leaved', channelUser)
+  }
+
+  @Socket('channel_user_update')
+  onChannelUserUpdate(channelUser: ChannelUser) {
+    this.$emit('update', channelUser)
+  }
+
+  @Socket('channel_owner_transfer')
+  onChannelOwnerTransfer(user: User) {
+    this.$emit('transfer', user)
   }
 
   get itemComponent() {

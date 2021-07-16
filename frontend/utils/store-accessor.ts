@@ -3,7 +3,9 @@ import { Store } from 'vuex'
 import { getModule } from 'vuex-module-decorators'
 import AchievementsModule from '~/store/achievements'
 import AuthModule from '~/store/auth'
+import ChannelsModule from '~/store/channels'
 import DirectMessageModule from '~/store/directMessages'
+import RelationshipsModule from '~/store/relationships'
 import SocketModule from '~/store/socket'
 import UIModule from '~/store/ui'
 
@@ -12,6 +14,8 @@ let authStore: AuthModule
 let achievementsStore: AchievementsModule
 let directMessageStore: DirectMessageModule
 let socketStore: SocketModule
+let channelsStore: ChannelsModule
+let relationshipsStore: RelationshipsModule
 
 function initializeStores(store: Store<any>): void {
   uiStore = getModule(UIModule, store)
@@ -19,6 +23,8 @@ function initializeStores(store: Store<any>): void {
   directMessageStore = getModule(DirectMessageModule, store)
   achievementsStore = getModule(AchievementsModule, store)
   socketStore = getModule(SocketModule, store)
+  channelsStore = getModule(ChannelsModule, store)
+  relationshipsStore = getModule(RelationshipsModule, store)
 }
 
 export {
@@ -28,4 +34,6 @@ export {
   directMessageStore,
   authStore,
   socketStore,
+  channelsStore,
+  relationshipsStore,
 }

@@ -33,13 +33,20 @@
             </v-btn>
           </v-col>
           <v-col cols="12" xl="6">
-            <v-btn depressed block color="primary">
-              friend
-              <v-icon right>mdi-account-plus</v-icon>
-            </v-btn>
+            <user-button-friend
+              :user="user"
+              :relationship="relationship"
+              @refresh="refresh"
+            />
           </v-col>
           <v-col cols="12" xl="6">
-            <v-btn outlined block color="primary" :to="toMessage">
+            <v-btn depressed block color="error" @click="askBlock">
+              block
+              <v-icon right>mdi-account-cancel</v-icon>
+            </v-btn>
+          </v-col>
+          <v-col cols="12">
+            <v-btn depressed block color="primary" :to="toMessage">
               message
               <v-icon right>mdi-message-arrow-right</v-icon>
             </v-btn>
@@ -55,13 +62,19 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { User } from '~/models'
-import { authStore } from '~/store'
+import { Relationship, User } from '~/models'
+import { authStore, relationshipsStore } from '~/store'
 
 @Component
 export default class Dot extends Vue {
   @Prop()
   user!: User
+
+  get relationship(): Relationship | null {
+    const { id } = this.user
+
+    return relationshipsStore.list.find((x) => x.peer.id === id) || null
+  }
 
   get isMe() {
     return authStore.user!.id === this.user.id
@@ -85,6 +98,38 @@ export default class Dot extends Vue {
 
   refresh() {
     this.$emit('refresh')
+  }
+
+  askBlock() {
+    this.$dialog.warning({
+      title: 'Blocking confirmation',
+      text: 'Are you sure',
+      actions: [
+        {
+          key: 'yes',
+          text: 'Yes',
+          color: 'error',
+          handler: async () => {
+            try {
+              await this.$axios.$post(`/users/@me/relationships`, {
+                peerId: this.user.id,
+                type: 'block',
+              })
+
+              this.$dialog.notify.success('user blocked')
+
+              this.$emit('refresh')
+            } catch (error) {
+              this.$dialog.notify.error('could not block user')
+            }
+          },
+        },
+        {
+          key: 'cancel',
+          text: 'Cancel',
+        },
+      ],
+    })
   }
 }
 </script>
