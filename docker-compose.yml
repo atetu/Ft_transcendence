@@ -8,6 +8,8 @@ services:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_ROOT_HOST: "%"
       MYSQL_DATABASE: ft_transcendence
+    volumes:
+      - database:/var/lib/mysql
   frontend:
     build:
       context: ./frontend
@@ -26,6 +28,8 @@ services:
       - "mysql"
     links:
       - "mysql:ft-transcendence-mysql"
+    volumes:
+      - pictures:/app/backend/data/pictures
   nginx:
     image: nginx
     restart: always
@@ -41,3 +45,6 @@ services:
     links:
       - "backend:ft-transcendence-backend"
       - "frontend:ft-transcendence-frontend"
+volumes:
+  database:
+  pictures:
