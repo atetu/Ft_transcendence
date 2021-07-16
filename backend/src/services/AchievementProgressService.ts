@@ -28,7 +28,7 @@ export default class AchievementProgressService {
     }
 
     progress = new AchievementProgress();
-    progress.user = Promise.resolve(user);
+    progress.user = user;
     progress.achievement = achievement;
     progress.value = 0;
     progress.unlockedAt = null;

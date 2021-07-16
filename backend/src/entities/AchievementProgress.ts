@@ -12,7 +12,7 @@ export default class AchievementProgress {
   @ManyToOne(() => User, {
     onDelete: "CASCADE",
   })
-  user: Promise<User>;
+  user: User;
 
   @ManyToOne(() => Achievement, {
     eager: true,
