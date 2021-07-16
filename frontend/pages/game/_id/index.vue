@@ -97,6 +97,15 @@ enum setStatusEnum {
   over,
 }
 
+class Sprite {
+  constructor(
+    public x: number,
+    public y: number,
+    public width: number,
+    public height: number
+  ) {}
+}
+
 @Component
 export default class Game extends Vue {
   x = true
@@ -131,8 +140,7 @@ export default class Game extends Vue {
   score2: number = 0
   setStatus: setStatusEnum = setStatusEnum.playing
   roundWinner: number = 1
-  sprite1X: number = 0
-  sprite1Y: number = 0
+  sprite: Sprite | null = null
   activeBtn: boolean = true
   primary = this.$vuetify.theme.themes.dark.primary
 
@@ -263,10 +271,10 @@ export default class Game extends Vue {
       this.ctx.fill()
       this.ctx.closePath()
 
-      if (this.sprite1X != 0)
+      if (this.sprite != null)
       {
           this.ctx.fillStyle = 'white'
-          this.ctx.fillRect(this.sprite1X, this.sprite1Y, 20, 20)
+          this.ctx.fillRect(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height)
       }
       this.ctx.strokeStyle = 'grey'
       this.ctx.moveTo(400, 20)
@@ -300,7 +308,7 @@ export default class Game extends Vue {
 
   @Socket('game_state')
   getDatas(data: any) {
-    const { paddle1, paddle2, ballX, ballY, state, sprite1X, sprite1Y } = data
+    const { paddle1, paddle2, ballX, ballY, state, sprite } = data
     this.ballX = ballX
     this.ballY = ballY
 
@@ -308,9 +316,8 @@ export default class Game extends Vue {
 
     this.paddleRightY = paddle2.y
     this.timer = state
-    this.sprite1X = sprite1X
-    this.sprite1Y = sprite1Y
-    console.log('SPRITE : ' + this.sprite1X)
+    this.sprite = sprite
+   
     if (this.timer === 3) this.status = Status.waiting
       this.activeBtn = true
 

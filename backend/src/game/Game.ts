@@ -66,8 +66,9 @@ export default class Game {
   public score2: number = 0;
   public status: setStatus = setStatus.playing;
   public winner: User;
-  public sprite1X: number = 0;
-  public sprite1Y: number = 0;
+  public sprite: Sprite | null = null;
+  
+
   public sprites: Sprite[] = new Array(3);
 
 
@@ -119,6 +120,14 @@ export default class Game {
     return Math.floor(Math.random() * max);
   }
   
+  defineSprite() {
+    this.sprite = new Sprite(
+      this.getRandomArbitrary(200, 600),
+      this.getRandomArbitrary(150, 450),
+      this.getRandomArbitrary(50,200),
+      this.getRandomArbitrary(50,200)
+    )
+  }
 
   async restart() {
     // await this.sleep(3000);
@@ -132,15 +141,11 @@ export default class Game {
     if (found === 1)
     {
       console.log('sprite found')
-      this.sprite1X = this.getRandomArbitrary(10, 200)
-      this.sprite1Y = this.getRandomArbitrary(40, 100)
-
+      this.defineSprite()
     }
-    console.log('SPRITE1X : ' + this.sprite1X)
-    console.log('SPRITE1Y : ' + this.sprite1Y)
 
-    this.ball.x = this.getRandomArbitrary(10, 600);
-    this.ball.y = this.getRandomArbitrary(10, 400);
+    this.ball.x = this.getRandomArbitrary(200, 400);
+    this.ball.y = this.getRandomArbitrary(200, 600);
     this.paddle1.y = 15;
     this.paddle2.y = 10;
 
@@ -193,6 +198,26 @@ export default class Game {
     return 0;
   }
 
+  collisionSprite()
+  {
+    let paddle: Paddle;
+    let xSide: number;
+    if (this.direction == -1) {
+      paddle = this.paddle1;
+      xSide = this.paddle1.x + 20;
+    } else {
+      paddle = this.paddle2;
+      xSide = this.paddle2.x;
+    }
+
+    if (
+      this.check_up_and_down(paddle.x, paddle.y) === 1 ||
+      this.check_up_and_down(paddle.x, paddle.y + 100) === 1 ||
+      this.check_side(xSide, paddle.y) === 1
+    )
+      return 1;
+  }
+
   collision() {
     let paddle: Paddle;
     let xSide: number;
@@ -210,6 +235,9 @@ export default class Game {
       this.check_side(xSide, paddle.y) === 1
     )
       return 1;
+    
+      if (this.sprite != null)
+        collisionSprite()
     return 0;
   }
 
@@ -294,8 +322,7 @@ export default class Game {
       ballX: this.ball.x,
       ballY: this.ball.y,
       state: this.state,
-      sprite1X: this.sprite1X,
-      sprite1Y: this.sprite1Y
+      sprite: this.sprite,
     });
   }
 
