@@ -52,9 +52,17 @@ export default class ChannelMessageService {
     return message;
   }
 
-  public async delete(message: ChannelMessage) {
+  public async delete(message: ChannelMessage): Promise<void> {
     await this.repository.delete(message);
 
-    // TODO Emit event to socket
+    this.socketService.broadcastChannelMessageDelete(message);
+  }
+
+  public async deleteAllByChannel(channel: Channel): Promise<void> {
+    await this.repository.delete({
+      channel,
+    });
+
+    this.socketService.broadcastChannelMessageDeleteAll(channel);
   }
 }

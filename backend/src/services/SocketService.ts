@@ -24,6 +24,8 @@ export enum ChannelEvent {
   DISCONNECT = "channel_disconnect",
   DELETE = "channel_delete",
   MESSAGE = "channel_message",
+  MESSAGE_DELETE = "channel_message_delete",
+  MESSAGE_DELETE_ALL = "channel_message_delete_all",
   USER_JOIN = "channel_user_join",
   USER_LEAVE = "channel_user_leave",
   USER_UPDATE = "channel_user_update",
@@ -158,6 +160,16 @@ export default class SocketService {
     const channel = message.channel;
 
     this.broadcastToChannel(channel, ChannelEvent.MESSAGE, message);
+  }
+
+  public broadcastChannelMessageDelete(message: ChannelMessage) {
+    const channel = message.channel;
+
+    this.broadcastToChannel(channel, ChannelEvent.MESSAGE_DELETE, message);
+  }
+
+  public broadcastChannelMessageDeleteAll(channel: Channel) {
+    this.broadcastToChannel(channel, ChannelEvent.MESSAGE_DELETE_ALL, channel);
   }
 
   public broadcastChannelUserJoin(channelUser: ChannelUser) {
@@ -307,35 +319,37 @@ export default class SocketService {
     }
   }
 
-  async gameRestart(socket, body){
-    console.log ('game restrt back')
+  async gameRestart(socket, body) {
+    console.log("game restrt back");
     const io = Container.get(socketio.Server);
-    const { gameId, option } = body
-    console.log("option first : " + option)
+    const { gameId, option } = body;
+    console.log("option first : " + option);
     const game: Game | false = this.gameService.gameRestartWaitingRoom(
       gameId,
       socket.data.user,
       option
-    )
-    console.log('game restart : ' + game)
-    if (game !== false)
-    {
-      io.to(game.toRoom()).emit('game_restart', { gameId: game.id })
-      game.restart()
-      console.log('starting....')
+    );
+    console.log("game restart : " + game);
+    if (game !== false) {
+      io.to(game.toRoom()).emit("game_restart", { gameId: game.id });
+      game.restart();
+      console.log("starting....");
     }
   }
 
   async matchMaking(socket: Socket) {
     const io = Container.get(socketio.Server);
-    console.log('matchMaking')
-    const game: Game = this.matchMakingService.addSocket(socket)
-    console.log('game : ' + game)
-    if (game != undefined)
-    {
-      io.to(game.toRoom()).emit('game_starting', { player1: game.player1.id, player2: game.player2.id, gameId: game.id })
-      game.start()
-      console.log('starting....')
+    console.log("matchMaking");
+    const game: Game = this.matchMakingService.addSocket(socket);
+    console.log("game : " + game);
+    if (game != undefined) {
+      io.to(game.toRoom()).emit("game_starting", {
+        player1: game.player1.id,
+        player2: game.player2.id,
+        gameId: game.id,
+      });
+      game.start();
+      console.log("starting....");
     }
   }
 
