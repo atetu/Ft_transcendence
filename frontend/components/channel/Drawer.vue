@@ -27,6 +27,11 @@
 
     <v-divider />
 
+    <template v-if="$scopedSlots['before']">
+      <slot name="before" />
+      <v-divider />
+    </template>
+
     <slot :items="filteredItems" />
 
     <template #append>

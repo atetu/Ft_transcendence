@@ -7,6 +7,9 @@
       :filterer="filterer"
       @refresh="$fetch"
     >
+      <template #before>
+        <relationship-top-item />
+      </template>
       <template #default="{ items }">
         <direct-message-list :direct-messages="items" />
       </template>
