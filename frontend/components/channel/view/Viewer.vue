@@ -8,6 +8,8 @@
     :messages="messages"
     @deleted="onDeleted"
     @message="onNewMessage"
+    @message-deleted="onMessageDelete"
+    @message-deleted-all="onClear"
     @joined="onUserJoin"
     @leaved="onUserLeave"
     @update="onUserUpdate"
@@ -80,6 +82,19 @@ export default class Viewer extends Vue {
 
   onNewMessage(message: ChannelMessage) {
     this.messages.push(message)
+  }
+
+  onMessageDelete(message: ChannelMessage) {
+    const { id } = message
+    const index = this.messages.findIndex((x) => x.id === id)
+
+    if (index !== -1) {
+      this.messages.splice(index, 1)
+    }
+  }
+
+  onClear(_channel: Channel) {
+    this.messages.splice(0)
   }
 
   onUserJoin(channelUser: ChannelUser) {

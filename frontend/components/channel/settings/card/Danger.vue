@@ -33,8 +33,14 @@ export default class Edit extends Vue {
         try {
           await this.$axios.delete(`/channels/${this.channel.id}/messages`)
           this.$router.push(`/channels/${this.channel.id}`)
+
+          this.$dialog.notify.success('Successfully cleared messages')
         } catch (error) {
-          alert(error) // TODO
+          this.$dialog.notify.error(
+            `Could not clear messages: ${
+              error?.response?.data?.errors?.message || error
+            }`
+          )
         }
       }
     })
@@ -52,7 +58,11 @@ export default class Edit extends Vue {
           this.$store.dispatch('channels/fetchAll')
           this.$router.push('/channels')
         } catch (error) {
-          alert(error) // TODO
+          this.$dialog.notify.error(
+            `Could not delete channel: ${
+              error?.response?.data?.errors?.message || error
+            }`
+          )
         }
       }
     })
