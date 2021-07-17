@@ -1,7 +1,7 @@
 <template>
   <relationship-item-base :relationship="relationship">
     <template #icons>
-      <v-btn icon :loading="loading" @click.prevent="accept">
+      <v-btn v-if="canAccept" icon :loading="loading" @click.prevent="accept">
         <v-icon>mdi-check-bold</v-icon>
       </v-btn>
       <v-btn icon :loading="loading" @click.prevent="refuse">
@@ -23,6 +23,10 @@ export default class ComponentImpl extends Vue {
 
   loading = false
 
+  get canAccept(): boolean {
+    return this.relationship.type === RelationshipType.INCOMING
+  }
+
   async accept() {
     if (this.loading) {
       return
@@ -33,12 +37,15 @@ export default class ComponentImpl extends Vue {
     try {
       const { peer } = this.relationship
 
-      await this.$axios.$post(`/users/@me/relationships`, {
-        peerId: peer.id,
-        type: RelationshipType.FRIEND,
-      })
+      const response: Relationship = await this.$axios.$post(
+        `/users/@me/relationships`,
+        {
+          peerId: peer.id,
+          type: RelationshipType.FRIEND,
+        }
+      )
 
-      relationshipsStore.deleteItem(peer)
+      relationshipsStore.updateItem(response)
     } catch (error) {
       this.$dialog.notify.error(`Could not unblock: ${error}`)
     }
