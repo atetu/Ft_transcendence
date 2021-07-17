@@ -50,8 +50,8 @@ export default class Default extends Vue {
       url: '/',
     },
     {
-      title: 'direct messages',
-      icon: 'message',
+      title: 'social plaza',
+      icon: 'human-greeting-proximity',
       url: '/direct-messages',
     },
     {

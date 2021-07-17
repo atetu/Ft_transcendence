@@ -15,10 +15,16 @@
         md="4"
         lg="3"
       >
+      <v-card-title class="headline">
+      <v-spacer /><v-icon right>mdi-human-handsup</v-icon>
+      Amis
+      <v-spacer />
+    </v-card-title>
         <v-card>
           <v-card-title>{{ relationship.peer.username }}</v-card-title>
           <v-card-subtitle>{{ relationship.type }}</v-card-subtitle>
         </v-card>
+        
       </v-col>
     </v-row>
   </v-main>
