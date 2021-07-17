@@ -2,7 +2,7 @@ version: '2.0'
 services:
   mysql:
     image: mysql:5
-    ports:
+    expose:
     - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
@@ -13,17 +13,13 @@ services:
   frontend:
     build:
       context: ./frontend
-    ports:
-    - "3000:3000"
     expose:
-    - "3000"
+    - "3000:3000"
   backend:
     build:
       context: ./backend
-    ports:
-    - "3001:3001"
     expose:
-    - "3001"
+    - "3001:3001"
     depends_on:
       - "mysql"
     links:
@@ -37,8 +33,6 @@ services:
       - "./docker/nginx/default.compose.conf:/etc/nginx/conf.d/default.conf:ro"
     ports:
     - "80:80"
-    expose:
-    - "80"
     depends_on:
       - "backend"
       - "frontend"
