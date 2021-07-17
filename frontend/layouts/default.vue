@@ -65,11 +65,6 @@ export default class Default extends Vue {
       url: '/users',
     },
     {
-      title: 'relationships',
-      icon: 'account-group',
-      url: '/relationships',
-    },
-    {
       title: 'achievements',
       icon: 'trophy-award',
       url: '/achievements',
