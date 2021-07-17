@@ -1,7 +1,7 @@
 <template>
   <v-list>
     <channel-user-item
-      v-for="user in users"
+      v-for="user in nonBanned"
       :key="user.id"
       :user="user"
       :channel="channel"
@@ -21,5 +21,9 @@ export default class Drawer extends Vue {
 
   @Prop({ type: Array })
   users!: ChannelUser[]
+
+  get nonBanned() {
+    return this.users.filter((x) => !x.banned)
+  }
 }
 </script>
