@@ -9,14 +9,26 @@
         <p class="login" v-if="player1">{{ player1.username }}</p>
         <p class="score">{{ this.score1 }}</p>
         <p>
-        <v-btn v-if="status === 3" :disabled="(mySide == 1 && activeBtn == true)? false : true" elevation="2" :color= "primary"
-        @click="restart"
-        > RESTART</v-btn>
+          <v-btn
+            v-if="status === 3"
+            :disabled="mySide == 1 && activeBtn == true ? false : true"
+            elevation="2"
+            :color="primary"
+            @click="restart"
+          >
+            RESTART</v-btn
+          >
         </p>
         <p>
-         <v-btn v-if="status === 3 && roundWinner === 1" :disabled="(mySide == 1 && activeBtn == true)? false : true" elevation="1" :color= "primary"
-        @click="restart"
-        > RESTART WITH OPTIONS</v-btn>
+          <v-btn
+            v-if="status === 3 && roundWinner === 1"
+            :disabled="mySide == 1 && activeBtn == true ? false : true"
+            elevation="1"
+            :color="primary"
+            @click="restart"
+          >
+            RESTART WITH OPTIONS</v-btn
+          >
         </p>
       </v-col>
 
@@ -35,14 +47,26 @@
         <p class="login" v-if="player2">{{ player2.username }}</p>
         <p class="score">{{ this.score2 }}</p>
         <p>
-         <v-btn v-if="status === 3" :disabled="(mySide === 2 && activeBtn == true)? false : true" elevation="2" :color= "primary"
-        @click="restart"
-        > RESTART</v-btn>
+          <v-btn
+            v-if="status === 3"
+            :disabled="mySide === 2 && activeBtn == true ? false : true"
+            elevation="2"
+            :color="primary"
+            @click="restart"
+          >
+            RESTART</v-btn
+          >
         </p>
         <p>
-         <v-btn v-if="status === 3 && roundWinner === 2" :disabled="(mySide === 2 && activeBtn == true) ? false : true" elevation="1" :color= "primary"
-        @click="restartWithOption"
-        > RESTART WITH OPTIONS</v-btn>
+          <v-btn
+            v-if="status === 3 && roundWinner === 2"
+            :disabled="mySide === 2 && activeBtn == true ? false : true"
+            elevation="1"
+            :color="primary"
+            @click="restartWithOption"
+          >
+            RESTART WITH OPTIONS</v-btn
+          >
         </p>
       </v-col>
     </v-row>
@@ -67,7 +91,7 @@
 }
 
 #custom-disabled.v-btn--disabled {
-    background-color: red !important;
+  background-color: red !important;
 }
 
 .score {
@@ -106,6 +130,7 @@ class Sprite {
   ) {}
 }
 
+
 @Component
 export default class Game extends Vue {
   x = true
@@ -143,6 +168,8 @@ export default class Game extends Vue {
   sprite: Sprite | null = null
   activeBtn: boolean = true
   primary = this.$vuetify.theme.themes.dark.primary
+  velPaddle: number = 4
+  factor: number = 1
 
   get id() {
     return this.$route.params.id
@@ -152,7 +179,7 @@ export default class Game extends Vue {
     // console.log(event.key)
     switch (event.key) {
       case 'ArrowDown': {
-        if ((this.status = Status.playing)) {
+        if ((this.status === Status.playing)) {
           this.down = true
           // console.log('down')
           // console.log('myside: ' + this.mySide)
@@ -160,7 +187,7 @@ export default class Game extends Vue {
         }
       }
       case 'ArrowUp': {
-        if ((this.status = Status.playing)) {
+        if ((this.status === Status.playing)) {
           this.up = true
           break
         }
@@ -168,32 +195,24 @@ export default class Game extends Vue {
     }
   }
 
-  restart()
-  {
+  restart() {
     console.log('restart')
     // this.x = false
     this.activeBtn = false
-    this.$socket.client.emit(
-        'game_restart',
-        {
-          gameId: this.id,
-          option: 0,
-        },
-    )
+    this.$socket.client.emit('game_restart', {
+      gameId: this.id,
+      option: 0,
+    })
   }
 
-  restartWithOption()
-  {
+  restartWithOption() {
     console.log('restart')
     this.x = false
     this.activeBtn = false
-    this.$socket.client.emit(
-        'game_restart',
-        {
-          gameId: this.id,
-          option: 1,
-        },
-    )
+    this.$socket.client.emit('game_restart', {
+      gameId: this.id,
+      option: 1,
+    })
   }
 
   update_paddle() {
@@ -202,8 +221,8 @@ export default class Game extends Vue {
     let prevY: number = 0
     let Y: number = 0
     let nb: number = 0
-    if (this.up) nb = -2
-    else if (this.down) nb = 2
+    if (this.up) nb = this.velPaddle * -1 * this.factor
+    else if (this.down) nb = this.velPaddle * this.factor
     this.up = false
     this.down = false
     if (this.mySide == 1) {
@@ -265,17 +284,23 @@ export default class Game extends Vue {
       this.ctx.fillStyle = `${this.$vuetify.theme.themes.dark.primary}`
       this.ctx.fillRect(0, 0, this.width, this.height)
 
+      if (this.sprite != null) {
+        console.log('inside sprite')
+        this.ctx.fillStyle = 'white'
+        this.ctx.fillRect(
+          this.sprite.x,
+          this.sprite.y,
+          this.sprite.width,
+          this.sprite.height
+        )
+      }
       this.ctx.beginPath()
       this.ctx.arc(this.ballX, this.ballY, 15, 0, Math.PI * 2)
       this.ctx.fillStyle = 'white'
       this.ctx.fill()
       this.ctx.closePath()
 
-      if (this.sprite != null)
-      {
-          this.ctx.fillStyle = 'white'
-          this.ctx.fillRect(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height)
-      }
+     
       this.ctx.strokeStyle = 'grey'
       this.ctx.moveTo(400, 20)
       this.ctx.lineTo(400, 580)
@@ -308,7 +333,7 @@ export default class Game extends Vue {
 
   @Socket('game_state')
   getDatas(data: any) {
-    const { paddle1, paddle2, ballX, ballY, state, sprite } = data
+    const { paddle1, paddle2, ballX, ballY, state, sprite, factor } = data
     this.ballX = ballX
     this.ballY = ballY
 
@@ -317,14 +342,19 @@ export default class Game extends Vue {
     this.paddleRightY = paddle2.y
     this.timer = state
     this.sprite = sprite
-   
+    this.factor = factor
+    console.log('FACTOR: ' + this.factor)
+    // if (this.sprite != null)
+    //   console.log('SPRITE X : ' + this.sprite.x)
+    // else
+    //   console.log('SPRITE NUL')
     if (this.timer === 3) this.status = Status.waiting
-      this.activeBtn = true
+    this.activeBtn = true
 
     // console.log('timer: ' + this.timer)
     if (this.timer === -1 && this.status === Status.waiting) {
       this.status = Status.playing
-        this.activeBtn = true
+      this.activeBtn = true
     }
     // console.log('game statae left: ' + this.paddleLeftY)
     // console.log('game state right: ' + this.paddleRightY)
@@ -340,10 +370,8 @@ export default class Game extends Vue {
     var prev_score1 = this.score1
     this.score1 = score1
     this.score2 = score2
-    if (this.score1 > prev_score1)
-      this.roundWinner = 1
-    else
-      this.roundWinner = 2
+    if (this.score1 > prev_score1) this.roundWinner = 1
+    else this.roundWinner = 2
     this.setStatus = setStatus
     // console.log('OVERRRRR')
     // console.log('roundWinner = ' + this.roundWinner)
@@ -354,22 +382,22 @@ export default class Game extends Vue {
     //   clearInterval(this.autoSaveInterval)
   }
 
-//   @Socket('game_over')
-//  gameRestart() {
-  
-//     if (winner != null) {
-//       let winnerFt: User = winner
-//       this.message = winnerFt.username + ' wins!'
-//     }
-//     this.score1 = score1
-//     this.score2 = score2
-//     this.setStatus = setStatus
-//     console.log('OVERRRRR')
-//     // this.timer = -2
-//     this.status = Status.over
-//     console.log('status after over: ' + this.status)
-//     // if (this.autoSaveInterval)
-//     //   clearInterval(this.autoSaveInterval)
-//   }
+  //   @Socket('game_over')
+  //  gameRestart() {
+
+  //     if (winner != null) {
+  //       let winnerFt: User = winner
+  //       this.message = winnerFt.username + ' wins!'
+  //     }
+  //     this.score1 = score1
+  //     this.score2 = score2
+  //     this.setStatus = setStatus
+  //     console.log('OVERRRRR')
+  //     // this.timer = -2
+  //     this.status = Status.over
+  //     console.log('status after over: ' + this.status)
+  //     // if (this.autoSaveInterval)
+  //     //   clearInterval(this.autoSaveInterval)
+  //   }
 }
 </script>

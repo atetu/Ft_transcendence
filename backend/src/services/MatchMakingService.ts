@@ -192,8 +192,18 @@ export default class MatchMakingService {
     if (room.isEmpty()) {
       this.gatekeeper.destroyRoom(room);
     }
+    console.log('Pending Game')
+    if (pendingGame){
+     console.log('here')
+     console.log(pendingGame.map)
+     console.log(pendingGame.map)
+     console.log(pendingGame.paddleVelocity)
 
-    const game = this.gameService.start(first, second);
+    }
+    else
+      console.log('not here')
+
+    const game = this.gameService.start(first, second, pendingGame);
 
     this.socketService.broadcastGameStarting(game);
 

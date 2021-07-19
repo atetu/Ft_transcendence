@@ -49,8 +49,15 @@ export default class Avatar extends Vue {
     return socketStore.connectedUserIds.includes(this.user.id)
   }
 
+  get playing(): boolean{
+    return socketStore.playingUserIds.includes(this.user.id)
+  }
+
   get color(): string {
-    return this.online ? 'green' : 'red'
+    let color: string
+    color = this.online ? 'green' : 'red'
+    color = this.playing? 'yellow' : color
+    return color
   }
 
   get outlineStyle() {

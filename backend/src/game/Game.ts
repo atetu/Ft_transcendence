@@ -47,6 +47,12 @@ class Sprite {
   ) {}
 }
 
+export interface GameSettings {
+  map: number;
+  ballVelocity: number;
+  paddleVelocity: number;
+}
+
 export default class Game {
   private interval?: ReturnType<typeof setInterval>;
   // private users: User[]
@@ -57,8 +63,8 @@ export default class Game {
   // private player2: User | null = null
   private direction: number = 1;
   // private status: string
-  private velX: number = 2;
-  private velY: number = 1;
+  private velX: number = 3.5;
+  private velY: number = 1.5;
   public connected: number = 0;
   public id: number | null = null;
   public state: number = 3;
@@ -66,20 +72,41 @@ export default class Game {
   public score2: number = 0;
   public status: setStatus = setStatus.playing;
   public winner: User;
-  public sprite: Sprite | null = null;
-  
+  public sprites: Sprite[] = [
+    { x: 0, y: 0, width: 0, height: 0 },
+    { x: 200, y: 150, width: 100, height: 200 },
+    { x: 600, y: 300, width: 50, height: 200 },
+    { x: 300, y: 300, width: 150, height: 50 },
+  ];
+  // public sprite: Sprite = new Sprite(0, 0, 0, 0);
+  public sprite: Sprite | null;
+  public change: boolean = false;
+  public settings: GameSettings;
+  // / this.sprite = new Sprite(
+  //   this.getRandomArbitrary(200, 600),
+  //   this.getRandomArbitrary(150, 450),
+  //   this.getRandomArbitrary(50,200),
+  //   this.getRandomArbitrary(50,200)
 
-  public sprites: Sprite[] = new Array(3);
-
+  // public sprites: Sprite[] = new Array(3);
 
   public matchService = Container.get(MatchService);
   public userStatisticsService = Container.get(UserStatisticsService);
   public waitingRoom: User[] = new Array(2);
   public waitingRoomOption: number[] = new Array(2);
 
-
-
-  constructor(public player1: User, public player2: User) {}
+  constructor(
+    public player1: User,
+    public player2: User,
+    settings?: GameSettings
+  ) {
+    this.settings = settings || {
+      map: 0,
+      paddleVelocity: 1,
+      ballVelocity: 1,
+    };
+    this.sprite = this.sprites[this.settings.map];
+  }
 
   public toRoom(): string {
     return `game_${this.id}`;
@@ -109,7 +136,11 @@ export default class Game {
       this.interval = setInterval(() => this.loop(), 1000 / 20);
     }
     this.decount();
-    console.log("end of start");
+    console.group('STARRTTTTTTTTTTTTTTTT')
+    console.log('Map : ' + this.settings.map)
+    console.log('ball : ' + this.settings.ballVelocity)
+    console.log('paddle : ' + this.settings.paddleVelocity)
+    // console.log("end of start");
   }
 
   getRandomArbitrary(min: number, max: number) {
@@ -119,43 +150,51 @@ export default class Game {
   getRandomInt(max: number) {
     return Math.floor(Math.random() * max);
   }
-  
-  defineSprite() {
-    // this.sprite = new Sprite(
-    //   this.getRandomArbitrary(200, 600),
-    //   this.getRandomArbitrary(150, 450),
-    //   this.getRandomArbitrary(50,200),
-    //   this.getRandomArbitrary(50,200)
-    // )
-    this.sprite = new Sprite(100,0,20,600)
-  }
+
+  // defineSprite() {
+  //   // this.sprite = new Sprite(
+  //   //   this.getRandomArbitrary(200, 600),
+  //   //   this.getRandomArbitrary(150, 450),
+  //   //   this.getRandomArbitrary(50,200),
+  //   //   this.getRandomArbitrary(50,200)
+  //   // )
+  //   let index = this.getRandomInt(2);
+  //   // console.log ('INDEX : ' + index)
+  //   //this.sprite = this.sprites[index]
+  //   this.sprite = new Sprite(200, 200, 500, 50);
+  //   // this.sprite.x = this.sprites[index].x
+  //   // this.sprite.y = this.sprites[index].y
+  //   // this.sprite.width = this.sprites[index].width
+  //   // this.sprite.height = this.sprites[index].height
+  // }
 
   async restart() {
     // await this.sleep(3000);
     // if (this.waitingRoomOption)
-    // console.log('restartWaitingRoom')
-    let found:number = 0
-      found = this.waitingRoomOption.find(function (element) {
-      return (element === 1);
-    });
-    console.log('Found: ' + found)
-    if (found === 1)
-    {
-      console.log('sprite found')
-      this.defineSprite()
-    }
+    // // console.log('restartWaitingRoom')
+    // let found: number = 0;
+    // found = this.waitingRoomOption.find(function (element) {
+    //   return element === 1;
+    // });
+    // // console.log('Found: ' + found)
+    // if (found === 1) {
+    //   // console.log('sprite found')
+    //   this.defineSprite();
+    //   // console.log("SPRITE X " + this.sprite.x)
+    // }
 
     this.ball.x = this.getRandomArbitrary(350, 450);
     this.ball.y = this.getRandomArbitrary(250, 350);
     this.paddle1.y = 15;
-    this.paddle2.y = 10;
+    this.paddle2.y = 15;
 
-    this.direction = this.getRandomInt(1) ? 1 : -1
+    this.direction = this.getRandomInt(1) ? 1 : -1;
     this.state = 3;
 
     this.status = setStatus.playing;
-    this.waitingRoomOption.length = 0
-    this.waitingRoom.length = 0
+    this.waitingRoomOption.length = 0;
+    this.waitingRoom.length = 0;
+
     this.interval = setInterval(() => this.loop(), 1000 / 20);
     this.decount();
   }
@@ -199,7 +238,7 @@ export default class Game {
     return 0;
   }
 
-  check_up_and_downSprite(x: number, y: number, w:number) {
+  check_up_and_downSprite(x: number, y: number, w: number) {
     let i: number = x;
     while (i <= x + w) {
       let ret: number = this.check_collision(i, y);
@@ -221,8 +260,7 @@ export default class Game {
     return 0;
   }
 
-  collisionSprite()
-  {
+  collisionSprite() {
     let xSide: number;
     if (this.direction == -1) {
       xSide = this.sprite.x + this.sprite.width;
@@ -231,13 +269,21 @@ export default class Game {
     }
 
     if (
-      this.check_up_and_downSprite(xSide, this.sprite.y, this.sprite.width) === 1 ||
-      this.check_up_and_downSprite(xSide, this.sprite.y + this.sprite.height, this.sprite.width) === 1 ||
-      this.check_sideSprite(xSide, this.sprite.y, this.sprite.height) === 1
+      this.check_up_and_downSprite(
+        this.sprite.x,
+        this.sprite.y,
+        this.sprite.width
+      ) === 1 ||
+      this.check_up_and_downSprite(
+        this.sprite.x,
+        this.sprite.y + this.sprite.height,
+        this.sprite.width
+      ) === 1
     )
       return 1;
-    else
-      return 0;
+    if (this.check_sideSprite(xSide, this.sprite.y, this.sprite.height) === 1)
+      return 2;
+    else return 0;
   }
 
   collision() {
@@ -254,32 +300,47 @@ export default class Game {
     if (
       this.check_up_and_down(paddle.x, paddle.y) === 1 ||
       this.check_up_and_down(paddle.x, paddle.y + 100) === 1 ||
-      this.check_side(xSide, paddle.y) === 1
-    )
-      return 1;
-    
-      if (this.sprite != null)
-        return(this.collisionSprite())
+      this.check_side(xSide, paddle.y) === 1) 
+        return 2;
+
+    if (this.sprite != null) return this.collisionSprite();
     return 0;
   }
 
   updateBall() {
-    let radius = 15 * this.direction;
+    let radius = 15;
+    let changeVel: boolean = false;
+    let changeDir: boolean = false;
+    let blockChange: boolean = false;
 
-    if (this.ball.x + radius <= 0 || this.ball.x + radius >= 800) {
+    if (this.ball.x - radius <= 0 || this.ball.x + radius >= 800) {
       return 0;
     }
-    if (this.ball.y + radius <= 0 || this.ball.y - radius >= 600)
-      this.velY *= -1;
+    if (this.ball.y - radius <= 0 || this.ball.y + radius >= 600) {
+      if (this.change === false) {
+        // this.velY *= -1
+        changeVel = true;
+      } else blockChange = true;
+    }
 
     let ret: number = this.collision();
 
-    if (ret === 1) this.direction *= -1;
+    if (ret === 2) this.direction *= -1;
+    if (ret === 1) {
+      if (this.change === false) changeVel = true;
+      else blockChange = true;
+      // changeDir = true
+    }
 
-    this.ball.x = this.ball.x + this.velX * this.direction;
-    this.ball.x = this.ball.x;
-    this.ball.y = this.ball.y + this.velY;
-    this.ball.y = this.ball.y;
+    if (changeVel) {
+      this.velY *= -1;
+      this.change = true;
+    } else if (!blockChange) this.change = false;
+
+    this.ball.x = this.ball.x + this.velX * this.direction * this.settings.ballVelocity;
+    // this.ball.x = this.ball.x;
+    this.ball.y = this.ball.y + this.velY * this.settings.ballVelocity;
+    // this.ball.y = this.ball.y;
     return 1;
   }
 
@@ -336,6 +397,11 @@ export default class Game {
       }
       // this.restart();
     }
+    // if (this.sprite != null)
+    //   console.log('SPITE BEFORE SEND: ' + this.sprite.x)
+    // else
+    //   console.log('SPITE AFTER SEND: ')
+
     io.to(this.toRoom()).emit("game_state", {
       player1: this.player1,
       player2: this.player2,
@@ -345,6 +411,7 @@ export default class Game {
       ballY: this.ball.y,
       state: this.state,
       sprite: this.sprite,
+      factor: this.settings.paddleVelocity,
     });
   }
 
@@ -352,57 +419,49 @@ export default class Game {
     if (y < 0 || y > 500) return false;
     else {
       if (player.id == this.player1.id) {
-        console.log("player1 - paddle1");
+        // console.log("player1 - paddle1");
         this.paddle1.y = y;
-        console.log(this.paddle1.y);
+        // console.log(this.paddle1.y);
       } else if (player.id == this.player2.id) {
-        console.log("player2 - paddle2");
+        // console.log("player2 - paddle2");
 
         this.paddle2.y = y;
-        console.log(this.paddle2.y);
+        // console.log(this.paddle2.y);
       }
     }
     return true;
   }
 
   restartWaitingRoom(player: User, option: number) {
-    console.log('restartWaitingRoom')
-    let found:User | null
-    if (this.waitingRoom)
-    {
-        found = this.waitingRoom.find(function (element) {
-        return (element === player);
+    // console.log('restartWaitingRoom')
+    let found: User | null;
+    if (this.waitingRoom) {
+      found = this.waitingRoom.find(function (element) {
+        return element === player;
       });
-      console.log('restartWaitingRoom2')
-    if (found === undefined)
-    {
-      this.waitingRoom.push(player)
-      this.waitingRoomOption.push(option)
-      let found2: User | null
-      found2 = this.waitingRoom.find(function (element) {
-        return (element === player);
-      });
-      if (found2 === player)
-        console.log ('find working')
-      else 
-        console.log ('find not working')
-      console.log ('option : ' + option)
-
+      // console.log('restartWaitingRoom2')
+      if (found === undefined) {
+        this.waitingRoom.push(player);
+        this.waitingRoomOption.push(option);
+        let found2: User | null;
+        found2 = this.waitingRoom.find(function (element) {
+          return element === player;
+        });
+        // if (found2 === player)
+        //   console.log ('find working')
+        // else
+        //   console.log ('find not working')
+        // console.log ('option : ' + option)
+      }
+    } else {
+      this.waitingRoom.push(player);
+      this.waitingRoomOption.push(option);
+      // console.log('restartWaitingRoom3 bis')
     }
-  }
-    else
-    {
-      this.waitingRoom.push(player)
-      this.waitingRoomOption.push(option)
-      console.log('restartWaitingRoom3 bis')
+    if (this.waitingRoom) {
+      if (Object.keys(this.waitingRoom).length === 2) return this;
+      // console.log('restartWaitingRoom4')
     }
-    if (this.waitingRoom)
-    {
-    if (Object.keys(this.waitingRoom).length === 2)
-      return this
-    console.log('restartWaitingRoom4')
-    }
-    console.log('restartWaitingRoom5')
-
+    // console.log('restartWaitingRoom5')
   }
 }

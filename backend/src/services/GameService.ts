@@ -1,5 +1,6 @@
 import { Socket } from "socket.io";
 import { Service } from "typedi";
+import PendingGame from "../entities/PendingGame";
 import User from "../entities/User";
 import Game from "../game/Game";
 
@@ -34,9 +35,9 @@ export default class GameService {
     return game.restartWaitingRoom(player, option);
   }
 
-  public start(first: Socket, second: Socket): Game {
-    const game = new Game(first.data.user, second.data.user);
-
+  public start(first: Socket, second: Socket, pendingGame?: PendingGame): Game {
+    const game = new Game(first.data.user, second.data.user, pendingGame);
+    console.log('Gameservice start')
     this.provideId(game);
 
     first.join(game.toRoom());

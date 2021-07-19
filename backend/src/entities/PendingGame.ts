@@ -1,11 +1,12 @@
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { GameSettings } from "../game/Game";
 import ChannelMessage from "./ChannelMessage";
 import User from "./User";
 
 @Entity({
   name: "pending_games",
 })
-export default class PendingGame {
+export default class PendingGame implements GameSettings {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -28,6 +29,15 @@ export default class PendingGame {
     onDelete: "CASCADE",
   })
   message: Promise<ChannelMessage>;
+
+  @Column()
+  map: number
+
+  @Column()
+  ballVelocity: number
+
+  @Column()
+  paddleVelocity: number
 
   public toJSON() {
     return {

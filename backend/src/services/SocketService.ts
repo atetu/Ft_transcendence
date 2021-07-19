@@ -342,9 +342,14 @@ export default class SocketService {
   public broadcastGameStarting(game: Game) {
     this.broadcastToGame(game, GameEvent.STARTING, {
       id: game.id,
-      player1: game.player2,
+      player1: game.player1,
       player2: game.player2,
     });
+
+
+    const io = Container.get(socketio.Server);
+    io.emit("client_playing_join", game.player2.id);
+    io.emit("client_playing_join", game.player2.id);
   }
 
   private broadcastToChannel(
