@@ -40,10 +40,11 @@
             />
           </v-col>
           <v-col cols="12" xl="6">
-            <v-btn depressed block color="error" @click="askBlock">
-              block
-              <v-icon right>mdi-account-cancel</v-icon>
-            </v-btn>
+            <user-button-block
+              :user="user"
+              :relationship="relationship"
+              @refresh="refresh"
+            />
           </v-col>
           <v-col cols="12">
             <v-btn depressed block color="primary" :to="toMessage">
