@@ -1,15 +1,6 @@
 <template>
   <v-app dark :class="classes">
-    <v-system-bar app>
-      ft-transcendence
-      <v-spacer />
-      <template v-if="$socket.connected">
-        {{ connectedCount }}
-        <v-icon>mdi-account-group</v-icon>
-        <v-icon color="green">mdi-power-plug</v-icon>
-      </template>
-      <v-icon v-else color="red">mdi-power-plug-off</v-icon>
-    </v-system-bar>
+    <system-bar />
 
     <v-navigation-drawer v-model="drawer" app fixed mini-variant>
       <navigation-profile-dot />
