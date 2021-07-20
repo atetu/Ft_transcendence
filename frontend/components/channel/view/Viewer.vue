@@ -6,6 +6,7 @@
     :title="title"
     :channel="channel"
     :messages="messages"
+    @updated="onUpdate"
     @deleted="onDeleted"
     @message="onNewMessage"
     @message-deleted="onMessageDelete"
@@ -71,6 +72,12 @@ export default class Viewer extends Vue {
     this.channel = channel
     this.users = users
     this.messages = messages
+  }
+
+  onUpdate(channel: Channel) {
+    if (this.channel?.id === channel.id) {
+      this.channel = channel
+    }
   }
 
   onDeleted(channel: Channel) {
