@@ -124,11 +124,14 @@ export default class Edit extends Vue {
 
       this.$router.push(`/channels/${channel.id}`)
     } catch (error) {
-      if (error.response?.status === 400) {
+      if (
+        error.response?.status === 400 &&
+        'validation' in error.response.data
+      ) {
         this.error = 'validation error'
         JoiHelper.extract(error.response.data.validation, this.validationErrors)
       } else {
-        this.error = error
+        this.error = error?.response?.data?.errors?.message || error
       }
     }
 
