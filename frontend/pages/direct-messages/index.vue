@@ -7,16 +7,18 @@
   />
   <div v-else class="fill-height" style="overflow: auto">
     <v-tabs v-model="tab" fixed-tabs>
-      <v-tab v-for="item in items" :key="item.title">
-        <v-icon left>mdi-{{ item.icon }}</v-icon>
-        {{ item.title }}
+      <v-tab v-for="{ category, icon } in tabs" :key="category">
+        <v-icon left>mdi-{{ icon }}</v-icon>
+        {{ $t(`relationship.tab.${category}._`) }}
       </v-tab>
 
       <v-tabs-items v-model="tab">
-        <relationship-tab category="online" :relationships="online" />
-        <relationship-tab category="all" :relationships="friends" />
-        <relationship-tab category="pending" :relationships="pending" />
-        <relationship-tab category="blocked" :relationships="blocked" />
+        <relationship-tab
+          v-for="{ category, relationships } in tabs"
+          :key="category"
+          :category="category"
+          :relationships="relationships"
+        />
       </v-tabs-items>
     </v-tabs>
   </div>
@@ -30,24 +32,30 @@ import { relationshipsStore, socketStore } from '~/store'
 @Component
 export default class Page extends Vue {
   defaultTab = 1
-  items = [
-    {
-      title: 'online',
-      icon: 'access-point',
-    },
-    {
-      title: 'friends',
-      icon: 'human-greeting',
-    },
-    {
-      title: 'pending',
-      icon: 'motion-pause',
-    },
-    {
-      title: 'blocked',
-      icon: 'block-helper',
-    },
-  ]
+  get tabs() {
+    return [
+      {
+        category: 'online',
+        icon: 'access-point',
+        relationships: this.online,
+      },
+      {
+        category: 'friends',
+        icon: 'human-greeting',
+        relationships: this.friends,
+      },
+      {
+        category: 'pending',
+        icon: 'motion-pause',
+        relationships: this.pending,
+      },
+      {
+        category: 'blocked',
+        icon: 'block-helper',
+        relationships: this.blocked,
+      },
+    ]
+  }
 
   head() {
     return {

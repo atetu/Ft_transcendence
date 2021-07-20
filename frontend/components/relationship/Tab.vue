@@ -1,7 +1,9 @@
 <template>
   <v-tab-item>
     <v-card flat>
-      <v-card-title>{{ category }} - {{ count }}</v-card-title>
+      <v-card-title class="text-overline">
+        {{ translatedCategory }} — {{ count }}
+      </v-card-title>
       <v-list v-if="relationships.length">
         <component
           :is="itemImpl"
@@ -10,7 +12,9 @@
           :relationship="relationship"
         />
       </v-list>
-      <v-card-text v-else class="text-center"> nothing to see </v-card-text>
+      <v-card-text v-else class="text-center">
+        {{ $t('relationship.nothing') }}
+      </v-card-text>
     </v-card>
   </v-tab-item>
 </template>
@@ -21,7 +25,7 @@ import { Relationship } from '~/models'
 
 const impls = {
   online: 'friend',
-  all: 'friend',
+  friends: 'friend',
   pending: 'pending',
   blocked: 'blocked',
 } as any
@@ -36,6 +40,10 @@ export default class ComponentImpl extends Vue {
 
   get count() {
     return this.relationships.length
+  }
+
+  get translatedCategory() {
+    return this.$t(`relationship.tab.${this.category}.top`)
   }
 
   get itemImpl() {
