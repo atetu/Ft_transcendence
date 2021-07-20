@@ -11,14 +11,14 @@
         <v-icon left>mdi-{{ item.icon }}</v-icon>
         {{ item.title }}
       </v-tab>
-    </v-tabs>
 
-    <v-tabs-items v-model="tab">
-      <relationship-tab category="online" :relationships="online" />
-      <relationship-tab category="all" :relationships="friends" />
-      <relationship-tab category="pending" :relationships="pending" />
-      <relationship-tab category="blocked" :relationships="blocked" />
-    </v-tabs-items>
+      <v-tabs-items v-model="tab">
+        <relationship-tab category="online" :relationships="online" />
+        <relationship-tab category="all" :relationships="friends" />
+        <relationship-tab category="pending" :relationships="pending" />
+        <relationship-tab category="blocked" :relationships="blocked" />
+      </v-tabs-items>
+    </v-tabs>
   </div>
 </template>
 
@@ -26,11 +26,9 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 import { Relationship, RelationshipType } from '~/models'
 import { relationshipsStore, socketStore } from '~/store'
-import API from '~/api/API'
 
 @Component
 export default class Page extends Vue {
-  tab = null
   items = [
     {
       title: 'online',
@@ -88,6 +86,20 @@ export default class Page extends Vue {
 
   get relationships(): Array<Relationship> {
     return relationshipsStore.list
+  }
+
+  get tab(): number {
+    return parseInt((this.$route.query.tab || '0') as string)
+  }
+
+  set tab(val: number) {
+    this.$router
+      .replace({
+        query: {
+          tab: `${val}` || undefined,
+        },
+      })
+      .catch((_error) => ({}))
   }
 }
 </script>
