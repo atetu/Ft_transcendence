@@ -25,10 +25,35 @@
                 required
               ></v-select>
             </v-col>
+             <v-col cols="12" sm="6">
+              <v-select
+                v-model="inputs.nbGames"
+                :items="['1', '2', '3', '4']"
+                label="Number of games per set"
+                required
+              ></v-select>
+            </v-col>
             <v-col cols="12" sm="6">
               <v-select
                 v-model="inputs.ballVelocity"
-                :items="['Slow', 'Normal', 'Fast', 'Very fast']"
+                :items="[
+                  {
+                    text: 'Slow',
+                    value: 0.8,
+                  },
+                  {
+                    text: 'Normal',
+                    value: 1,
+                  },
+                  {
+                    text: 'Fast',
+                    value: 1.2,
+                  },
+                  {
+                    text: 'Very fast',
+                    value: 1.5,
+                  },
+                  ]"
                 label="Ball speed"
                 required
               ></v-select>
@@ -83,11 +108,13 @@ export default class Viewer extends Vue {
   paddleVelocity: number = 1
   ballVelocity: number = 1
   map: number = 0
+  nbGames: number = 3
 
   inputs = {
     paddleVelocity: 1,
     maps: 0,
     ballVelocity : 1,
+    nbGames : 3,
   }
 
   get small() {
@@ -127,6 +154,7 @@ export default class Viewer extends Vue {
         map: this.inputs.maps,
         ballVelocity: this.inputs.ballVelocity,
         paddleVelocity: this.inputs.paddleVelocity,
+        nbGames: this.inputs.nbGames,
       })
     } catch (error) {
       this.$dialog.notify.error(`Could not challenge: ${error}`)

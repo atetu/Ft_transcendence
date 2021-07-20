@@ -24,13 +24,14 @@ export default class PendingGameService {
     return await this.repository.findOne({ id })
   }
 
-  public async create(user: User, peer: User, map: number, ballVelocity: number, paddleVelocity: number): Promise<PendingGame> {
+  public async create(user: User, peer: User, map: number, ballVelocity: number, paddleVelocity: number, nbGames: number): Promise<PendingGame> {
     const pendingGame = new PendingGame();
     pendingGame.user = user;
     pendingGame.peer = peer;
     pendingGame.map = map;
     pendingGame.ballVelocity = ballVelocity;
     pendingGame.paddleVelocity = paddleVelocity;
+    pendingGame.nbGames = nbGames;
 
     console.log('inside create')
     console.log(map)

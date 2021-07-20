@@ -39,6 +39,9 @@ export default class PendingGame implements GameSettings {
   @Column()
   paddleVelocity: number
 
+  @Column()
+  nbGames: number
+
   public toJSON() {
     return {
       id: this.id,

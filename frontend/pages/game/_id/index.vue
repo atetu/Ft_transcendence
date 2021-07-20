@@ -9,26 +9,14 @@
         <p class="login" v-if="player1">{{ player1.username }}</p>
         <p class="score">{{ this.score1 }}</p>
         <p>
-          <v-btn
-            v-if="status === 3"
-            :disabled="mySide == 1 && activeBtn == true ? false : true"
-            elevation="2"
-            :color="primary"
-            @click="restart"
-          >
-            RESTART</v-btn
-          >
+        <v-btn v-if="status === 3" :disabled="(mySide == 1 && activeBtn == true)? false : true" elevation="2" :color= "primary"
+        @click="restart"
+        > RESTART</v-btn>
         </p>
         <p>
-          <v-btn
-            v-if="status === 3 && roundWinner === 1"
-            :disabled="mySide == 1 && activeBtn == true ? false : true"
-            elevation="1"
-            :color="primary"
-            @click="restart"
-          >
-            RESTART WITH OPTIONS</v-btn
-          >
+         <v-btn v-if="status === 3 && roundWinner === 1" :disabled="(mySide == 1 && activeBtn == true)? false : true" elevation="1" :color= "primary"
+        @click="restart"
+        > RESTART WITH OPTIONS</v-btn>
         </p>
       </v-col>
 
@@ -47,26 +35,14 @@
         <p class="login" v-if="player2">{{ player2.username }}</p>
         <p class="score">{{ this.score2 }}</p>
         <p>
-          <v-btn
-            v-if="status === 3"
-            :disabled="mySide === 2 && activeBtn == true ? false : true"
-            elevation="2"
-            :color="primary"
-            @click="restart"
-          >
-            RESTART</v-btn
-          >
+         <v-btn v-if="status === 3" :disabled="(mySide === 2 && activeBtn == true)? false : true" elevation="2" :color= "primary"
+        @click="restart"
+        > RESTART</v-btn>
         </p>
         <p>
-          <v-btn
-            v-if="status === 3 && roundWinner === 2"
-            :disabled="mySide === 2 && activeBtn == true ? false : true"
-            elevation="1"
-            :color="primary"
-            @click="restartWithOption"
-          >
-            RESTART WITH OPTIONS</v-btn
-          >
+         <v-btn v-if="status === 3 && roundWinner === 2" :disabled="(mySide === 2 && activeBtn == true) ? false : true" elevation="1" :color= "primary"
+        @click="restartWithOption"
+        > RESTART WITH OPTIONS</v-btn>
         </p>
       </v-col>
     </v-row>
@@ -117,8 +93,8 @@ enum Status {
 }
 
 enum setStatusEnum {
-  playing,
-  over,
+  playing = 1,
+  over = 2,
 }
 
 class Sprite {
@@ -129,7 +105,6 @@ class Sprite {
     public height: number
   ) {}
 }
-
 
 @Component
 export default class Game extends Vue {
@@ -160,7 +135,7 @@ export default class Game extends Vue {
   user: User | null = null
   status: Status = Status.waiting
   player1: User | null = null
-  player2: User | null = null
+  winner: User | null = null
   score1: number = 0
   score2: number = 0
   setStatus: setStatusEnum = setStatusEnum.playing
@@ -179,7 +154,7 @@ export default class Game extends Vue {
     // console.log(event.key)
     switch (event.key) {
       case 'ArrowDown': {
-        if ((this.status === Status.playing)) {
+        if (this.status === Status.playing) {
           this.down = true
           // console.log('down')
           // console.log('myside: ' + this.mySide)
@@ -187,7 +162,7 @@ export default class Game extends Vue {
         }
       }
       case 'ArrowUp': {
-        if ((this.status === Status.playing)) {
+        if (this.status === Status.playing) {
           this.up = true
           break
         }
@@ -269,7 +244,7 @@ export default class Game extends Vue {
           if (player1.id === this.$store.state.auth.user.id) this.mySide = 1
           else this.mySide = 2
           this.player1 = player1
-          this.player2 = player2
+          // this.player2 = player2
         }
         // console.log('MY SIDE: ' + this.mySide)
       }
@@ -284,51 +259,61 @@ export default class Game extends Vue {
       this.ctx.fillStyle = `${this.$vuetify.theme.themes.dark.primary}`
       this.ctx.fillRect(0, 0, this.width, this.height)
 
-      if (this.sprite != null) {
-        console.log('inside sprite')
+      if (this.status !== Status.over) {
+        if (this.sprite != null) {
+          console.log('inside sprite')
+          this.ctx.fillStyle = 'white'
+          this.ctx.fillRect(
+            this.sprite.x,
+            this.sprite.y,
+            this.sprite.width,
+            this.sprite.height
+          )
+        }
+        this.ctx.beginPath()
+        this.ctx.arc(this.ballX, this.ballY, 15, 0, Math.PI * 2)
         this.ctx.fillStyle = 'white'
-        this.ctx.fillRect(
-          this.sprite.x,
-          this.sprite.y,
-          this.sprite.width,
-          this.sprite.height
-        )
-      }
-      this.ctx.beginPath()
-      this.ctx.arc(this.ballX, this.ballY, 15, 0, Math.PI * 2)
-      this.ctx.fillStyle = 'white'
-      this.ctx.fill()
-      this.ctx.closePath()
+        this.ctx.fill()
+        this.ctx.closePath()
 
-     
-      this.ctx.strokeStyle = 'grey'
-      this.ctx.moveTo(400, 20)
-      this.ctx.lineTo(400, 580)
-      this.ctx.stroke()
+        this.ctx.strokeStyle = 'grey'
+        this.ctx.moveTo(400, 20)
+        this.ctx.lineTo(400, 580)
+        this.ctx.stroke()
 
-      this.update_paddle()
-      this.ctx.fillStyle = 'white'
-      this.ctx.fillRect(this.paddleRightX, this.paddleRightY, 20, 100)
-      this.ctx.fillStyle = 'white'
-      this.ctx.fillRect(this.paddleLeftX, this.paddleLeftY, 20, 100)
-
-      // console.log('status after over and before writing: ' + this.status)
-      if (this.status === Status.over) {
-        this.ctx.font = '80px Nunito'
+        this.update_paddle()
         this.ctx.fillStyle = 'white'
-        this.ctx.textAlign = 'center'
-        this.ctx.fillText('GAME OVER', this.width / 2, this.height / 2)
-      }
-
-      if (this.status === Status.waiting) {
-        this.ctx.font = '80px Nunito'
+        this.ctx.fillRect(this.paddleRightX, this.paddleRightY, 20, 100)
         this.ctx.fillStyle = 'white'
-        this.ctx.textAlign = 'center'
-        this.ctx.fillText('' + this.timer, this.width / 2, this.height / 2)
+        this.ctx.fillRect(this.paddleLeftX, this.paddleLeftY, 20, 100)
+
+        if (this.status === Status.waiting) {
+          this.ctx.font = '80px Nunito'
+          this.ctx.fillStyle = 'white'
+          this.ctx.textAlign = 'center'
+          this.ctx.fillText('' + this.timer, this.width / 2, this.height / 2)
+        }
+      } else {
+        // console.log('status after over and before writing: ' + this.status)
+        if (this.setStatus === setStatusEnum.over) {
+          this.ctx.font = '80px Nunito'
+          this.ctx.fillStyle = 'white'
+          this.ctx.textAlign = 'center'
+          this.ctx.fillText(this.message, this.width / 2, this.height / 2)
+        } else if (this.status === Status.over) {
+          this.ctx.font = '80px Nunito'
+          this.ctx.fillStyle = 'white'
+          this.ctx.textAlign = 'center'
+          this.ctx.fillText('GAME OVER', this.width / 2, this.height / 2)
+        }
       }
-      //   if (this.timer === -1){
-      //  this.playing = true
     }
+  }
+
+  get gameOver() {
+    if (this.status != 3) return null
+    if (this.setStatus === 1) return 'GAME OVER'
+    else return this.winner?.username + 'wins !'
   }
 
   @Socket('game_state')
@@ -362,17 +347,17 @@ export default class Game extends Vue {
 
   @Socket('game_over')
   finishGame(data: any) {
-    const { winner, score1, score2, setStatus } = data
-    if (winner != null) {
-      let winnerFt: User = winner
-      this.message = winnerFt.username + ' wins!'
-    }
+    const { score1, score2 } = data
+    // if (winner != null) {
+    //   let winnerFt: User = winner
+    //   this.message = winnerFt.username + ' wins!'
+    // }
     var prev_score1 = this.score1
     this.score1 = score1
     this.score2 = score2
     if (this.score1 > prev_score1) this.roundWinner = 1
     else this.roundWinner = 2
-    this.setStatus = setStatus
+    // this.setStatus = setStatus
     // console.log('OVERRRRR')
     // console.log('roundWinner = ' + this.roundWinner)
     // this.timer = -2
@@ -382,6 +367,17 @@ export default class Game extends Vue {
     //   clearInterval(this.autoSaveInterval)
   }
 
+  @Socket('set_over')
+  finishSet(data: any) {
+    console.log('SET OVER')
+    this.setStatus = setStatusEnum.over
+    this.status = Status.over
+    const { winner, score1, score2 } = data
+    this.winner = winner
+    if (this.winner !== null) this.message = this.winner.username + ' wins!'
+    this.score1 = score1
+    this.score2 = score2
+  }
   //   @Socket('game_over')
   //  gameRestart() {
 

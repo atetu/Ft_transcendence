@@ -25,6 +25,7 @@ export default (app: express.Router) => {
           map: celebrate.Joi.number().required(),
           ballVelocity: celebrate.Joi.number().required(),
           paddleVelocity: celebrate.Joi.number().required(),
+          nbGames: celebrate.Joi.number().required(),
         },
       },
       {
@@ -33,16 +34,18 @@ export default (app: express.Router) => {
     ),
     async (req, res, next) => {
       const user: User = req.user as any;
-      const { peerId, map, ballVelocity, paddleVelocity } = req.body as {
+      const { peerId, map, ballVelocity, paddleVelocity, nbGames } = req.body as {
         peerId: number;
         map: number;
         ballVelocity: number;
         paddleVelocity: number;
+        nbGames: number;
       };
       console.log('inside index')
-      console.log(map)
-      console.log(ballVelocity)
-      console.log(paddleVelocity)
+      console.log('MAP: ' + map)
+      console.log('Ball: ' + ballVelocity)
+      console.log('Paddle: ' + paddleVelocity)
+      console.log('Nb Games: ' + nbGames)
       try {
         const peer = await userService.findById(peerId);
 
@@ -50,7 +53,7 @@ export default (app: express.Router) => {
           return helpers.notFound(`peer not found`);
         }
 
-        const pendingGame = await pendingGameService.create(user, peer, map, ballVelocity, paddleVelocity);
+        const pendingGame = await pendingGameService.create(user, peer, map, ballVelocity, paddleVelocity, nbGames);
 
         res.status(200).send(pendingGame.toJSON());
       } catch (error) {

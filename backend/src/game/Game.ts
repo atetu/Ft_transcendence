@@ -51,6 +51,7 @@ export interface GameSettings {
   map: number;
   ballVelocity: number;
   paddleVelocity: number;
+  nbGames: number;
 }
 
 export default class Game {
@@ -78,18 +79,10 @@ export default class Game {
     { x: 600, y: 300, width: 50, height: 200 },
     { x: 300, y: 300, width: 150, height: 50 },
   ];
-  // public sprite: Sprite = new Sprite(0, 0, 0, 0);
   public sprite: Sprite | null;
   public change: boolean = false;
   public settings: GameSettings;
-  // / this.sprite = new Sprite(
-  //   this.getRandomArbitrary(200, 600),
-  //   this.getRandomArbitrary(150, 450),
-  //   this.getRandomArbitrary(50,200),
-  //   this.getRandomArbitrary(50,200)
-
-  // public sprites: Sprite[] = new Array(3);
-
+  public actualNbGames: number = 0;
   public matchService = Container.get(MatchService);
   public userStatisticsService = Container.get(UserStatisticsService);
   public waitingRoom: User[] = new Array(2);
@@ -104,6 +97,7 @@ export default class Game {
       map: 0,
       paddleVelocity: 1,
       ballVelocity: 1,
+      nbGames: 3,
     };
     this.sprite = this.sprites[this.settings.map];
   }
@@ -169,20 +163,6 @@ export default class Game {
   // }
 
   async restart() {
-    // await this.sleep(3000);
-    // if (this.waitingRoomOption)
-    // // console.log('restartWaitingRoom')
-    // let found: number = 0;
-    // found = this.waitingRoomOption.find(function (element) {
-    //   return element === 1;
-    // });
-    // // console.log('Found: ' + found)
-    // if (found === 1) {
-    //   // console.log('sprite found')
-    //   this.defineSprite();
-    //   // console.log("SPRITE X " + this.sprite.x)
-    // }
-
     this.ball.x = this.getRandomArbitrary(350, 450);
     this.ball.y = this.getRandomArbitrary(250, 350);
     this.paddle1.y = 15;
@@ -194,6 +174,7 @@ export default class Game {
     this.status = setStatus.playing;
     this.waitingRoomOption.length = 0;
     this.waitingRoom.length = 0;
+
 
     this.interval = setInterval(() => this.loop(), 1000 / 20);
     this.decount();
@@ -362,8 +343,12 @@ export default class Game {
       await this.userStatisticsService.incrementWinCount(this.player2);
       await this.userStatisticsService.incrementLossCount(this.player1);
     }
-
-    io.to(this.toRoom()).emit("set_over");
+console.log('SET OVER')
+    io.to(this.toRoom()).emit("set_over", {
+      winner: this.winner,
+      score1: this.score1,
+      score2: this.score2,
+    });
     // TODO : enregistrer infos match
     // envoyer infos au front pour dire que c'est la fin des fins
   }
@@ -380,21 +365,24 @@ export default class Game {
         winner = this.player1;
         this.score1++;
       }
+      this.actualNbGames++;
+      console.log('actual nb games : ' + this.actualNbGames)
+      console.log('settings nb games : ' + this.settings.nbGames)
 
-      io.to(this.toRoom()).emit("game_over", {
-        winner: this.player1,
-        score1: this.score1,
-        score2: this.score2,
-        setStatus: this.status,
-      });
-      clearInterval(this.interval);
-      if (this.score1 === 2 || this.score2 === 2) {
-        if (this.score1 === 2) this.winner = this.player1;
+       if (this.actualNbGames === this.settings.nbGames) {
+         console.log('OVER')
+        if (this.score1 > this.score2) this.winner = this.player1;
         else this.winner = this.player2;
         this.status = setStatus.over;
         this.stopGame();
         return;
       }
+      io.to(this.toRoom()).emit("game_over", {
+        score1: this.score1,
+        score2: this.score2,
+      });
+      clearInterval(this.interval);
+     
       // this.restart();
     }
     // if (this.sprite != null)
