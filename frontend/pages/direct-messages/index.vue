@@ -29,6 +29,7 @@ import { relationshipsStore, socketStore } from '~/store'
 
 @Component
 export default class Page extends Vue {
+  defaultTab = 1
   items = [
     {
       title: 'online',
@@ -89,7 +90,7 @@ export default class Page extends Vue {
   }
 
   get tab(): number {
-    return parseInt((this.$route.query.tab || '0') as string)
+    return parseInt((this.$route.query.tab || this.defaultTab) as string)
   }
 
   set tab(val: number) {
@@ -100,6 +101,12 @@ export default class Page extends Vue {
         },
       })
       .catch((_error) => ({}))
+  }
+
+  mounted() {
+    if (this.online.length) {
+      this.defaultTab = 0
+    }
   }
 }
 </script>
