@@ -70,6 +70,12 @@ export default (app: express.Router) => {
           }
         }
 
+        if (a && a.type == RelationshipType.OUTCOMING) {
+          if (type == RelationshipType.BLOCK) {
+            await relationshipService.block(a, b);
+          }
+        }
+
         if (!b && !a) {
           if (type == RelationshipType.FRIEND) {
             const [a2, b2] = await relationshipService.ask(user, peer);
@@ -86,7 +92,7 @@ export default (app: express.Router) => {
     }
   );
 
-  _peerid(route)
+  _peerid(route);
 
   return route;
 };
