@@ -27,10 +27,12 @@
         </v-col>
         <template v-else>
           <v-col cols="12">
-            <v-btn depressed block color="primary">
-              ask game
-              <v-icon right>mdi-sword-cross</v-icon>
-            </v-btn>
+            <direct-message-button-challenge
+              never-small
+              block
+              :peer="user"
+              @success="onChallenged"
+            />
           </v-col>
           <v-col cols="12" xl="6">
             <user-button-friend
@@ -99,6 +101,12 @@ export default class Dot extends Vue {
 
   refresh() {
     this.$emit('refresh')
+  }
+
+  onChallenged() {
+    this.$router.push({
+      path: `/direct-messages/${this.user.id}`,
+    })
   }
 
   askBlock() {
