@@ -4,7 +4,7 @@
       Users
       <v-spacer />
       <channel-dialog-invite
-        v-if="isAdmin"
+        v-if="isAdmin || isSiteAdmin"
         :channel="channel"
         :users="users"
         @invited="$emit('refresh')"
@@ -25,6 +25,7 @@
       :key="key"
       :is-owner="isOwner"
       :is-admin="isAdmin"
+      :is-site-admin="isSiteAdmin"
       :channel="channel"
       :users="group.users"
       :name="group.name"
@@ -54,6 +55,9 @@ export default class Drawer extends Vue {
 
   @Prop({ type: Boolean, default: false })
   isAdmin!: boolean
+
+  @Prop({ type: Boolean, default: false })
+  isSiteAdmin!: boolean
 
   get groups() {
     const makeGroup = (name: string) => ({

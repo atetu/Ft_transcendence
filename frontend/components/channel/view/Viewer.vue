@@ -179,10 +179,6 @@ export default class Viewer extends Vue {
   get isOwner() {
     const user = authStore.user!
 
-    if (user.admin) {
-      return true
-    }
-
     if (this.id && this.channel) {
       return this.channel.owner.id === user.id
     }

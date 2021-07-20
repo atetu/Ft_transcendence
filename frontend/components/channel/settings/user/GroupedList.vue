@@ -9,6 +9,7 @@
       :channel="channel"
       :is-owner="isOwner"
       :is-admin="isAdmin"
+      :is-site-admin="isSiteAdmin"
       @refresh="$emit('refresh')"
     />
   </v-list>
@@ -34,5 +35,8 @@ export default class ComponentImpl extends Vue {
 
   @Prop({ type: Boolean })
   isAdmin!: boolean
+
+  @Prop({ type: Boolean })
+  isSiteAdmin!: boolean
 }
 </script>

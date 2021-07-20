@@ -9,6 +9,7 @@
             :users="users"
             :is-admin="isAdmin"
             :is-owner="isOwner"
+            :is-site-admin="isSiteAdmin"
             :loading="loading"
             @refresh="refresh"
           >
@@ -36,7 +37,7 @@
           </channel-dialog-invite>
         </v-list-item>
 
-        <v-list-item v-show="hasJoined">
+        <v-list-item v-show="hasJoined && !isOwner">
           <channel-dialog-leave :channel="channel" @leaved="onLeaved()">
             <template #activator="{ on, attrs }">
               <v-btn block color="primary" v-bind="attrs" v-on="on">
