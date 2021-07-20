@@ -21,18 +21,18 @@ const plugin: Plugin = ({ $axios, store, redirect }) => {
       return response
     },
     async (error) => {
-      if (error.response.status === 401) {
+      if (error?.response?.status === 401) {
         if (error.response.data?.banned) {
           redirect('/auth')
           return Promise.reject(error)
         }
 
-        if (error.response.data?.message === 'invalid token') {
+        if (error?.response?.data?.message === 'invalid token') {
           redirect('/auth')
           return Promise.reject(error)
         }
 
-        if (!error.response.data?.authenticated /* if admin only page */) {
+        if (!error?.response?.data?.authenticated /* if admin only page */) {
           let newTokens
 
           try {
