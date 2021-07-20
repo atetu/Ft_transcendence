@@ -29,6 +29,10 @@ export default class ChannelUserService {
     return await this.repository.findByChannelAndUser(channel, user);
   }
 
+  public async findAllByChannelNotBanned(channel: Channel) {
+    return await this.repository.findAllByChannelNotBanned(channel);
+  }
+
   public async findAllByUserAndNotBanned(user: User) {
     return await this.repository.findAllByUserAndNotBannedIncludeChannel(user);
   }

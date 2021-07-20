@@ -72,6 +72,12 @@ export default class ChannelService {
 
   public async update(channel: Channel) {
     await this.repository.save(channel);
+
+    const users = (
+      await this.channelUserService.findAllByChannelNotBanned(channel)
+    ).map((x) => x.user);
+
+    this.socketService.broadcastChannelUpdate(channel, users);
   }
 
   public async transferOwnership(channel: Channel, channelUser: ChannelUser) {

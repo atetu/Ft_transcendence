@@ -22,6 +22,7 @@ export enum ClientEvent {
 export enum ChannelEvent {
   CONNECT = "channel_connect",
   DISCONNECT = "channel_disconnect",
+  UPDATE = "channel_update",
   DELETE = "channel_delete",
   MESSAGE = "channel_message",
   MESSAGE_DELETE = "channel_message_delete",
@@ -150,6 +151,11 @@ export default class SocketService {
     }
 
     delete socket.data.currentChannelRoom;
+  }
+
+  public broadcastChannelUpdate(channel: Channel, users: Array<User>) {
+    this.broadcastToChannel(channel, ChannelEvent.UPDATE, channel);
+    this.broadcastToUsers(users, ChannelEvent.UPDATE, channel);
   }
 
   public broadcastChannelDelete(channel: Channel) {
@@ -377,7 +383,23 @@ export default class SocketService {
     this.broadcastToRoom(user.toRoom(), event, message);
   }
 
-  private broadcastToRoom(room: string, event: Event, message?: any) {
+  private broadcastToUsers(
+    users: Array<User>,
+    event: UserEvent | Event,
+    message?: any
+  ) {
+    this.broadcastToRoom(
+      users.map((x) => x.toRoom()),
+      event,
+      message
+    );
+  }
+
+  private broadcastToRoom(
+    room: string | Array<string>,
+    event: Event,
+    message?: any
+  ) {
     this.io.to(room).emit(event, message?.toJSON?.() || message);
 
     console.log(`[io]: {${room}} -> ${event}: ${JSON.stringify(message)}`);
