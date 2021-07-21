@@ -22,6 +22,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { Socket } from 'vue-socket.io-extended'
+import { AchievementProgress } from '~/models'
 import { socketStore, uiStore } from '~/store'
 
 interface Link {
@@ -97,6 +99,13 @@ export default class Default extends Vue {
 
   get connectedCount() {
     return socketStore.connectedUserIds.length
+  }
+
+  @Socket('achievement_unlock')
+  onAchievementUnlock(progress: AchievementProgress) {
+    this.$dialog.message.success(`Unlocked: ${progress.achievement.name}`, {
+      dismissible: true,
+    })
   }
 }
 </script>

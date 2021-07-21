@@ -1,5 +1,5 @@
 import { Module, Action, VuexModule, Mutation } from 'vuex-module-decorators'
-import { Channel, User, ChannelMessage, Relationship } from '~/models'
+import { Channel, User, Relationship } from '~/models'
 
 @Module({
   stateFactory: true,
