@@ -34,15 +34,13 @@
           :loading="$fetchState.pending"
           @refresh="$fetch"
         />
-        <v-card class="pa-2 mt-4" outlined tile>
-          friends
-          {{ relationship }}
-          <v-icon right>mdi-account-group</v-icon>
-          <v-btn outlined block color="red">
-            block
-            <v-icon right>mdi-account-cancel</v-icon>
-          </v-btn>
-        </v-card>
+        <user-profile-card-friends
+          :user="user"
+          :friends="friends"
+          :loading="$fetchState.pending"
+          class="mt-4"
+          @refresh="$fetch"
+        />
       </v-col>
     </v-row>
   </v-main>
@@ -67,8 +65,8 @@ export default class ComponentImpl extends Vue {
   user: User | null = null
   matches: Array<Match> = []
   progresses: Array<AchievementProgress> = []
-  relationship: Relationship | null = null
   statistics: UserStatistics | null = null
+  friends: Array<Relationship> = []
 
   async fetch() {
     this.user = await this.$axios.$get(`/users/${this.userId}`)
@@ -77,6 +75,7 @@ export default class ComponentImpl extends Vue {
       `/users/${this.userId}/achievements`
     )
     this.statistics = await this.$axios.$get(`/users/${this.userId}/statistics`)
+    this.friends = await this.$axios.$get(`/users/${this.userId}/friends`)
 
     this.$axios
       .$get(`/users/@me/relationships/${this.userId}`)
