@@ -1,15 +1,19 @@
-import { Service } from "typedi";
+import { Inject, Service } from "typedi";
 import { InjectRepository } from "typeorm-typedi-extensions";
 import Achievement from "../entities/Achievement";
 import User from "../entities/User";
 import AchievementProgress from "../entities/AchievementProgress";
 import AchievementProgressRepository from "../repositories/AchievementProgressRepository";
+import SocketService from "./SocketService";
 
 @Service()
 export default class AchievementProgressService {
   constructor(
     @InjectRepository()
-    private repository: AchievementProgressRepository
+    private repository: AchievementProgressRepository,
+
+    @Inject()
+    private socketService: SocketService
   ) {}
 
   async allByUser(user: User) {
@@ -43,6 +47,7 @@ export default class AchievementProgressService {
   }
 
   async increment(achievement: Achievement, user: User, value = 1) {
+    let unlocked = false;
     const progress = await this.get(achievement, user);
 
     if (progress.unlocked) {
@@ -53,9 +58,14 @@ export default class AchievementProgressService {
 
     if (progress.value === achievement.max) {
       progress.unlockedAt = new Date();
+      unlocked = true;
     }
 
     this.repository.save(progress);
+
+    if (unlocked) {
+      this.socketService.notifyAchievementUnlock(user, progress);
+    }
   }
 
   async set(achievement: Achievement, user: User, value: number) {
@@ -66,17 +76,23 @@ export default class AchievementProgressService {
     }
 
     const unlockedAt = progress.unlockedAt;
+    let unlocked = false;
 
     progress.value = Math.min(achievement.max, value);
 
     if (progress.value === achievement.max) {
       progress.unlockedAt = new Date();
+      unlocked = true;
     } else {
       progress.unlockedAt = null;
     }
 
     if (unlockedAt !== progress.unlockedAt) {
       this.repository.save(progress);
+    }
+
+    if (unlocked) {
+      this.socketService.notifyAchievementUnlock(user, progress);
     }
   }
 }

@@ -2,6 +2,7 @@ import * as socketio from "socket.io";
 import { Socket } from "socket.io";
 import Container, { Service } from "typedi";
 import { isObject } from "util";
+import AchievementProgress from "../entities/AchievementProgress";
 import Channel from "../entities/Channel";
 import ChannelMessage from "../entities/ChannelMessage";
 import ChannelUser from "../entities/ChannelUser";
@@ -56,12 +57,17 @@ export enum UserEvent {
   RELATIONSHIP_DELETE = "relationship_delete",
 }
 
+export enum AchievementEvent {
+  UNLOCK = "achievement_unlock",
+}
+
 export type Event =
   | ClientEvent
   | ChannelEvent
   | DirectMessageEvent
   | GameEvent
-  | UserEvent;
+  | UserEvent
+  | AchievementEvent;
 
 @Service()
 export default class SocketService {
@@ -235,6 +241,13 @@ export default class SocketService {
       : ChannelEvent.ADD;
 
     this.broadcastToUser(user, event, channel);
+  }
+
+  public notifyAchievementUnlock(
+    user: User,
+    achievementProgress: AchievementProgress
+  ) {
+    this.broadcastToUser(user, AchievementEvent.UNLOCK, achievementProgress);
   }
 
   async askMatchMakingJoin(
