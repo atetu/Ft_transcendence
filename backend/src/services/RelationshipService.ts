@@ -21,6 +21,10 @@ export default class RelationshipService {
   async all(user: User) {
     return this.repository.findAllByUser(user);
   }
+  
+  async findAllFriends(user: User) {
+    return this.repository.findAllByUserAndType(user, RelationshipType.FRIEND);
+  }
 
   async findRelationship(user: User, peer: User) {
     return await this.repository.findByUserAndPeer(user, peer);
