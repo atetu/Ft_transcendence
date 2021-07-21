@@ -27,7 +27,7 @@ export default (app: express.Router) => {
     celebrate.celebrate({
       [celebrate.Segments.BODY]: {
         type: celebrate.Joi.string().valid(ChannelMessage.Type.TEXT).required(),
-        content: celebrate.Joi.string().required(),
+        content: celebrate.Joi.string().min(1).max(200).required(),
       },
     }),
     async (req, res, next) => {
@@ -48,7 +48,7 @@ export default (app: express.Router) => {
         message.type = type;
         message.content = content;
 
-        channelMessageService.create(message);// TODO add await
+        channelMessageService.create(message); // TODO add await
 
         res.status(200).send(message);
       } catch (error) {
