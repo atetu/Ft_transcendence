@@ -22,9 +22,33 @@ export default class Achievements {
   static COMMUNITY_MEMBER = inline({
     id: 2000,
     name: "Community Member",
-    description: "Send 20 messages",
+    description: "Send 100 messages",
     percent: true,
-    max: 20,
+    max: 100,
+  });
+
+  static COMMUNITY_CREATOR = inline({
+    id: 2100,
+    name: "Community Creator",
+    description: "Create a channel",
+    percent: false,
+    max: 1,
+  });
+
+  static COMMUNITY_GROWER = inline({
+    id: 2200,
+    name: "Community Grower",
+    description: "Invite someone to a channel",
+    percent: false,
+    max: 1,
+  });
+
+  static ONE_OF_US = inline({
+    id: 2300,
+    name: "One of us!",
+    description: "Join a protected channel",
+    percent: false,
+    max: 1,
   });
 
   static BEGINNER = inline({

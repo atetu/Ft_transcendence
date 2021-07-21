@@ -3,6 +3,8 @@ import * as express from "express";
 import Container from "typedi";
 import Channel from "../../../../../entities/Channel";
 import User from "../../../../../entities/User";
+import Achievements from "../../../../../game/Achievements";
+import AchievementProgressService from "../../../../../services/AchievementProgressService";
 import ChannelService from "../../../../../services/ChannelService";
 import ChannelUserService from "../../../../../services/ChannelUserService";
 import helpers from "../../../../helpers";
@@ -11,6 +13,7 @@ import _id from "./_id";
 export default (app: express.Router) => {
   const channelService = Container.get(ChannelService);
   const channelUserService = Container.get(ChannelUserService);
+  const achievementProgressService = Container.get(AchievementProgressService);
 
   const route = express.Router();
 
@@ -67,12 +70,13 @@ export default (app: express.Router) => {
             return helpers.forbidden("no password provided");
           }
 
-          if (!await channel.checkPassword(password)) {
+          if (!(await channel.checkPassword(password))) {
             return helpers.forbidden("wrong password");
           }
         }
 
         await channelUserService.create(channel, user);
+        await achievementProgressService.unlock(Achievements.ONE_OF_US, user);
 
         res.status(200).send(channel);
       } catch (error) {

@@ -1,9 +1,12 @@
 import { Container, Inject, Service } from "typedi";
 import { InjectRepository } from "typeorm-typedi-extensions";
+import Achievement from "../entities/Achievement";
 import Channel, { Type as ChannelType } from "../entities/Channel";
 import ChannelUser from "../entities/ChannelUser";
 import User from "../entities/User";
+import Achievements from "../game/Achievements";
 import ChannelRepository from "../repositories/ChannelRepository";
+import AchievementProgressService from "./AchievementProgressService";
 import ChannelUserService from "./ChannelUserService";
 import SocketService from "./SocketService";
 
@@ -18,7 +21,10 @@ export default class ChannelService {
     private repository: ChannelRepository,
 
     @Inject()
-    private channelUserService: ChannelUserService
+    private channelUserService: ChannelUserService,
+
+    @Inject()
+    private achievementProgressService: AchievementProgressService
   ) {}
 
   public async allNotPrivate() {
@@ -51,6 +57,11 @@ export default class ChannelService {
     await this.channelUserService.createOwner(channel);
 
     this.socketService.broadcastNewChannel(channel);
+
+    await this.achievementProgressService.unlock(
+      Achievements.COMMUNITY_CREATOR,
+      channel.owner
+    );
 
     return channel;
   }

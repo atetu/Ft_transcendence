@@ -3,7 +3,9 @@ import { Container, InjectRepository } from "typeorm-typedi-extensions";
 import Channel from "../entities/Channel";
 import ChannelUser from "../entities/ChannelUser";
 import User from "../entities/User";
+import Achievements from "../game/Achievements";
 import { ChannelUserRepository } from "../repositories/ChannelUserRepository";
+import AchievementProgressService from "./AchievementProgressService";
 import SocketService from "./SocketService";
 
 @Service()
@@ -14,7 +16,10 @@ export default class ChannelUserService {
 
   constructor(
     @InjectRepository()
-    private repository: ChannelUserRepository
+    private repository: ChannelUserRepository,
+
+    @Inject()
+    private achievementProgressService: AchievementProgressService
   ) {}
 
   public async all() {
@@ -84,7 +89,8 @@ export default class ChannelUserService {
   public async create(
     channel: Channel,
     user: User,
-    admin = false
+    admin = false,
+    inviter?: User
   ): Promise<ChannelUser> {
     const channelUser = new ChannelUser();
     channelUser.user = user;
@@ -94,7 +100,14 @@ export default class ChannelUserService {
     await this.repository.save(channelUser);
 
     this.socketService.broadcastChannelUserJoin(channelUser);
-    this.socketService.notifyAdded(user, channel)
+    this.socketService.notifyAdded(user, channel);
+
+    if (inviter) {
+      await this.achievementProgressService.unlock(
+        Achievements.COMMUNITY_GROWER,
+        inviter
+      );
+    }
 
     return channelUser;
   }

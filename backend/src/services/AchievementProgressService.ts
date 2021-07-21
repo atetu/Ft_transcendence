@@ -1,19 +1,15 @@
-import { Inject, Service } from "typedi";
-import { InjectRepository } from "typeorm-typedi-extensions";
+import { Service } from "typedi";
+import { Container, InjectRepository } from "typeorm-typedi-extensions";
 import Achievement from "../entities/Achievement";
-import User from "../entities/User";
 import AchievementProgress from "../entities/AchievementProgress";
+import User from "../entities/User";
 import AchievementProgressRepository from "../repositories/AchievementProgressRepository";
-import SocketService from "./SocketService";
 
 @Service()
 export default class AchievementProgressService {
   constructor(
     @InjectRepository()
-    private repository: AchievementProgressRepository,
-
-    @Inject()
-    private socketService: SocketService
+    private repository: AchievementProgressRepository
   ) {}
 
   async allByUser(user: User) {
@@ -64,7 +60,7 @@ export default class AchievementProgressService {
     this.repository.save(progress);
 
     if (unlocked) {
-      this.socketService.notifyAchievementUnlock(user, progress);
+      this.notifyUnlock(user, progress);
     }
   }
 
@@ -92,7 +88,15 @@ export default class AchievementProgressService {
     }
 
     if (unlocked) {
-      this.socketService.notifyAchievementUnlock(user, progress);
+      this.notifyUnlock(user, progress);
     }
+  }
+
+  notifyUnlock(user: User, progress: AchievementProgress) {
+    const socketService = Container.get(
+      require("./SocketService").default
+    ) as any;
+
+    socketService.notifyAchievementUnlock(user, progress);
   }
 }
