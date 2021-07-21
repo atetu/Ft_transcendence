@@ -7,6 +7,10 @@
   />
   <v-main v-else class="fill-height" style="overflow-y: auto">
     <v-row class="ma-4">
+      <v-col v-if="user.banned" cols="12">
+        <v-alert type="error"> This user has been banned </v-alert>
+      </v-col>
+
       <v-col cols="12" md="3">
         <user-profile-card-info :user="user" @refresh="$fetch" />
         <user-profile-card-statistics
