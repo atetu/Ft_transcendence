@@ -24,3 +24,16 @@
     </v-row>
   </v-main>
 </template>
+
+<script lang="ts">
+import { Component, Vue } from 'nuxt-property-decorator'
+
+@Component
+export default class Page extends Vue {
+  head() {
+    return {
+      title: 'Settings',
+    }
+  }
+}
+</script>

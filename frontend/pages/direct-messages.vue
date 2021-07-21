@@ -31,7 +31,7 @@ import { directMessageStore, relationshipsStore } from '~/store'
 export default class Index extends Vue {
   head() {
     return {
-      title: 'direct messages',
+      title: 'Direct  Messages',
     }
   }
 
