@@ -1,6 +1,6 @@
 <template>
   <v-alert v-if="isEmpty" type="info" class="ma-4">
-    You havn't contacted anyone
+    You didn't contacted anyone
   </v-alert>
   <v-list v-else>
     <direct-message-item
