@@ -49,4 +49,8 @@ export default class PendingGame implements GameSettings {
       peer: this.peer,
     };
   }
+
+  public toRoom(): string {
+    return `pending_games${this.id}`;
+  }
 }

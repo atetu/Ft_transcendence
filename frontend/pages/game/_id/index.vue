@@ -2,21 +2,50 @@
   <!-- Canvas -->
 
   <!-- <v-main> -->
+
   <v-container fill-height>
+    <v-dialog v-model="dialog" persistent max-width="600px">
+      <!-- <template #activator="{ on, attrs }">
+      <v-btn v-if="small" icon color="primary" v-bind="attrs" v-on="on">
+        <v-icon>mdi-sword-cross</v-icon>
+      </v-btn>
+      <v-btn v-else color="primary" v-bind="attrs" v-on="on" @click="dialog = true">
+        challenge
+        <v-icon right>mdi-sword-cross</v-icon>
+      </v-btn>
+    </template> -->
+      <v-card height="200" class="text-center">
+        <v-card-title>
+        <v-row class="fill-height" justify="center" align="center">
+          <v-col cols="12">
+            <p font-size="xx-large"> Your partner has left the game. </p>
+             <p font-size="normal">You will be redirected to the home page.</p>
+          </v-col>
+        </v-row>
+        </v-card-title>
+      
+        <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn  @click="quit">OK</v-btn>
+      </v-card-actions>
+      
+      </v-card>
+    </v-dialog>
     <v-row>
       <v-col cols="1" align="center" justify="center">
         <user-avatar v-if="player1" :user="player1" />
         <p class="login" v-if="player1">{{ player1.username }}</p>
         <p class="score">{{ this.score1 }}</p>
         <p>
-        <v-btn v-if="status === 3" :disabled="(mySide == 1 && activeBtn == true)? false : true" elevation="2" :color= "primary"
-        @click="restart"
-        > RESTART</v-btn>
-        </p>
-        <p>
-         <v-btn v-if="status === 3 && roundWinner === 1" :disabled="(mySide == 1 && activeBtn == true)? false : true" elevation="1" :color= "primary"
-        @click="restart"
-        > RESTART WITH OPTIONS</v-btn>
+          <v-btn
+            v-if="status === 3"
+            :disabled="mySide == 1 && activeBtn == true ? false : true"
+            elevation="2"
+            :color="primary"
+            @click="restart"
+          >
+            RESTART</v-btn
+          >
         </p>
       </v-col>
 
@@ -35,14 +64,15 @@
         <p class="login" v-if="player2">{{ player2.username }}</p>
         <p class="score">{{ this.score2 }}</p>
         <p>
-         <v-btn v-if="status === 3" :disabled="(mySide === 2 && activeBtn == true)? false : true" elevation="2" :color= "primary"
-        @click="restart"
-        > RESTART</v-btn>
-        </p>
-        <p>
-         <v-btn v-if="status === 3 && roundWinner === 2" :disabled="(mySide === 2 && activeBtn == true) ? false : true" elevation="1" :color= "primary"
-        @click="restartWithOption"
-        > RESTART WITH OPTIONS</v-btn>
+          <v-btn
+            v-if="status === 3"
+            :disabled="mySide === 2 && activeBtn == true ? false : true"
+            elevation="2"
+            :color="primary"
+            @click="restart"
+          >
+            RESTART</v-btn
+          >
         </p>
       </v-col>
     </v-row>
@@ -109,7 +139,7 @@ class Sprite {
 @Component
 export default class Game extends Vue {
   x = true
-
+  dialog = false
   canvas: HTMLCanvasElement | null = null
   ctx: CanvasRenderingContext2D | null = null
 
@@ -135,6 +165,7 @@ export default class Game extends Vue {
   user: User | null = null
   status: Status = Status.waiting
   player1: User | null = null
+  player2: User | null = null
   winner: User | null = null
   score1: number = 0
   score2: number = 0
@@ -145,6 +176,7 @@ export default class Game extends Vue {
   primary = this.$vuetify.theme.themes.dark.primary
   velPaddle: number = 4
   factor: number = 1
+  block: boolean = false
 
   get id() {
     return this.$route.params.id
@@ -154,7 +186,7 @@ export default class Game extends Vue {
     // console.log(event.key)
     switch (event.key) {
       case 'ArrowDown': {
-        if (this.status === Status.playing) {
+        if (this.status === Status.playing && !this.block) {
           this.down = true
           // console.log('down')
           // console.log('myside: ' + this.mySide)
@@ -162,7 +194,7 @@ export default class Game extends Vue {
         }
       }
       case 'ArrowUp': {
-        if (this.status === Status.playing) {
+        if (this.status === Status.playing && !this.block) {
           this.up = true
           break
         }
@@ -244,6 +276,7 @@ export default class Game extends Vue {
           if (player1.id === this.$store.state.auth.user.id) this.mySide = 1
           else this.mySide = 2
           this.player1 = player1
+          this.player2 =player2
           // this.player2 = player2
         }
         // console.log('MY SIDE: ' + this.mySide)
@@ -251,6 +284,12 @@ export default class Game extends Vue {
     )
 
     this.autoSaveInterval = setInterval(() => this.drawRect(), 1000 / 60)
+  }
+
+  beforeDestroy() {
+    this.$socket.client.emit(
+      'game_disconnect'
+    )
   }
 
   drawRect(): void {
@@ -261,7 +300,6 @@ export default class Game extends Vue {
 
       if (this.status !== Status.over) {
         if (this.sprite != null) {
-          console.log('inside sprite')
           this.ctx.fillStyle = 'white'
           this.ctx.fillRect(
             this.sprite.x,
@@ -314,6 +352,11 @@ export default class Game extends Vue {
     if (this.status != 3) return null
     if (this.setStatus === 1) return 'GAME OVER'
     else return this.winner?.username + 'wins !'
+  }
+
+  quit(){
+    // this.dialog = false
+     this.$router.push({ path: `/` })
   }
 
   @Socket('game_state')
@@ -395,5 +438,13 @@ export default class Game extends Vue {
   //     // if (this.autoSaveInterval)
   //     //   clearInterval(this.autoSaveInterval)
   //   }
+
+  @Socket('game_exit')
+  async gameExit(data: any) {
+    console.log('GAME EXIT')
+    this.block = true
+    this.dialog = true
+    console.log('block')
+  }
 }
 </script>

@@ -50,7 +50,8 @@ export default class Avatar extends Vue {
   }
 
   get playing(): boolean{
-    return socketStore.playingUserIds.includes(this.user.id)
+    let ret:boolean =socketStore.playingUserIds.includes(this.user.id)
+    return ret
   }
 
   get color(): string {

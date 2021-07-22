@@ -1,5 +1,7 @@
+import * as socketio from "socket.io";
 import { Socket } from "socket.io";
-import { Service } from "typedi";
+import Container, { Service } from "typedi";
+import { isUndefined } from "util";
 import PendingGame from "../entities/PendingGame";
 import User from "../entities/User";
 import Game from "../game/Game";
@@ -12,7 +14,7 @@ export default class GameService {
   private incrementalId = 0;
 
   public findByUser(user: User) {
-
+    return this.players[user.id];
   }
 
   public gameMove(gameId: number, player: User, newY: number) {
@@ -36,8 +38,10 @@ export default class GameService {
   }
 
   public start(first: Socket, second: Socket, pendingGame?: PendingGame): Game {
+    const io = Container.get(socketio.Server);
+
     const game = new Game(first.data.user, second.data.user, pendingGame);
-    console.log('Gameservice start')
+    console.log("Gameservice start");
     this.provideId(game);
 
     first.join(game.toRoom());
@@ -46,6 +50,7 @@ export default class GameService {
     this.save(game);
 
     game.start();
+    io.emit("game_status_join", game.id);
 
     return game;
   }
@@ -60,6 +65,8 @@ export default class GameService {
     }
 
     this.repository[game.id] = game;
+    this.players[game.player1.id] = game;
+    this.players[game.player2.id] = game;
 
     return game;
   }
@@ -70,5 +77,22 @@ export default class GameService {
     }
 
     game.id = ++this.incrementalId;
+  }
+
+  public gameDisconnect(player: User) {
+    const io = Container.get(socketio.Server);
+    const game = this.findByUser(player);
+
+    if (!game) {
+      return {};
+    }
+    delete this.players[player.id];
+    io.emit("client_playing_quit", player.id);
+
+    let ret = game.disconnect(player);
+    console.log("RET: " + ret);
+    if (ret === true) io.emit("game_status_quit", game.id);
+
+    return { game: game, ret: ret };
   }
 }

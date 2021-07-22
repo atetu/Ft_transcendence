@@ -87,6 +87,8 @@ export default class Game {
   public userStatisticsService = Container.get(UserStatisticsService);
   public waitingRoom: User[] = new Array(2);
   public waitingRoomOption: number[] = new Array(2);
+  private leaving: Array<User>;
+  private stopIndex: boolean = false;
 
   constructor(
     public player1: User,
@@ -100,6 +102,7 @@ export default class Game {
       nbGames: 3,
     };
     this.sprite = this.sprites[this.settings.map];
+    this.leaving = [];
   }
 
   public toRoom(): string {
@@ -130,10 +133,10 @@ export default class Game {
       this.interval = setInterval(() => this.loop(), 1000 / 20);
     }
     this.decount();
-    console.group('STARRTTTTTTTTTTTTTTTT')
-    console.log('Map : ' + this.settings.map)
-    console.log('ball : ' + this.settings.ballVelocity)
-    console.log('paddle : ' + this.settings.paddleVelocity)
+    console.group("STARRTTTTTTTTTTTTTTTT");
+    console.log("Map : " + this.settings.map);
+    console.log("ball : " + this.settings.ballVelocity);
+    console.log("paddle : " + this.settings.paddleVelocity);
     // console.log("end of start");
   }
 
@@ -174,7 +177,6 @@ export default class Game {
     this.status = setStatus.playing;
     this.waitingRoomOption.length = 0;
     this.waitingRoom.length = 0;
-
 
     this.interval = setInterval(() => this.loop(), 1000 / 20);
     this.decount();
@@ -281,14 +283,17 @@ export default class Game {
     if (
       this.check_up_and_down(paddle.x, paddle.y) === 1 ||
       this.check_up_and_down(paddle.x, paddle.y + 100) === 1 ||
-      this.check_side(xSide, paddle.y) === 1) 
-        return 2;
+      this.check_side(xSide, paddle.y) === 1
+    )
+      return 2;
 
     if (this.sprite != null) return this.collisionSprite();
     return 0;
   }
 
   updateBall() {
+    if (!this.stopIndex)
+    {
     let radius = 15;
     let changeVel: boolean = false;
     let changeDir: boolean = false;
@@ -318,11 +323,13 @@ export default class Game {
       this.change = true;
     } else if (!blockChange) this.change = false;
 
-    this.ball.x = this.ball.x + this.velX * this.direction * this.settings.ballVelocity;
+    this.ball.x =
+      this.ball.x + this.velX * this.direction * this.settings.ballVelocity;
     // this.ball.x = this.ball.x;
     this.ball.y = this.ball.y + this.velY * this.settings.ballVelocity;
     // this.ball.y = this.ball.y;
     return 1;
+  }
   }
 
   async stopGame() {
@@ -343,7 +350,7 @@ export default class Game {
       await this.userStatisticsService.incrementWinCount(this.player2);
       await this.userStatisticsService.incrementLossCount(this.player1);
     }
-console.log('SET OVER')
+    console.log("SET OVER");
     io.to(this.toRoom()).emit("set_over", {
       winner: this.winner,
       score1: this.score1,
@@ -366,11 +373,11 @@ console.log('SET OVER')
         this.score1++;
       }
       this.actualNbGames++;
-      console.log('actual nb games : ' + this.actualNbGames)
-      console.log('settings nb games : ' + this.settings.nbGames)
+      console.log("actual nb games : " + this.actualNbGames);
+      console.log("settings nb games : " + this.settings.nbGames);
 
-       if (this.actualNbGames === this.settings.nbGames) {
-         console.log('OVER')
+      if (this.actualNbGames === this.settings.nbGames) {
+        console.log("OVER");
         if (this.score1 > this.score2) this.winner = this.player1;
         else this.winner = this.player2;
         this.status = setStatus.over;
@@ -382,7 +389,7 @@ console.log('SET OVER')
         score2: this.score2,
       });
       clearInterval(this.interval);
-     
+
       // this.restart();
     }
     // if (this.sprite != null)
@@ -451,5 +458,33 @@ console.log('SET OVER')
       // console.log('restartWaitingRoom4')
     }
     // console.log('restartWaitingRoom5')
+  }
+
+  disconnect(player: User) {
+    this.stopIndex = true
+    let found: User | null;
+    if (this.leaving && this.leaving.length !== 0) {
+      found = this.leaving.find(function (element) {
+        return element === player;
+      });
+      // console.log('restartWaitingRoom2')
+      if (found === undefined) {
+        this.leaving.push(player);
+      }
+    } else {
+      this.leaving.push(player);
+    }
+    if (this.leaving !== undefined)
+    {
+      if (this.leaving.length === 2) 
+      {
+        // if (this.winner)
+        // {
+
+        // }
+        return true;
+      }
+    }
+    return false;
   }
 }

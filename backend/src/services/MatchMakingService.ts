@@ -1,10 +1,17 @@
+import * as socketio from "socket.io";
 import { Socket } from "socket.io";
-import { Inject, Service } from "typedi";
+import Container, { Inject, Service } from "typedi";
+import { isObject } from "util";
 import PendingGame from "../entities/PendingGame";
 import User from "../entities/User";
 import Game from "../game/Game";
 import GameService from "./GameService";
 import SocketService from "./SocketService";
+import PendingGameRepository from "../repositories/PendingGameRepository";
+import ChannelMessageService from "./ChannelMessageService";
+import DirectMessageService from "./DirectMessageService";
+import { InjectRepository } from "typeorm-typedi-extensions";
+import ChannelMessage from "../entities/ChannelMessage";
 
 function getUserId(socket: Socket): number {
   return socket.data.user.id;
@@ -175,12 +182,25 @@ export default class MatchMakingService {
     private gameService: GameService,
 
     @Inject()
-    private socketService: SocketService
+    private socketService: SocketService,
+
+    @InjectRepository()
+    private readonly repository: PendingGameRepository,
+
+    @Inject()
+    private readonly directMessageService: DirectMessageService,
+
+    @Inject()
+    private readonly channelMessageService: ChannelMessageService
   ) {
     this.gatekeeper = new Gatekeeper();
   }
 
-  add(socket: Socket, pendingGame?: PendingGame): Game | null {
+  
+
+  async add(socket: Socket, pendingGame?: PendingGame): Game | null {
+    const io = Container.get(socketio.Server);
+
     const room = this.gatekeeper.add(socket, pendingGame);
 
     if (!room || room.size() < 2) {
@@ -204,9 +224,25 @@ export default class MatchMakingService {
       console.log('not here')
 
     const game = this.gameService.start(first, second, pendingGame);
-
+    // io.to(pendingGame.toRoom()).emit("game_starting_btn");
     this.socketService.broadcastGameStarting(game);
 
+    const { channel } = await this.directMessageService.getOrCreate(game.player1, game.player2);
+
+    const message = new ChannelMessage();
+    message.channel = channel;
+    message.user = socket.data.user;
+    message.type = ChannelMessage.Type.INVITE;
+    message.content = JSON.stringify({
+      id: pendingGame.id,
+      state: "played",
+    });
+
+    await this.channelMessageService.create(message);
+
+    pendingGame.message = Promise.resolve(message);
+
+    
     return game;
   }
 

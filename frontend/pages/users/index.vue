@@ -20,7 +20,7 @@
                   <v-icon v-if="user.admin" right>
                     mdi-account-supervisor
                   </v-icon>
-                  <v-icon v-if="user.playing" right>
+                  <v-icon v-if="playing(user)" right>
                     controller-classic
                   </v-icon>
                 </v-list-item-title>
@@ -37,6 +37,8 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 import API from '~/api/API'
 import { User } from '~/models'
+import { socketStore } from '~/store'
+
 
 @Component
 export default class Page extends Vue {
@@ -44,6 +46,11 @@ export default class Page extends Vue {
 
   async fetch() {
     this.users = await API.Users.index()
+  }
+
+   playing(user: User): boolean{
+    let ret:boolean =socketStore.playingUserIds.includes(user.id)
+    return ret
   }
 }
 </script>

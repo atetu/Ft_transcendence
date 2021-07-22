@@ -17,7 +17,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Socket } from 'socket.io-client'
 import { ChannelMessage } from '~/models'
+
 
 enum PendinGameState {
   PENDING = 'pending',
@@ -38,6 +40,7 @@ export default class XInvite extends Vue {
   }
 
   get buttonText() {
+    console.log('______________________________________' + this.state)
     switch (this.state) {
       case PendinGameState.PENDING: {
         return 'join'
@@ -61,6 +64,7 @@ export default class XInvite extends Vue {
       }
     }
   }
+  
 }
 </script>
 

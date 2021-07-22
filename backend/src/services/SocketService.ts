@@ -326,6 +326,34 @@ export default class SocketService {
     }
   }
 
+  gameDisconnect(socket){
+    console.log('DISCONNECT')
+    const io = Container.get(socketio.Server);
+    const { game, ret } = this.gameService.gameDisconnect(
+      socket.data.user
+    )
+    // console.log('game restart : ' + game)
+    // if (game !== false)
+    // {
+    //   io.to(game.toRoom()).emit('game_disconnect', { gameId: game.id })
+    //   game.restart()
+    //   console.log('starting....')
+    // }
+    console.log('game exit')
+    console.log('RET: ' + ret)
+    if (game && !ret)
+    {
+      console.log('game exit')
+      io.to(game.toRoom()).emit('game_exit', { gameId: game.id })
+    }
+    // if (game && ret)
+    // {
+    //   console.log('game exit BOTH')
+    //   io.emit("client_playing_quit", game.player1.id);
+    //   io.emit("client_playing_quit", game.player2.id);
+    // }
+  }
+
   async matchMaking(socket: Socket) {
     const io = Container.get(socketio.Server);
     console.log('matchMaking')
@@ -348,7 +376,7 @@ export default class SocketService {
 
 
     const io = Container.get(socketio.Server);
-    io.emit("client_playing_join", game.player2.id);
+    io.emit("client_playing_join", game.player1.id);
     io.emit("client_playing_join", game.player2.id);
   }
 
