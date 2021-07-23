@@ -9,6 +9,7 @@ import matches from "./matches";
 import achievements from "./achievements";
 import avatar from "./avatar";
 import statistics from "./statistics";
+import game from "./game";
 
 export default (app: express.Router) => {
   const userService = Container.get(UserService);
@@ -72,6 +73,7 @@ export default (app: express.Router) => {
   avatar(route);
   matches(route);
   statistics(route);
+  game(route);
 
   return route;
 };

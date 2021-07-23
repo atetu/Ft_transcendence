@@ -6,7 +6,7 @@
 
     <v-list-item-content class="pt-2 break">
       <v-list-item-title>{{ message.user.username }}</v-list-item-title>
-      <p class="text--secondary">Pending Game</p>
+      <p class="text--secondary">{{ status }}</p>
     </v-list-item-content>
 
     <v-list-item-action>
@@ -19,7 +19,6 @@
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { Socket } from 'socket.io-client'
 import { ChannelMessage } from '~/models'
-
 
 enum PendinGameState {
   PENDING = 'pending',
@@ -40,7 +39,6 @@ export default class XInvite extends Vue {
   }
 
   get buttonText() {
-    console.log('______________________________________' + this.state)
     switch (this.state) {
       case PendinGameState.PENDING: {
         return 'join'
@@ -48,6 +46,18 @@ export default class XInvite extends Vue {
 
       case PendinGameState.PLAYED: {
         return 'see'
+      }
+    }
+  }
+
+  get status() {
+    switch (this.state) {
+      case PendinGameState.PENDING: {
+        return 'Pending Game'
+      }
+
+      case PendinGameState.PLAYED: {
+        return 'Playing'
       }
     }
   }
@@ -64,12 +74,11 @@ export default class XInvite extends Vue {
       }
     }
   }
-  
 }
 </script>
 
 <style scoped>
-  .break {
-    word-break: break-all;
-  }
+.break {
+  word-break: break-all;
+}
 </style>

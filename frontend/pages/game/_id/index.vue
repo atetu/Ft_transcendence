@@ -16,19 +16,18 @@
     </template> -->
       <v-card height="200" class="text-center">
         <v-card-title>
-        <v-row class="fill-height" justify="center" align="center">
-          <v-col cols="12">
-            <p font-size="xx-large"> Your partner has left the game. </p>
-             <p font-size="normal">You will be redirected to the home page.</p>
-          </v-col>
-        </v-row>
+          <v-row class="fill-height" justify="center" align="center">
+            <v-col cols="12">
+              <p font-size="xx-large">Your partner has left the game.</p>
+              <p font-size="normal">You will be redirected to the home page.</p>
+            </v-col>
+          </v-row>
         </v-card-title>
-      
+
         <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn  @click="quit">OK</v-btn>
-      </v-card-actions>
-      
+          <v-spacer></v-spacer>
+          <v-btn @click="quit">OK</v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
     <v-row>
@@ -225,38 +224,43 @@ export default class Game extends Vue {
   update_paddle() {
     // console.log('UPDATE')
     // console.log(this.down)
-    let prevY: number = 0
-    let Y: number = 0
-    let nb: number = 0
-    if (this.up) nb = this.velPaddle * -1 * this.factor
-    else if (this.down) nb = this.velPaddle * this.factor
-    this.up = false
-    this.down = false
-    if (this.mySide == 1) {
-      prevY = this.paddleLeftY
-      this.paddleLeftY += nb
-      Y = this.paddleLeftY
-    } else if (this.mySide == 2) {
-      prevY = this.paddleRightY
-      this.paddleRightY += nb
-      Y = this.paddleRightY
-    }
-    // console.log('front update: ' + Y)
-    if (nb) {
-      this.$socket.client.emit(
-        'game_move',
-        {
-          gameId: this.id,
-          y: Y,
-        },
-        (err: any, body: any) => {
-          if (err) {
-            console.log('error after update')
-            if (this.mySide == 1) this.paddleLeftY = prevY
-            else this.paddleRightY = prevY
-          } else console.log('ok')
-        }
-      )
+    if (
+      this.player1?.id === this.$store.state.auth.user.id ||
+      this.player2?.id === this.$store.state.auth.user.id
+    ) {
+      let prevY: number = 0
+      let Y: number = 0
+      let nb: number = 0
+      if (this.up) nb = this.velPaddle * -1 * this.factor
+      else if (this.down) nb = this.velPaddle * this.factor
+      this.up = false
+      this.down = false
+      if (this.mySide == 1) {
+        prevY = this.paddleLeftY
+        this.paddleLeftY += nb
+        Y = this.paddleLeftY
+      } else if (this.mySide == 2) {
+        prevY = this.paddleRightY
+        this.paddleRightY += nb
+        Y = this.paddleRightY
+      }
+      // console.log('front update: ' + Y)
+      if (nb) {
+        this.$socket.client.emit(
+          'game_move',
+          {
+            gameId: this.id,
+            y: Y,
+          },
+          (err: any, body: any) => {
+            if (err) {
+              console.log('error after update')
+              if (this.mySide == 1) this.paddleLeftY = prevY
+              else this.paddleRightY = prevY
+            } else console.log('ok')
+          }
+        )
+      }
     }
   }
 
@@ -276,7 +280,7 @@ export default class Game extends Vue {
           if (player1.id === this.$store.state.auth.user.id) this.mySide = 1
           else this.mySide = 2
           this.player1 = player1
-          this.player2 =player2
+          this.player2 = player2
           // this.player2 = player2
         }
         // console.log('MY SIDE: ' + this.mySide)
@@ -287,9 +291,7 @@ export default class Game extends Vue {
   }
 
   beforeDestroy() {
-    this.$socket.client.emit(
-      'game_disconnect'
-    )
+    this.$socket.client.emit('game_disconnect')
   }
 
   drawRect(): void {
@@ -354,9 +356,9 @@ export default class Game extends Vue {
     else return this.winner?.username + 'wins !'
   }
 
-  quit(){
+  quit() {
     // this.dialog = false
-     this.$router.push({ path: `/` })
+    this.$router.push({ path: `/` })
   }
 
   @Socket('game_state')

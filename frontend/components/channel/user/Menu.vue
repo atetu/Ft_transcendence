@@ -40,6 +40,7 @@
 
         <v-btn text :to="toProfile" color="primary"> profile </v-btn>
         <v-btn text :to="toMessage"> message </v-btn>
+        <v-btn v-if="game" text :to="toGame"> Watch game </v-btn>
       </v-card-actions>
     </v-card>
   </v-menu>
@@ -49,6 +50,9 @@
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 
 import { Channel, ChannelUser, UserStatistics } from '~/models'
+import { User } from '~/models'
+import Game from '~/pages/game/_id/index.vue'
+import { socketStore } from '~/store'
 
 @Component
 export default class ComponentImpl extends Vue {
@@ -66,6 +70,8 @@ export default class ComponentImpl extends Vue {
 
   loading = false
   error: any = null
+
+  game: any | null = null
 
   async fetchStatistics() {
     if (this.loading) {
@@ -86,6 +92,11 @@ export default class ComponentImpl extends Vue {
     this.loading = false
   }
 
+  playing(user: User): boolean {
+    let ret: boolean = socketStore.playingUserIds.includes(user.id)
+    console.log('is playing? ' + ret)
+    return ret
+  }
   get toProfile() {
     return `/users/${this.user.id}`
   }
@@ -94,11 +105,34 @@ export default class ComponentImpl extends Vue {
     return `/direct-messages/${this.user.id}`
   }
 
+  //  async toGame() {
+  //    console.log('TO GAME')
+  //   let gameId = await this.$axios.$get(`users/${this.$store.state.auth.user.id}/game`)
+  //   console.log('IDDDD: ' + gameId)
+  //   return `/game/${gameId}`
+  // }
+
+  async fetchGameId() {
+    this.game = await this.$axios.$get(`/users/${this.user.id}/game`)
+  }
+
+  get toGame() {
+    if (!this.game) {
+      return null
+    }
+
+    return `/game/${this.game.id}`
+  }
+
   @Watch('menu')
   onMenuOpenStateUpdate(val: boolean) {
     if (val) {
       this.fetchStatistics()
     }
+  }
+
+  mounted() {
+    this.fetchGameId()
   }
 }
 </script>

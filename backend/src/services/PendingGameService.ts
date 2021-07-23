@@ -9,6 +9,8 @@ import DirectMessageService from "./DirectMessageService";
 
 @Service()
 export default class PendingGameService {
+  private waiters: { [key: number]: PendingGame } = {};
+
   constructor(
     @InjectRepository()
     private readonly repository: PendingGameRepository,
@@ -33,11 +35,6 @@ export default class PendingGameService {
     pendingGame.paddleVelocity = paddleVelocity;
     pendingGame.nbGames = nbGames;
 
-    console.log('inside create')
-    console.log(map)
-    console.log(ballVelocity)
-    console.log(paddleVelocity)
-    console.log('INSIDE PENDING GAME')
     await this.repository.save(pendingGame);
 
     const { channel } = await this.directMessageService.getOrCreate(user, peer);

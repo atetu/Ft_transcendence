@@ -12,6 +12,7 @@ import ChannelMessageService from "./ChannelMessageService";
 import DirectMessageService from "./DirectMessageService";
 import { InjectRepository } from "typeorm-typedi-extensions";
 import ChannelMessage from "../entities/ChannelMessage";
+import Channel from "../entities/Channel";
 
 function getUserId(socket: Socket): number {
   return socket.data.user.id;
@@ -29,6 +30,7 @@ class Room {
   public accept(socket: Socket): boolean {
     throw new Error("not implemented");
   }
+
 
   protected add(socket: Socket): void {
     if (this.contains(socket)) {
@@ -198,7 +200,7 @@ export default class MatchMakingService {
 
   
 
-  async add(socket: Socket, pendingGame?: PendingGame): Game | null {
+  async add(socket: Socket, pendingGame?: PendingGame): Promise<Game> {
     const io = Container.get(socketio.Server);
 
     const room = this.gatekeeper.add(socket, pendingGame);
@@ -212,33 +214,20 @@ export default class MatchMakingService {
     if (room.isEmpty()) {
       this.gatekeeper.destroyRoom(room);
     }
-    console.log('Pending Game')
-    if (pendingGame){
-     console.log('here')
-     console.log(pendingGame.map)
-     console.log(pendingGame.map)
-     console.log(pendingGame.paddleVelocity)
-
-    }
-    else
-      console.log('not here')
 
     const game = this.gameService.start(first, second, pendingGame);
     // io.to(pendingGame.toRoom()).emit("game_starting_btn");
     this.socketService.broadcastGameStarting(game);
 
-    const { channel } = await this.directMessageService.getOrCreate(game.player1, game.player2);
-
-    const message = new ChannelMessage();
-    message.channel = channel;
-    message.user = socket.data.user;
-    message.type = ChannelMessage.Type.INVITE;
+    // const { channel } = await this.directMessageService.getOrCreate(game.player1, game.player2);
+    
+    const message = await pendingGame.message
     message.content = JSON.stringify({
       id: pendingGame.id,
       state: "played",
     });
 
-    await this.channelMessageService.create(message);
+    await this.channelMessageService.edit(message);
 
     pendingGame.message = Promise.resolve(message);
 
@@ -249,4 +238,6 @@ export default class MatchMakingService {
   remove(socket: Socket, id?: number) {
     this.gatekeeper.remove(socket); // TODO use id
   }
+
+  
 }

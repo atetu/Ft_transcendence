@@ -24,6 +24,7 @@ export enum ChannelEvent {
   DISCONNECT = "channel_disconnect",
   DELETE = "channel_delete",
   MESSAGE = "channel_message",
+  EDIT_MESSAGE = "edit_message",
   USER_JOIN = "channel_user_join",
   USER_LEAVE = "channel_user_leave",
   USER_UPDATE = "channel_user_update",
@@ -160,6 +161,12 @@ export default class SocketService {
     this.broadcastToChannel(channel, ChannelEvent.MESSAGE, message);
   }
 
+  public broadcastChannelEditMessage(message: ChannelMessage) {
+    const channel = message.channel;
+
+    this.broadcastToChannel(channel, ChannelEvent.EDIT_MESSAGE, message);
+  }
+
   public broadcastChannelUserJoin(channelUser: ChannelUser) {
     const channel = channelUser.channel;
 
@@ -224,6 +231,7 @@ export default class SocketService {
     body: { id: number },
     callback: Callback
   ) {
+    const gameService = Container.get(GameService);
     const pendingGameService = Container.get(
       require("./PendingGameService").default
     ) as any;
@@ -240,7 +248,8 @@ export default class SocketService {
           throw new Error(`no pending game found for id = '${id}'`);
         }
       }
-
+      // if (gameService.findByUser(socket.data.user) || this.matchMakingService.contains(socket))
+      //    callback(error, null)
       const game: Game | null = this.matchMakingService.add(
         socket,
         pendingGame

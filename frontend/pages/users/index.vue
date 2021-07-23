@@ -20,8 +20,8 @@
                   <v-icon v-if="user.admin" right>
                     mdi-account-supervisor
                   </v-icon>
-                  <v-icon v-if="playing(user)" right>
-                    controller-classic
+                  <v-icon v-if="playing(user) === true" right>
+                    mdi-binoculars
                   </v-icon>
                 </v-list-item-title>
               </v-list-item-content>
@@ -50,6 +50,7 @@ export default class Page extends Vue {
 
    playing(user: User): boolean{
     let ret:boolean =socketStore.playingUserIds.includes(user.id)
+    console.log('is playing? ' + ret)
     return ret
   }
 }

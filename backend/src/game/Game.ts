@@ -487,4 +487,11 @@ export default class Game {
     }
     return false;
   }
+
+  public toJSON() {
+    return {
+      id: this.id
+    };
+  }
+
 }

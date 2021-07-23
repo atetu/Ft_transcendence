@@ -52,6 +52,14 @@ export default class ChannelMessageService {
     return message;
   }
 
+  public async edit(message: ChannelMessage) {
+    await this.repository.save(message);
+
+    this.socketService.broadcastChannelEditMessage(message);
+
+    return message;
+  }
+
   public async delete(message: ChannelMessage) {
     await this.repository.delete(message);
 

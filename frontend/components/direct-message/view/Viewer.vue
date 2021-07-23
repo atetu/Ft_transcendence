@@ -7,6 +7,7 @@
     :channel="channel"
     :messages="messages"
     @message="onNewMessage"
+    @message-update="updateMessage"
   >
     <template v-if="peer" #title>
       <channel-user-menu :channel="channel" :user="peer" bottom>
@@ -77,6 +78,11 @@ export default class Viewer extends Vue {
 
   onNewMessage(message: ChannelMessage) {
     this.messages.push(message)
+  }
+
+  updateMessage(message: ChannelMessage) {
+    let index = this.messages.findIndex((x) => x === message)
+    if (index != -1) this.messages[index].content = message.content
   }
 }
 </script>

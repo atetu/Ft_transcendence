@@ -85,6 +85,11 @@ export default class Viewer extends Vue {
     this.$emit('message', message)
   }
 
+  @Socket('channel_update_message')
+  onChannelUpdateMessage(message: ChannelMessage) {
+    this.$emit('message-update', message)
+  }
+
   @Socket('channel_user_join')
   onChannelUserJoin(channelUser: ChannelUser) {
     this.$emit('joined', channelUser)
