@@ -87,7 +87,7 @@ class Ball extends Circle {
     if (direction === Direction.LEFT && this.xVelocity > 0) {
       this.xVelocity *= -1;
     }
-    
+
     if (direction === Direction.RIGHT && this.xVelocity < 0) {
       this.xVelocity *= -1;
     }
@@ -246,7 +246,7 @@ export default class Game {
   public sprite: Sprite | null;
   public change: boolean = false;
   public settings: GameSettings;
-  public actualNbGames: number = 0;
+  public roundNumber: number = 0;
   public matchService = Container.get(MatchService);
   public userStatisticsService = Container.get(UserStatisticsService);
   public waitingRoom: User[] = new Array(2);
@@ -388,7 +388,7 @@ export default class Game {
       );
     }
 
-    io.to(this.toRoom()).emit("set_over", this.toJSON());
+    io.to(this.toRoom()).emit("game_end", match);
     // TODO : enregistrer infos match
     // envoyer infos au front pour dire que c'est la fin des fins
   }
@@ -399,30 +399,30 @@ export default class Game {
     if (this.state === -1 && this.updateBall() === 0) {
       clearInterval(this.interval);
 
-      let roundWinner: Player;
+      let scorer: Player;
       if (this.direction == Direction.LEFT) {
-        roundWinner = this.player[Side.LEFT];
+        scorer = this.player[Side.LEFT];
       } else {
-        roundWinner = this.player[Side.RIGHT];
+        scorer = this.player[Side.RIGHT];
       }
 
-      roundWinner.score++;
+      scorer.score++;
+      this.roundNumber++;
 
-      this.actualNbGames++;
-      console.log("actual nb games : " + this.actualNbGames);
-      console.log("settings nb games : " + this.settings.nbGames);
-
-      if (this.actualNbGames === this.settings.nbGames) {
+      if (this.roundNumber === this.settings.nbGames) {
         this.status = setStatus.over;
-        this.stopGame(roundWinner);
+        this.stopGame(scorer);
         return;
       }
 
-      io.to(this.toRoom()).emit("game_over", this.toJSON());
+      io.to(this.toRoom()).emit("game_scored", {
+        ...this.toJSON(),
+        scorer,
+      });
 
       clearInterval(this.interval);
 
-      this.restart();
+      setTimeout(() => this.restart(), 500);
     }
 
     io.to(this.toRoom()).emit("game_state", this.toJSON());

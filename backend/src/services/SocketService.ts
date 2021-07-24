@@ -180,7 +180,7 @@ export default class SocketService {
 
     this.broadcastToChannel(channel, ChannelEvent.EDIT_MESSAGE, message);
   }
-  
+
   public broadcastChannelMessageDelete(message: ChannelMessage) {
     const channel = message.channel;
 
@@ -304,6 +304,12 @@ export default class SocketService {
   }
 
   async askGameConnect(socket: Socket, body: any, callback: Callback) {
+    const { currentGameRoom } = socket.data;
+    if (currentGameRoom !== undefined) {
+      socket.leave(currentGameRoom);
+      delete socket.data.currentGameRoom;
+    }
+
     try {
       this.ensureBody(body);
 
@@ -314,6 +320,11 @@ export default class SocketService {
       if (!game) {
         throw new Error("game not found");
       }
+
+      const newGameRoom = game.toRoom();
+
+      socket.join(newGameRoom);
+      socket.data.currentGameRoom = newGameRoom;
 
       callback(null, game.toJSON());
     } catch (error) {
@@ -361,12 +372,10 @@ export default class SocketService {
     }
   }
 
-  gameDisconnect(socket){
-    console.log('DISCONNECT')
+  gameDisconnect(socket) {
+    console.log("DISCONNECT");
     const io = Container.get(socketio.Server);
-    const { game, ret } = this.gameService.gameDisconnect(
-      socket.data.user
-    )
+    const { game, ret } = this.gameService.gameDisconnect(socket.data.user);
     // console.log('game restart : ' + game)
     // if (game !== false)
     // {
@@ -374,12 +383,11 @@ export default class SocketService {
     //   game.restart()
     //   console.log('starting....')
     // }
-    console.log('game exit')
-    console.log('RET: ' + ret)
-    if (game && !ret)
-    {
-      console.log('game exit')
-      io.to(game.toRoom()).emit('game_exit', { gameId: game.id })
+    console.log("game exit");
+    console.log("RET: " + ret);
+    if (game && !ret) {
+      console.log("game exit");
+      io.to(game.toRoom()).emit("game_exit", { gameId: game.id });
     }
     // if (game && ret)
     // {
