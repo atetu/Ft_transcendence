@@ -10,7 +10,12 @@
     @message-update="updateMessage"
   >
     <template v-if="peer" #title>
-      <channel-user-menu :channel="channel" :user="peer" bottom>
+      <channel-user-menu
+        :channel="channel"
+        :user="peer"
+        bottom
+        without-message-button
+      >
         <template #activator="{ on, attrs }">
           <v-list-item rounded shaped v-bind="attrs" v-on="on">
             <v-list-item-avatar>

@@ -39,7 +39,9 @@
         <v-spacer />
 
         <v-btn text :to="toProfile" color="primary"> profile </v-btn>
-        <v-btn text :to="toMessage"> message </v-btn>
+        <v-btn v-if="!withoutMessageButton" text :to="toMessage">
+          message
+        </v-btn>
         <v-btn v-if="game" text :to="toGame"> Watch game </v-btn>
       </v-card-actions>
     </v-card>
@@ -62,6 +64,9 @@ export default class ComponentImpl extends Vue {
 
   @Prop({ type: Boolean })
   bottom!: boolean
+
+  @Prop({ type: Boolean })
+  withoutMessageButton!: boolean
 
   menu = false
   loading = false
