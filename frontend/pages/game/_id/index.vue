@@ -32,13 +32,14 @@
     </v-dialog>
     <v-row>
       <v-col cols="1" align="center" justify="center">
-        <user-avatar v-if="player1" :user="player1" />
-        <p class="login" v-if="player1">{{ player1.username }}</p>
-        <p class="score">{{ this.score1 }}</p>
+        <template v-if="leftPlayer">
+        <user-avatar :user="leftPlayer.user" />
+        <p class="login">{{ leftPlayer.user.username }}</p>
+        <p class="score">{{ leftPlayer.score }}</p>
         <p>
           <v-btn
             v-if="status === 3"
-            :disabled="mySide == 1 && activeBtn == true ? false : true"
+            :disabled="activeBtn == true"
             elevation="2"
             :color="primary"
             @click="restart"
@@ -46,6 +47,7 @@
             RESTART</v-btn
           >
         </p>
+        </template>
       </v-col>
 
       <v-col cols="10">
@@ -60,20 +62,22 @@
         ></canvas>
       </v-col>
       <v-col cols="1" align="center" justify="center">
-        <user-avatar v-if="player2" :user="player2" />
-        <p class="login" v-if="player2">{{ player2.username }}</p>
-        <p class="score">{{ this.score2 }}</p>
-        <p>
-          <v-btn
-            v-if="status === 3"
-            :disabled="mySide === 2 && activeBtn == true ? false : true"
-            elevation="2"
-            :color="primary"
-            @click="restart"
-          >
-            RESTART</v-btn
-          >
-        </p>
+        <template v-if="rightPlayer">
+          <user-avatar :user="rightPlayer.user" />
+          <p class="login">{{ rightPlayer.user.username }}</p>
+          <p class="score">{{ rightPlayer.score }}</p>
+          <p>
+            <v-btn
+              v-if="status === 3"
+              :disabled="activeBtn == true"
+              elevation="2"
+              :color="primary"
+              @click="restart"
+            >
+              RESTART</v-btn
+            >
+          </p>
+        </template>
       </v-col>
     </v-row>
   </v-container>
@@ -115,6 +119,7 @@
 import { Component, Vue } from 'nuxt-property-decorator' // propre a nuxt
 import { Socket } from 'vue-socket.io-extended'
 import { User } from '~/models'
+import { Game, Player, Side } from '~/models/Game'
 
 enum Status {
   waiting = 1,
@@ -144,6 +149,11 @@ class VisibleObject {
     public height: number
   ) {}
 
+  copyPosition({ x, y }: { x: number; y: number }) {
+    this.x = x
+    this.y = y
+  }
+
   updatePosition(x: number, y: number) {
     this.x = x
     this.y = y
@@ -152,11 +162,6 @@ class VisibleObject {
   draw(ctx: CanvasRenderingContext2D) {
     /* empty */
   }
-}
-
-enum Side {
-  LEFT,
-  RIGHT,
 }
 
 class Paddle extends VisibleObject {
@@ -185,13 +190,13 @@ class Ball extends VisibleObject {
 }
 
 @Component
-export default class Game extends Vue {
+export default class Page extends Vue {
   dialog = false
   canvas: HTMLCanvasElement | null = null
   ctx: CanvasRenderingContext2D | null = null
 
   private loopInterval: NodeJS.Timeout | null = null
-  
+
   height: number = 600
   width: number = 800
 
@@ -200,6 +205,11 @@ export default class Game extends Vue {
   paddle = {
     [Side.LEFT]: new Paddle(15, 10),
     [Side.RIGHT]: new Paddle(770, 10),
+  }
+
+  player = {
+    [Side.LEFT]: null as unknown as Player,
+    [Side.RIGHT]: null as unknown as Player,
   }
 
   side: Side = Side.LEFT
@@ -211,11 +221,7 @@ export default class Game extends Vue {
   playing: boolean = false
   user: User | null = null
   status: Status = Status.waiting
-  player1: User | null = null
-  player2: User | null = null
   winner: User | null = null
-  score1: number = 0
-  score2: number = 0
   setStatus: setStatusEnum = setStatusEnum.playing
   roundWinner: number = 1
   sprite: Sprite | null = null
@@ -284,8 +290,8 @@ export default class Game extends Vue {
 
   updatePaddles() {
     if (
-      this.player1?.id === this.$store.state.auth.user.id ||
-      this.player2?.id === this.$store.state.auth.user.id
+      this.player[Side.LEFT].user.id === this.$store.state.auth.user.id ||
+      this.player[Side.RIGHT].user.id === this.$store.state.auth.user.id
     ) {
       const paddle = this.myPaddle
 
@@ -324,29 +330,36 @@ export default class Game extends Vue {
   mounted() {
     this.canvas = <HTMLCanvasElement>document.getElementById('myCanvas')
     this.ctx = <CanvasRenderingContext2D>this.canvas.getContext('2d')
+    this.ctx.fillStyle = `${this.$vuetify.theme.themes.dark.primary}`
+    this.ctx.fillRect(0, 0, this.width, this.height)
 
     this.$socket.client.emit(
       'game_connect',
       {
         gameId: this.id,
       },
-      (error: any, body: any) => {
+      (error: any, body: Game) => {
         if (!error) {
-          const { player1, player2 } = body
+          const { player, ball, paddle, countdown } = body
 
-          if (player1.id === this.$store.state.auth.user.id) {
+          if (player[Side.LEFT].user.id === this.$store.state.auth.user.id) {
             this.side = Side.LEFT
           } else {
             this.side = Side.RIGHT
           }
 
-          this.player1 = player1
-          this.player2 = player2
+          this.player = player
+
+          this.ball.copyPosition(ball)
+          this.paddle[Side.LEFT].copyPosition(paddle[Side.LEFT])
+          this.paddle[Side.RIGHT].copyPosition(paddle[Side.RIGHT])
+
+          this.timer = countdown
+
+          this.loopInterval = setInterval(() => this.loop(), 1000 / 60)
         }
       }
     )
-
-    this.loopInterval = setInterval(() => this.loop(), 1000 / 60)
   }
 
   beforeDestroy() {
@@ -420,15 +433,15 @@ export default class Game extends Vue {
   }
 
   @Socket('game_state')
-  getDatas(data: any) {
-    const { paddle1, paddle2, ballX, ballY, state, sprite, factor } = data
+  onGameState(data: Game) {
+    const { paddle, ball, countdown, sprite, factor } = data
 
-    this.ball.updatePosition(ballX, ballY)
+    this.ball.copyPosition(ball)
 
-    this.paddle[Side.LEFT].y = paddle1.y
-    this.paddle[Side.RIGHT].y = paddle2.y
+    this.paddle[Side.LEFT].y = paddle[Side.LEFT].y
+    this.paddle[Side.RIGHT].y = paddle[Side.RIGHT].y
 
-    this.timer = state
+    this.timer = countdown
     this.sprite = sprite
     this.factor = factor
 
@@ -444,28 +457,28 @@ export default class Game extends Vue {
     }
   }
 
-  @Socket('game_over')
-  finishGame(data: any) {
-    const { score1, score2 } = data
-    var prev_score1 = this.score1
-    this.score1 = score1
-    this.score2 = score2
-    if (this.score1 > prev_score1) this.roundWinner = 1
-    else this.roundWinner = 2
-    this.status = Status.over
-  }
+  // @Socket('game_over')
+  // finishGame(data: any) {
+  //   const { score1, score2 } = data
+  //   var prev_score1 = this.score1
+  //   this.score1 = score1
+  //   this.score2 = score2
+  //   if (this.score1 > prev_score1) this.roundWinner = 1
+  //   else this.roundWinner = 2
+  //   this.status = Status.over
+  // }
 
-  @Socket('set_over')
-  finishSet(data: any) {
-    console.log('SET OVER')
-    this.setStatus = setStatusEnum.over
-    this.status = Status.over
-    const { winner, score1, score2 } = data
-    this.winner = winner
-    if (this.winner !== null) this.message = this.winner.username + ' wins!'
-    this.score1 = score1
-    this.score2 = score2
-  }
+  // @Socket('set_over')
+  // finishSet(data: any) {
+  //   console.log('SET OVER')
+  //   this.setStatus = setStatusEnum.over
+  //   this.status = Status.over
+  //   const { winner, score1, score2 } = data
+  //   this.winner = winner
+  //   if (this.winner !== null) this.message = this.winner.username + ' wins!'
+  //   this.score1 = score1
+  //   this.score2 = score2
+  // }
 
   @Socket('game_exit')
   async gameExit(data: any) {
@@ -473,6 +486,14 @@ export default class Game extends Vue {
     this.block = true
     this.dialog = true
     console.log('block')
+  }
+
+  get leftPlayer(): Player {
+    return this.player[Side.LEFT]
+  }
+
+  get rightPlayer(): Player {
+    return this.player[Side.RIGHT]
   }
 }
 </script>

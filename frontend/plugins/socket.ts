@@ -15,6 +15,10 @@ const plugin: Plugin = ({ store, isDev }) => {
 
   if (isDev) {
     socket.onAny((event, ...args) => {
+      if (event == 'game_state') {
+        return
+      }
+
       console.log(`got ${event}:`, args)
     })
   }
