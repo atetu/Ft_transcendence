@@ -6,6 +6,7 @@ import MatchService from "../services/MatchService";
 import { AdvancedConsoleLogger } from "typeorm";
 import Match from "../entities/Match";
 import UserStatisticsService from "../services/UserStatisticsService";
+import { throws } from "assert";
 
 let nbGames: number = 0;
 
@@ -14,37 +15,141 @@ enum setStatus {
   over,
 }
 
-class Paddle {
+class GameObject {
   constructor(public x: number, public y: number) {}
+}
 
-  setY(newY: number) {
-    this.y = newY;
-    // console.log('newY: ' + this.y)
+class Circle extends GameObject {
+  constructor(x: number, y: number, public radius: number) {
+    super(x, y);
+  }
+
+  get radiusSquare() {
+    return Math.pow(this.radius, 2);
   }
 }
 
-class Ball {
+class Rectangle extends GameObject {
   constructor(
-    public x: number,
-    public y: number,
-    public xSpeed: number,
-    public ySpeed: number
-  ) {}
+    x: number,
+    y: number,
+    public width: number,
+    public height: number
+  ) {
+    super(x, y);
+  }
 
-  update() {}
+  // http://www.jeffreythompson.org/collision-detection/circle-rect.php
+  collide(circle: Circle): boolean {
+    const { x: cx, y: cy, radius } = circle;
+    const { x: rx, y: ry, width: rw, height: rh } = this;
 
-  collide(paddle: Paddle): boolean {
+    let testX = cx;
+    let testY = cy;
+
+    // which edge is closest?
+    if (cx < rx) testX = rx;
+    // compare to left edge
+    else if (cx > rx + rw) testX = rx + rw; // right edge
+    if (cy < ry) testY = ry;
+    // top edge
+    else if (cy > ry + rh) testY = ry + rh; // bottom edge
+
+    // get distance from closest edges
+    const distX = cx - testX;
+    const distY = cy - testY;
+    const distance = Math.sqrt(distX * distX + distY * distY);
+
+    // if the distance is less than the radius, collision!
+    if (distance <= radius) {
+      return true;
+    }
     return false;
   }
 }
 
-class Sprite {
+class Ball extends Circle {
   constructor(
-    public x: number,
-    public y: number,
-    public width: number,
-    public height: number
+    x: number,
+    y: number,
+    public xVelocity: number,
+    public yVelocity: number
+  ) {
+    super(x, y, 15);
+  }
+
+  applyVelocity(multiplier: number) {
+    this.x += this.xVelocity * multiplier;
+    this.y += this.yVelocity * multiplier;
+  }
+
+  setDirection(direction: Direction) {
+    if (direction === Direction.LEFT && this.yVelocity > 0) {
+      this.yVelocity *= -1;
+    }
+    
+    if (direction === Direction.RIGHT && this.yVelocity < 0) {
+      this.yVelocity *= -1;
+    }
+  }
+}
+
+class Paddle extends Rectangle {
+  constructor(x: number, y: number) {
+    super(x, y, 20, 100);
+  }
+}
+
+class Sprite extends Rectangle {
+  constructor(x: number, y: number, width: number, height: number) {
+    super(x, y, width, height);
+  }
+}
+
+class World {
+  constructor(
+    public readonly topWall: Rectangle,
+    public readonly bottomWall: Rectangle,
+    public readonly leftWall: Rectangle,
+    public readonly rightWall: Rectangle
   ) {}
+
+  collideX(circle: Ball) {
+    return this.leftWall.collide(circle) || this.rightWall.collide(circle);
+  }
+
+  collideY(circle: Ball) {
+    return this.topWall.collide(circle) || this.bottomWall.collide(circle);
+  }
+}
+
+class Player {
+  public readonly user: User;
+  public score: number = 0;
+
+  constructor(public socket: socketio.Socket) {
+    this.user = socket.data.user;
+  }
+
+  setDisconnected() {
+    this.socket = null;
+  }
+
+  setConnected(socket: socketio.Socket) {
+    this.socket = socket;
+  }
+
+  get connected(): boolean {
+    return !!this.socket;
+  }
+
+  public toJSON(): any {
+    return {
+      user: this.user,
+      score: this.score,
+      connected: this.connected,
+    };
+  }
 }
 
 export interface GameSettings {
@@ -54,31 +159,90 @@ export interface GameSettings {
   nbGames: number;
 }
 
+function getRandomArbitrary(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
+function getRandomInt(max: number) {
+  return Math.floor(Math.random() * max);
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+enum Side {
+  LEFT,
+  RIGHT,
+}
+
+enum Direction {
+  LEFT = -1,
+  RIGHT = 1,
+}
+
+const sprites: Sprite[] = [
+  new Sprite(0, 0, 0, 0),
+  new Sprite(200, 150, 100, 200),
+  new Sprite(600, 300, 50, 200),
+  new Sprite(300, 300, 150, 50),
+];
+
+const WIDTH = 800;
+const HEIGHT = 600;
+const WALL_THICKNESS = 100;
+const COLLISION_STEP = 3;
+
 export default class Game {
-  private interval?: ReturnType<typeof setInterval>;
-  // private users: User[]
-  private ball: Ball = new Ball(300, 200, 3, 1);
-  private paddle1: Paddle = new Paddle(15, 10);
-  private paddle2: Paddle = new Paddle(770, 10);
-  // private player1: User | null = null
-  // private player2: User | null = null
-  private direction: number = 1;
-  // private status: string
-  private velX: number = 3.5;
-  private velY: number = 1.5;
-  public connected: number = 0;
   public id: number | null = null;
+
+  private interval?: ReturnType<typeof setInterval>;
+
+  private ball: Ball = new Ball(300, HEIGHT - 50, 3.5, 1.5);
+  private direction: Direction;
+
+  private paddle = {
+    [Side.LEFT]: new Paddle(15, 10),
+    [Side.RIGHT]: new Paddle(770, 10),
+  };
+
+  private player = {
+    [Side.LEFT]: null as Player,
+    [Side.RIGHT]: null as Player,
+  };
+
+  private world = new World(
+    new Rectangle(
+      -WALL_THICKNESS,
+      -WALL_THICKNESS,
+      WIDTH + WALL_THICKNESS * 2,
+      WALL_THICKNESS
+    ),
+    new Rectangle(
+      -WALL_THICKNESS,
+      HEIGHT,
+      WIDTH + WALL_THICKNESS * 2,
+      WALL_THICKNESS
+    ),
+    new Rectangle(
+      -WALL_THICKNESS,
+      -WALL_THICKNESS,
+      WALL_THICKNESS,
+      HEIGHT + WALL_THICKNESS * 2
+    ),
+    new Rectangle(
+      WIDTH,
+      -WALL_THICKNESS,
+      WALL_THICKNESS,
+      HEIGHT + WALL_THICKNESS * 2
+    )
+  );
+
+  public connected: number = 0;
   public state: number = 3;
-  public score1: number = 0;
-  public score2: number = 0;
   public status: setStatus = setStatus.playing;
-  public winner: User;
-  public sprites: Sprite[] = [
-    { x: 0, y: 0, width: 0, height: 0 },
-    { x: 200, y: 150, width: 100, height: 200 },
-    { x: 600, y: 300, width: 50, height: 200 },
-    { x: 300, y: 300, width: 150, height: 50 },
-  ];
   public sprite: Sprite | null;
   public change: boolean = false;
   public settings: GameSettings;
@@ -91,8 +255,8 @@ export default class Game {
   private stopIndex: boolean = false;
 
   constructor(
-    public player1: User,
-    public player2: User,
+    first: socketio.Socket,
+    second: socketio.Socket,
     settings?: GameSettings
   ) {
     this.settings = settings || {
@@ -101,23 +265,23 @@ export default class Game {
       ballVelocity: 1,
       nbGames: 3,
     };
-    this.sprite = this.sprites[this.settings.map];
+    this.sprite = sprites[this.settings.map];
     this.leaving = [];
+
+    this.player[Side.LEFT] = new Player(first);
+    this.player[Side.RIGHT] = new Player(second);
+
+    this.direction = this.nextDirection();
+    this.ball.setDirection(this.direction);
   }
 
   public toRoom(): string {
     return `game_${this.id}`;
   }
 
-  sleep(ms: number) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
-  }
-
   async decount() {
     while (this.state != -1) {
-      await this.sleep(1000);
+      await sleep(10);
       this.state--;
     }
   }
@@ -125,53 +289,23 @@ export default class Game {
   start() {
     const io = Container.get(socketio.Server);
 
-    io.to(this.toRoom()).emit("game_connect", {
-      player1: this.player1,
-      player2: this.player2,
-    });
+    io.to(this.toRoom()).emit("game_connect", this.toJSON());
+
     if (this.interval === undefined) {
       this.interval = setInterval(() => this.loop(), 1000 / 20);
     }
+
     this.decount();
-    console.group("STARRTTTTTTTTTTTTTTTT");
-    console.log("Map : " + this.settings.map);
-    console.log("ball : " + this.settings.ballVelocity);
-    console.log("paddle : " + this.settings.paddleVelocity);
-    // console.log("end of start");
   }
-
-  getRandomArbitrary(min: number, max: number) {
-    return Math.random() * (max - min) + min;
-  }
-
-  getRandomInt(max: number) {
-    return Math.floor(Math.random() * max);
-  }
-
-  // defineSprite() {
-  //   // this.sprite = new Sprite(
-  //   //   this.getRandomArbitrary(200, 600),
-  //   //   this.getRandomArbitrary(150, 450),
-  //   //   this.getRandomArbitrary(50,200),
-  //   //   this.getRandomArbitrary(50,200)
-  //   // )
-  //   let index = this.getRandomInt(2);
-  //   // console.log ('INDEX : ' + index)
-  //   //this.sprite = this.sprites[index]
-  //   this.sprite = new Sprite(200, 200, 500, 50);
-  //   // this.sprite.x = this.sprites[index].x
-  //   // this.sprite.y = this.sprites[index].y
-  //   // this.sprite.width = this.sprites[index].width
-  //   // this.sprite.height = this.sprites[index].height
-  // }
 
   async restart() {
-    this.ball.x = this.getRandomArbitrary(350, 450);
-    this.ball.y = this.getRandomArbitrary(250, 350);
-    this.paddle1.y = 15;
-    this.paddle2.y = 15;
+    this.ball.x = getRandomArbitrary(350, 450);
+    this.ball.y = getRandomArbitrary(250, 350);
+    this.paddle[Side.LEFT].y = 15;
+    this.paddle[Side.RIGHT].y = 15;
 
-    this.direction = this.getRandomInt(1) ? 1 : -1;
+    this.direction = this.nextDirection();
+    this.ball.setDirection(this.direction);
     this.state = 3;
 
     this.status = setStatus.playing;
@@ -182,6 +316,10 @@ export default class Game {
     this.decount();
   }
 
+  private nextDirection() {
+    return getRandomInt(1) ? Direction.LEFT : Direction.RIGHT;
+  }
+
   stop() {
     if (this.interval != undefined) {
       clearInterval(this.interval);
@@ -189,241 +327,120 @@ export default class Game {
     }
   }
 
-  check_collision(x: number, y: number) {
-    let radius: number = 15;
-    let dist: number =
-      (x - this.ball.x) * (x - this.ball.x) +
-      (y - this.ball.y) * (y - this.ball.y);
-
-    if (dist <= radius * radius) return 1;
-    return 0;
-  }
-
-  check_up_and_down(x: number, y: number) {
-    let i: number = x;
-    while (i <= x + 20) {
-      let ret: number = this.check_collision(i, y);
-      if (ret === 1) return 1;
-      i = i + 1;
-    }
-    return 0;
-  }
-
-  check_side(x: number, y: number) {
-    let i: number = y;
-    while (i <= y + 100) {
-      let ret: number = this.check_collision(x, i);
-
-      if (ret === 1) return 1;
-
-      i = i + 1;
-    }
-    return 0;
-  }
-
-  check_up_and_downSprite(x: number, y: number, w: number) {
-    let i: number = x;
-    while (i <= x + w) {
-      let ret: number = this.check_collision(i, y);
-      if (ret === 1) return 1;
-      i = i + 1;
-    }
-    return 0;
-  }
-
-  check_sideSprite(x: number, y: number, h: number) {
-    let i: number = y;
-    while (i <= y + h) {
-      let ret: number = this.check_collision(x, i);
-
-      if (ret === 1) return 1;
-
-      i = i + 1;
-    }
-    return 0;
-  }
-
-  collisionSprite() {
-    let xSide: number;
-    if (this.direction == -1) {
-      xSide = this.sprite.x + this.sprite.width;
-    } else {
-      xSide = this.sprite.x;
-    }
-
-    if (
-      this.check_up_and_downSprite(
-        this.sprite.x,
-        this.sprite.y,
-        this.sprite.width
-      ) === 1 ||
-      this.check_up_and_downSprite(
-        this.sprite.x,
-        this.sprite.y + this.sprite.height,
-        this.sprite.width
-      ) === 1
-    )
-      return 1;
-    if (this.check_sideSprite(xSide, this.sprite.y, this.sprite.height) === 1)
-      return 2;
-    else return 0;
-  }
-
-  collision() {
-    let paddle: Paddle;
-    let xSide: number;
-    if (this.direction == -1) {
-      paddle = this.paddle1;
-      xSide = this.paddle1.x + 20;
-    } else {
-      paddle = this.paddle2;
-      xSide = this.paddle2.x;
-    }
-
-    if (
-      this.check_up_and_down(paddle.x, paddle.y) === 1 ||
-      this.check_up_and_down(paddle.x, paddle.y + 100) === 1 ||
-      this.check_side(xSide, paddle.y) === 1
-    )
-      return 2;
-
-    if (this.sprite != null) return this.collisionSprite();
-    return 0;
-  }
-
   updateBall() {
-    if (!this.stopIndex)
-    {
-    let radius = 15;
-    let changeVel: boolean = false;
-    let changeDir: boolean = false;
-    let blockChange: boolean = false;
+    for (let i = 0; i < COLLISION_STEP; i++) {
+      if (this.world.collideX(this.ball)) {
+        return 0;
+      }
 
-    if (this.ball.x - radius <= 0 || this.ball.x + radius >= 800) {
-      return 0;
+      if (this.world.collideY(this.ball)) {
+        this.ball.yVelocity *= -1;
+      }
+
+      if (
+        this.direction == Direction.RIGHT &&
+        this.paddle[Side.RIGHT].collide(this.ball)
+      ) {
+        this.direction = Direction.LEFT;
+        this.ball.xVelocity *= -1;
+      }
+
+      if (
+        this.direction == Direction.LEFT &&
+        this.paddle[Side.LEFT].collide(this.ball)
+      ) {
+        this.direction = Direction.RIGHT;
+        this.ball.xVelocity *= -1;
+      }
+
+      this.ball.applyVelocity(this.settings.ballVelocity / COLLISION_STEP);
     }
-    if (this.ball.y - radius <= 0 || this.ball.y + radius >= 600) {
-      if (this.change === false) {
-        // this.velY *= -1
-        changeVel = true;
-      } else blockChange = true;
-    }
 
-    let ret: number = this.collision();
-
-    if (ret === 2) this.direction *= -1;
-    if (ret === 1) {
-      if (this.change === false) changeVel = true;
-      else blockChange = true;
-      // changeDir = true
-    }
-
-    if (changeVel) {
-      this.velY *= -1;
-      this.change = true;
-    } else if (!blockChange) this.change = false;
-
-    this.ball.x =
-      this.ball.x + this.velX * this.direction * this.settings.ballVelocity;
-    // this.ball.x = this.ball.x;
-    this.ball.y = this.ball.y + this.velY * this.settings.ballVelocity;
-    // this.ball.y = this.ball.y;
     return 1;
   }
-  }
 
-  async stopGame() {
+  async stopGame(winner: Player) {
+    this.stop();
+
     const io = Container.get(socketio.Server);
 
     let match = new Match();
-    match.player1 = this.player1;
-    match.player2 = this.player2;
-    match.score1 = this.score1;
-    match.score2 = this.score2;
-    match.winner = this.winner;
+    match.player1 = this.player[Side.LEFT].user;
+    match.player2 = this.player[Side.RIGHT].user;
+    match.score1 = this.player[Side.LEFT].score;
+    match.score2 = this.player[Side.RIGHT].score;
+    match.winner = winner.user;
     match = await this.matchService.save(match);
 
-    if (this.winner.id == this.player1.id) {
-      await this.userStatisticsService.incrementWinCount(this.player1);
-      await this.userStatisticsService.incrementLossCount(this.player2);
+    if (winner == this.player[Side.LEFT]) {
+      await this.userStatisticsService.incrementWinCount(
+        this.player[Side.LEFT].user
+      );
+      await this.userStatisticsService.incrementLossCount(
+        this.player[Side.RIGHT].user
+      );
     } else {
-      await this.userStatisticsService.incrementWinCount(this.player2);
-      await this.userStatisticsService.incrementLossCount(this.player1);
+      await this.userStatisticsService.incrementWinCount(
+        this.player[Side.RIGHT].user
+      );
+      await this.userStatisticsService.incrementLossCount(
+        this.player[Side.LEFT].user
+      );
     }
-    console.log("SET OVER");
-    io.to(this.toRoom()).emit("set_over", {
-      winner: this.winner,
-      score1: this.score1,
-      score2: this.score2,
-    });
+
+    io.to(this.toRoom()).emit("set_over", this.toJSON());
     // TODO : enregistrer infos match
     // envoyer infos au front pour dire que c'est la fin des fins
   }
 
   loop() {
     const io = Container.get(socketio.Server);
+
     if (this.state === -1 && this.updateBall() === 0) {
       clearInterval(this.interval);
-      let winner: User | null = null;
-      if (this.direction == -1) {
-        winner = this.player2;
-        this.score2++;
+
+      let roundWinner: Player;
+      if (this.direction == Direction.LEFT) {
+        roundWinner = this.player[Side.LEFT];
       } else {
-        winner = this.player1;
-        this.score1++;
+        roundWinner = this.player[Side.RIGHT];
       }
+
+      roundWinner.score++;
+
       this.actualNbGames++;
       console.log("actual nb games : " + this.actualNbGames);
       console.log("settings nb games : " + this.settings.nbGames);
 
       if (this.actualNbGames === this.settings.nbGames) {
-        console.log("OVER");
-        if (this.score1 > this.score2) this.winner = this.player1;
-        else this.winner = this.player2;
         this.status = setStatus.over;
-        this.stopGame();
+        this.stopGame(roundWinner);
         return;
       }
-      io.to(this.toRoom()).emit("game_over", {
-        score1: this.score1,
-        score2: this.score2,
-      });
+
+      io.to(this.toRoom()).emit("game_over", this.toJSON());
+
       clearInterval(this.interval);
 
-      // this.restart();
+      this.restart();
     }
-    // if (this.sprite != null)
-    //   console.log('SPITE BEFORE SEND: ' + this.sprite.x)
-    // else
-    //   console.log('SPITE AFTER SEND: ')
 
-    io.to(this.toRoom()).emit("game_state", {
-      player1: this.player1,
-      player2: this.player2,
-      paddle1: this.paddle1,
-      paddle2: this.paddle2,
-      ballX: this.ball.x,
-      ballY: this.ball.y,
-      state: this.state,
-      sprite: this.sprite,
-      factor: this.settings.paddleVelocity,
-    });
+    io.to(this.toRoom()).emit("game_state", this.toJSON());
   }
 
-  movePaddle(player: User, y: number) {
-    if (y < 0 || y > 500) return false;
-    else {
-      if (player.id == this.player1.id) {
-        // console.log("player1 - paddle1");
-        this.paddle1.y = y;
-        // console.log(this.paddle1.y);
-      } else if (player.id == this.player2.id) {
-        // console.log("player2 - paddle2");
-
-        this.paddle2.y = y;
-        // console.log(this.paddle2.y);
-      }
+  movePaddle(user: User, y: number) {
+    if (y < 0 || y > 500) {
+      return false;
     }
+
+    if (user.id == this.player[Side.LEFT].user.id) {
+      this.paddle[Side.LEFT].y = y;
+    }
+
+    if (user.id == this.player[Side.RIGHT].user.id) {
+      this.paddle[Side.RIGHT].y = y;
+    }
+
     return true;
   }
 
@@ -461,7 +478,7 @@ export default class Game {
   }
 
   disconnect(player: User) {
-    this.stopIndex = true
+    this.stopIndex = true;
     let found: User | null;
     if (this.leaving && this.leaving.length !== 0) {
       found = this.leaving.find(function (element) {
@@ -474,10 +491,8 @@ export default class Game {
     } else {
       this.leaving.push(player);
     }
-    if (this.leaving !== undefined)
-    {
-      if (this.leaving.length === 2) 
-      {
+    if (this.leaving !== undefined) {
+      if (this.leaving.length === 2) {
         // if (this.winner)
         // {
 
@@ -488,10 +503,19 @@ export default class Game {
     return false;
   }
 
-  public toJSON() {
-    return {
-      id: this.id
-    };
+  get users(): [User, User] {
+    return [this.player[Side.LEFT].user, this.player[Side.RIGHT].user];
   }
 
+  public toJSON() {
+    return {
+      id: this.id,
+      player: this.player,
+      paddle: this.paddle,
+      ball: this.ball,
+      countdown: this.state,
+      sprite: this.sprite,
+      factor: this.settings.paddleVelocity,
+    };
+  }
 }

@@ -288,7 +288,6 @@ export default class SocketService {
 
       callback(null, 1);
     } catch (error) {
-      console.log(error);
       callback(error, null);
     }
   }
@@ -316,10 +315,7 @@ export default class SocketService {
         throw new Error("game not found");
       }
 
-      callback(null, {
-        player1: game.player1,
-        player2: game.player2,
-      });
+      callback(null, game.toJSON());
     } catch (error) {
       callback(error, null);
     }
@@ -399,27 +395,19 @@ export default class SocketService {
     const game: Game = this.matchMakingService.addSocket(socket);
     console.log("game : " + game);
     if (game != undefined) {
-      io.to(game.toRoom()).emit("game_starting", {
-        player1: game.player1.id,
-        player2: game.player2.id,
-        gameId: game.id,
-      });
+      io.to(game.toRoom()).emit("game_starting", game.toJSON());
       game.start();
       console.log("starting....");
     }
   }
 
   public broadcastGameStarting(game: Game) {
-    this.broadcastToGame(game, GameEvent.STARTING, {
-      id: game.id,
-      player1: game.player1,
-      player2: game.player2,
-    });
-
+    this.broadcastToGame(game, GameEvent.STARTING, game.toJSON());
 
     const io = Container.get(socketio.Server);
-    io.emit("client_playing_join", game.player1.id);
-    io.emit("client_playing_join", game.player2.id);
+    for (const user of game.users) {
+      io.emit("client_playing_join", user);
+    }
   }
 
   private broadcastToChannel(

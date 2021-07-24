@@ -40,8 +40,7 @@ export default class GameService {
   public start(first: Socket, second: Socket, pendingGame?: PendingGame): Game {
     const io = Container.get(socketio.Server);
 
-    const game = new Game(first.data.user, second.data.user, pendingGame);
-    console.log("Gameservice start");
+    const game = new Game(first, second, pendingGame);
     this.provideId(game);
 
     first.join(game.toRoom());
@@ -65,8 +64,9 @@ export default class GameService {
     }
 
     this.repository[game.id] = game;
-    this.players[game.player1.id] = game;
-    this.players[game.player2.id] = game;
+    for (const { id } of game.users) {
+      this.players[id] = game;
+    }
 
     return game;
   }

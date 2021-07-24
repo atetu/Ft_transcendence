@@ -53,6 +53,10 @@ class Room {
     return !!this.awaitings.find((x) => getUserId(x) === userId);
   }
 
+  public pop1(): Socket {
+    return this.awaitings.shift();
+  }
+
   public pop2(): [Socket, Socket] {
     return [this.awaitings.shift(), this.awaitings.shift()];
   }
@@ -125,6 +129,14 @@ class Gatekeeper {
     }
 
     return null;
+  }
+
+  public pop1(room: Room): Socket {
+    const a = room.pop1();
+
+    this.remove(a);
+
+    return a;
   }
 
   public pop2(room: Room): [Socket, Socket] {
@@ -205,31 +217,39 @@ export default class MatchMakingService {
 
     const room = this.gatekeeper.add(socket, pendingGame);
 
-    if (!room || room.size() < 2) {
+    // if (!room || room.size() < 2) {
+    //   return null;
+    // }
+    if (!room || room.size() < 1) {
       return null;
     }
 
-    const [first, second] = this.gatekeeper.pop2(room);
+    // const [first, second] = this.gatekeeper.pop2(room);
+    const first = this.gatekeeper.pop1(room);
+
 
     if (room.isEmpty()) {
       this.gatekeeper.destroyRoom(room);
     }
 
-    const game = this.gameService.start(first, second, pendingGame);
+    // const game = this.gameService.start(first, second, pendingGame);
+    const game = this.gameService.start(first, first, pendingGame);
     // io.to(pendingGame.toRoom()).emit("game_starting_btn");
     this.socketService.broadcastGameStarting(game);
 
     // const { channel } = await this.directMessageService.getOrCreate(game.player1, game.player2);
     
-    const message = await pendingGame.message
-    message.content = JSON.stringify({
-      id: pendingGame.id,
-      state: "played",
-    });
-
-    await this.channelMessageService.edit(message);
-
-    pendingGame.message = Promise.resolve(message);
+    if (pendingGame) {
+      const message: ChannelMessage = await pendingGame.message
+      message.content = JSON.stringify({
+        id: pendingGame.id,
+        state: "played",
+      });
+  
+      await this.channelMessageService.edit(message);
+  
+      pendingGame.message = Promise.resolve(message);
+    }
 
     
     return game;
