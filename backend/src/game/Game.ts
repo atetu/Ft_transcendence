@@ -84,12 +84,12 @@ class Ball extends Circle {
   }
 
   setDirection(direction: Direction) {
-    if (direction === Direction.LEFT && this.yVelocity > 0) {
-      this.yVelocity *= -1;
+    if (direction === Direction.LEFT && this.xVelocity > 0) {
+      this.xVelocity *= -1;
     }
     
-    if (direction === Direction.RIGHT && this.yVelocity < 0) {
-      this.yVelocity *= -1;
+    if (direction === Direction.RIGHT && this.xVelocity < 0) {
+      this.xVelocity *= -1;
     }
   }
 }
@@ -317,7 +317,7 @@ export default class Game {
   }
 
   private nextDirection() {
-    return getRandomInt(1) ? Direction.LEFT : Direction.RIGHT;
+    return Math.random() >= 0.5 ? Direction.LEFT : Direction.RIGHT;
   }
 
   stop() {
