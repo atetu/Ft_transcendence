@@ -83,32 +83,32 @@
 </template>
 
 <style>
-#myCanvas {
-  position: absolute;
-  padding: 0;
-  margin: auto;
-  display: block;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 50%;
-  border: 1px solid black;
-}
+  #myCanvas {
+    position: absolute;
+    padding: 0;
+    margin: auto;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 50%;
+    border: 1px solid black;
+  }
 
-#custom-disabled.v-btn--disabled {
-  background-color: red !important;
-}
+  #custom-disabled.v-btn--disabled {
+    background-color: red !important;
+  }
 
-.score {
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  font-size: 80px;
-}
+  .score {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 80px;
+  }
 
-.login {
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  font-size: 20px;
-}
+  .login {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 20px;
+  }
 </style>
 
 <script lang="ts">
@@ -136,27 +136,74 @@ class Sprite {
   ) {}
 }
 
+class VisibleObject {
+  constructor(
+    public x: number,
+    public y: number,
+    public width: number,
+    public height: number
+  ) {}
+
+  updatePosition(x: number, y: number) {
+    this.x = x
+    this.y = y
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    /* empty */
+  }
+}
+
+enum Side {
+  LEFT,
+  RIGHT,
+}
+
+class Paddle extends VisibleObject {
+  constructor(x: number, y: number) {
+    super(x, y, 20, 100)
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = 'white'
+    ctx.fillRect(this.x, this.y, 20, 100)
+  }
+}
+
+class Ball extends VisibleObject {
+  constructor(x: number, y: number) {
+    super(x, y, 15, 15)
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath()
+    ctx.arc(this.x, this.y, this.width, 0, Math.PI * 2)
+    ctx.fillStyle = 'white'
+    ctx.fill()
+    ctx.closePath()
+  }
+}
+
 @Component
 export default class Game extends Vue {
-  x = true
   dialog = false
   canvas: HTMLCanvasElement | null = null
   ctx: CanvasRenderingContext2D | null = null
 
-  private autoSaveInterval: NodeJS.Timeout | null = null
-  // private timerInterval: NodeJS.Timeout | null = null
-
-  ballX: number = 300
-  ballY = 200
+  private loopInterval: NodeJS.Timeout | null = null
+  
   height: number = 600
   width: number = 800
-  up: boolean = false
-  down: boolean = false
-  paddleLeftX = 15
-  paddleLeftY = 10
-  paddleRightX = 770
-  paddleRightY = 10
-  mySide: number = 0
+
+  ball = new Ball(300, 200)
+
+  paddle = {
+    [Side.LEFT]: new Paddle(15, 10),
+    [Side.RIGHT]: new Paddle(770, 10),
+  }
+
+  side: Side = Side.LEFT
+
   over: boolean = false
   start: boolean = true
   message: string = ''
@@ -178,49 +225,56 @@ export default class Game extends Vue {
   factor: number = 1
   block: boolean = false
 
+  keys = {
+    up: false,
+    down: false,
+  }
+
   get id() {
     return this.$route.params.id
   }
 
   onKeyDown(event: KeyboardEvent) {
+    if (!this.inputEnabled) {
+      return
+    }
+
     switch (event.key) {
       case 'ArrowDown': {
-        if (this.status === Status.playing && !this.block) {
-          this.down = true
-          break
-        }
+        this.keys.down = true
+        break
       }
-      
+
       case 'ArrowUp': {
-        if (this.status === Status.playing && !this.block) {
-          this.up = true
-          break
-        }
+        this.keys.up = true
+        break
       }
     }
   }
 
   onKeyUp(event: KeyboardEvent) {
+    if (!this.inputEnabled) {
+      return
+    }
+
     switch (event.key) {
       case 'ArrowDown': {
-        if (this.status === Status.playing && !this.block) {
-          this.down = false
-          break
-        }
+        this.keys.down = false
+        break
       }
-      
+
       case 'ArrowUp': {
-        if (this.status === Status.playing && !this.block) {
-          this.up = false
-          break
-        }
+        this.keys.up = false
+        break
       }
     }
   }
 
+  get inputEnabled(): boolean {
+    return this.status === Status.playing && !this.block
+  }
+
   restart() {
-    console.log('restart')
-    // this.x = false
     this.activeBtn = false
     this.$socket.client.emit('game_restart', {
       gameId: this.id,
@@ -228,55 +282,43 @@ export default class Game extends Vue {
     })
   }
 
-  restartWithOption() {
-    console.log('restart')
-    this.x = false
-    this.activeBtn = false
-    this.$socket.client.emit('game_restart', {
-      gameId: this.id,
-      option: 1,
-    })
-  }
-
-  update_paddle() {
-    // console.log('UPDATE')
-    // console.log(this.down)
+  updatePaddles() {
     if (
       this.player1?.id === this.$store.state.auth.user.id ||
       this.player2?.id === this.$store.state.auth.user.id
     ) {
-      let prevY: number = 0
-      let Y: number = 0
-      let nb: number = 0
-      if (this.up) nb = this.velPaddle * -1 * this.factor
-      else if (this.down) nb = this.velPaddle * this.factor
-      if (this.mySide == 1) {
-        prevY = this.paddleLeftY
-        this.paddleLeftY += nb
-        Y = this.paddleLeftY
-      } else if (this.mySide == 2) {
-        prevY = this.paddleRightY
-        this.paddleRightY += nb
-        Y = this.paddleRightY
+      const paddle = this.myPaddle
+
+      let newY = paddle.y
+      const prevY = newY
+
+      if (this.keys.up && !this.keys.down) {
+        newY += this.velPaddle * -1 * this.factor
+      } else if (this.keys.down && !this.keys.up) {
+        newY += this.velPaddle * this.factor
       }
-      // console.log('front update: ' + Y)
-      if (nb) {
+
+      if (newY !== prevY) {
+        paddle.y = newY
+
         this.$socket.client.emit(
           'game_move',
           {
             gameId: this.id,
-            y: Y,
+            y: newY,
           },
-          (err: any, body: any) => {
+          (err: any) => {
             if (err) {
-              console.log('error after update')
-              if (this.mySide == 1) this.paddleLeftY = prevY
-              else this.paddleRightY = prevY
-            } else console.log('ok')
+              paddle.y = prevY
+            }
           }
         )
       }
     }
+  }
+
+  get myPaddle(): Paddle {
+    return this.paddle[this.side]
   }
 
   mounted() {
@@ -290,77 +332,78 @@ export default class Game extends Vue {
       },
       (error: any, body: any) => {
         if (!error) {
-          // console.log('inside error')
           const { player1, player2 } = body
-          if (player1.id === this.$store.state.auth.user.id) this.mySide = 1
-          else this.mySide = 2
+
+          if (player1.id === this.$store.state.auth.user.id) {
+            this.side = Side.LEFT
+          } else {
+            this.side = Side.RIGHT
+          }
+
           this.player1 = player1
           this.player2 = player2
-          // this.player2 = player2
         }
-        // console.log('MY SIDE: ' + this.mySide)
       }
     )
 
-    this.autoSaveInterval = setInterval(() => this.drawRect(), 1000 / 60)
+    this.loopInterval = setInterval(() => this.loop(), 1000 / 60)
   }
 
   beforeDestroy() {
     this.$socket.client.emit('game_disconnect')
+
+    if (this.loopInterval) {
+      clearInterval(this.loopInterval)
+      this.loopInterval = null
+    }
   }
 
-  drawRect(): void {
-    if (this.ctx != null) {
-      this.ctx.clearRect(0, 0, this.width, this.height)
-      this.ctx.fillStyle = `${this.$vuetify.theme.themes.dark.primary}`
-      this.ctx.fillRect(0, 0, this.width, this.height)
+  loop(): void {
+    if (!this.ctx) {
+      return
+    }
 
-      if (this.status !== Status.over) {
-        if (this.sprite != null) {
-          this.ctx.fillStyle = 'white'
-          this.ctx.fillRect(
-            this.sprite.x,
-            this.sprite.y,
-            this.sprite.width,
-            this.sprite.height
-          )
-        }
-        this.ctx.beginPath()
-        this.ctx.arc(this.ballX, this.ballY, 15, 0, Math.PI * 2)
+    this.ctx.fillStyle = `${this.$vuetify.theme.themes.dark.primary}`
+    this.ctx.fillRect(0, 0, this.width, this.height)
+
+    if (this.status !== Status.over) {
+      if (this.sprite != null) {
         this.ctx.fillStyle = 'white'
-        this.ctx.fill()
-        this.ctx.closePath()
+        this.ctx.fillRect(
+          this.sprite.x,
+          this.sprite.y,
+          this.sprite.width,
+          this.sprite.height
+        )
+      }
+      this.ball.draw(this.ctx)
 
-        this.ctx.strokeStyle = 'grey'
-        this.ctx.moveTo(400, 20)
-        this.ctx.lineTo(400, 580)
-        this.ctx.stroke()
+      this.ctx.strokeStyle = 'grey'
+      this.ctx.moveTo(400, 20)
+      this.ctx.lineTo(400, 580)
+      this.ctx.stroke()
 
-        this.update_paddle()
+      this.updatePaddles()
+      this.paddle[Side.LEFT].draw(this.ctx)
+      this.paddle[Side.RIGHT].draw(this.ctx)
+
+      if (this.status === Status.waiting) {
+        this.ctx.font = '80px Nunito'
         this.ctx.fillStyle = 'white'
-        this.ctx.fillRect(this.paddleRightX, this.paddleRightY, 20, 100)
+        this.ctx.textAlign = 'center'
+        this.ctx.fillText('' + this.timer, this.width / 2, this.height / 2)
+      }
+    } else {
+      if (this.setStatus === setStatusEnum.over) {
+        this.ctx.font = '80px Nunito'
         this.ctx.fillStyle = 'white'
-        this.ctx.fillRect(this.paddleLeftX, this.paddleLeftY, 20, 100)
-
-        if (this.status === Status.waiting) {
-          this.ctx.font = '80px Nunito'
-          this.ctx.fillStyle = 'white'
-          this.ctx.textAlign = 'center'
-          this.ctx.fillText('' + this.timer, this.width / 2, this.height / 2)
-        }
-      } else {
-        // console.log('status after over and before writing: ' + this.status)
-        if (this.setStatus === setStatusEnum.over) {
-          this.ctx.font = '80px Nunito'
-          this.ctx.fillStyle = 'white'
-          this.ctx.textAlign = 'center'
-          this.ctx.fillText(this.message, this.width / 2, this.height / 2)
-        } else if (this.status === Status.over) {
-          this.ctx.font = '80px Nunito'
-          this.ctx.fillStyle = 'white'
-          this.ctx.textAlign = 'center'
-          this.ctx.fillText('GAME OVER', this.width / 2, this.height / 2)
-        }
+        this.ctx.textAlign = 'center'
+        this.ctx.fillText(this.message, this.width / 2, this.height / 2)
+      } else if (this.status === Status.over) {
+        this.ctx.font = '80px Nunito'
+        this.ctx.fillStyle = 'white'
+        this.ctx.textAlign = 'center'
+        this.ctx.fillText('GAME OVER', this.width / 2, this.height / 2)
       }
     }
   }
@@ -379,52 +422,37 @@ export default class Game extends Vue {
   @Socket('game_state')
   getDatas(data: any) {
     const { paddle1, paddle2, ballX, ballY, state, sprite, factor } = data
-    this.ballX = ballX
-    this.ballY = ballY
 
-    this.paddleLeftY = paddle1.y
+    this.ball.updatePosition(ballX, ballY)
 
-    this.paddleRightY = paddle2.y
+    this.paddle[Side.LEFT].y = paddle1.y
+    this.paddle[Side.RIGHT].y = paddle2.y
+
     this.timer = state
     this.sprite = sprite
     this.factor = factor
-    console.log('FACTOR: ' + this.factor)
-    // if (this.sprite != null)
-    //   console.log('SPRITE X : ' + this.sprite.x)
-    // else
-    //   console.log('SPRITE NUL')
-    if (this.timer === 3) this.status = Status.waiting
+
+    if (this.timer === 3) {
+      this.status = Status.waiting
+    }
+
     this.activeBtn = true
 
-    // console.log('timer: ' + this.timer)
     if (this.timer === -1 && this.status === Status.waiting) {
       this.status = Status.playing
       this.activeBtn = true
     }
-    // console.log('game statae left: ' + this.paddleLeftY)
-    // console.log('game state right: ' + this.paddleRightY)
   }
 
   @Socket('game_over')
   finishGame(data: any) {
     const { score1, score2 } = data
-    // if (winner != null) {
-    //   let winnerFt: User = winner
-    //   this.message = winnerFt.username + ' wins!'
-    // }
     var prev_score1 = this.score1
     this.score1 = score1
     this.score2 = score2
     if (this.score1 > prev_score1) this.roundWinner = 1
     else this.roundWinner = 2
-    // this.setStatus = setStatus
-    // console.log('OVERRRRR')
-    // console.log('roundWinner = ' + this.roundWinner)
-    // this.timer = -2
     this.status = Status.over
-    // console.log('status after over: ' + this.status)
-    // if (this.autoSaveInterval)
-    //   clearInterval(this.autoSaveInterval)
   }
 
   @Socket('set_over')
@@ -438,23 +466,6 @@ export default class Game extends Vue {
     this.score1 = score1
     this.score2 = score2
   }
-  //   @Socket('game_over')
-  //  gameRestart() {
-
-  //     if (winner != null) {
-  //       let winnerFt: User = winner
-  //       this.message = winnerFt.username + ' wins!'
-  //     }
-  //     this.score1 = score1
-  //     this.score2 = score2
-  //     this.setStatus = setStatus
-  //     console.log('OVERRRRR')
-  //     // this.timer = -2
-  //     this.status = Status.over
-  //     console.log('status after over: ' + this.status)
-  //     // if (this.autoSaveInterval)
-  //     //   clearInterval(this.autoSaveInterval)
-  //   }
 
   @Socket('game_exit')
   async gameExit(data: any) {
