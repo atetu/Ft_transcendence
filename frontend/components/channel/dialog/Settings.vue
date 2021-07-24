@@ -15,7 +15,7 @@
         <button-close @click="dialog = false" />
       </v-card-title>
       <v-row class="ma-2">
-        <v-col v-if="isOwner" cols="12">
+        <v-col v-if="isOwner || isSiteAdmin" cols="12">
           <channel-settings-card-edit :channel="channel" />
         </v-col>
 
@@ -25,12 +25,13 @@
             :users="users"
             :is-admin="isAdmin"
             :is-owner="isOwner"
+            :is-site-admin="isSiteAdmin"
             :loading="loading"
             @refresh="$emit('refresh')"
           />
         </v-col>
 
-        <v-col v-if="isOwner" cols="12">
+        <v-col v-if="isOwner || isSiteAdmin" cols="12">
           <channel-settings-card-danger :channel="channel" />
         </v-col>
       </v-row>
@@ -55,6 +56,9 @@ export default class ComponentImpl extends Vue {
 
   @Prop({ type: Boolean, default: false })
   isAdmin!: boolean
+
+  @Prop({ type: Boolean, default: false })
+  isSiteAdmin!: boolean
 
   @Prop({ type: Boolean, default: false })
   loading!: boolean

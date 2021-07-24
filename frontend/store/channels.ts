@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { Channel } from '~/models'
 import { $axios } from '~/utils/api'
@@ -27,6 +28,16 @@ class ChannelsModule extends VuexModule {
 
     if (index !== -1) {
       this.list.splice(index, 1)
+    }
+  }
+
+  @Mutation
+  update(channel: Channel) {
+    const { id } = channel
+    const index = this.list.findIndex((x) => x.id === id)
+
+    if (index !== -1) {
+      Vue.set(this.list, index, channel)
     }
   }
 

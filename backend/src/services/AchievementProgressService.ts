@@ -1,8 +1,8 @@
 import { Service } from "typedi";
-import { InjectRepository } from "typeorm-typedi-extensions";
+import { Container, InjectRepository } from "typeorm-typedi-extensions";
 import Achievement from "../entities/Achievement";
-import User from "../entities/User";
 import AchievementProgress from "../entities/AchievementProgress";
+import User from "../entities/User";
 import AchievementProgressRepository from "../repositories/AchievementProgressRepository";
 
 @Service()
@@ -28,7 +28,7 @@ export default class AchievementProgressService {
     }
 
     progress = new AchievementProgress();
-    progress.user = Promise.resolve(user);
+    progress.user = user;
     progress.achievement = achievement;
     progress.value = 0;
     progress.unlockedAt = null;
@@ -43,6 +43,7 @@ export default class AchievementProgressService {
   }
 
   async increment(achievement: Achievement, user: User, value = 1) {
+    let unlocked = false;
     const progress = await this.get(achievement, user);
 
     if (progress.unlocked) {
@@ -53,9 +54,14 @@ export default class AchievementProgressService {
 
     if (progress.value === achievement.max) {
       progress.unlockedAt = new Date();
+      unlocked = true;
     }
 
     this.repository.save(progress);
+
+    if (unlocked) {
+      this.notifyUnlock(user, progress);
+    }
   }
 
   async set(achievement: Achievement, user: User, value: number) {
@@ -66,11 +72,13 @@ export default class AchievementProgressService {
     }
 
     const unlockedAt = progress.unlockedAt;
+    let unlocked = false;
 
     progress.value = Math.min(achievement.max, value);
 
     if (progress.value === achievement.max) {
       progress.unlockedAt = new Date();
+      unlocked = true;
     } else {
       progress.unlockedAt = null;
     }
@@ -78,5 +86,17 @@ export default class AchievementProgressService {
     if (unlockedAt !== progress.unlockedAt) {
       this.repository.save(progress);
     }
+
+    if (unlocked) {
+      this.notifyUnlock(user, progress);
+    }
+  }
+
+  notifyUnlock(user: User, progress: AchievementProgress) {
+    const socketService = Container.get(
+      require("./SocketService").default
+    ) as any;
+
+    socketService.notifyAchievementUnlock(user, progress);
   }
 }

@@ -2,31 +2,31 @@
   <v-main class="fill-height" style="overflow: auto">
     <v-row class="ma-2">
       <v-col cols="12">
-        <v-card>
-          <v-card-title>Users</v-card-title>
-          <v-list>
-            <v-list-item
-              v-for="user in users"
-              :key="user.id"
-              link
-              :to="`/users/${user.id}`"
-            >
-              <v-list-item-avatar size="60">
-                <user-avatar :user="user" />
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-title>
-                  {{ user.username }}
-                  <v-icon v-if="user.admin" right>
-                    mdi-account-supervisor
-                  </v-icon>
-                  <v-icon v-if="playing(user) === true" right>
-                    mdi-binoculars
-                  </v-icon>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
+        <v-card :loading="$fetchState.pending">
+          <v-card-title>
+            Users
+            <v-spacer />
+            <v-text-field
+              v-model="filter"
+              clearable
+              solo
+              outlined
+              dense
+              hide-details
+              prepend-inner-icon="mdi-magnify"
+              style="max-width: 200px"
+              class="mr-4"
+            />
+            <v-btn icon :loading="$fetchState.pending" @click="$fetch">
+              <v-icon>mdi-refresh</v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text v-if="$fetchState.error">
+            <v-alert type="error">
+              Could not fetch users: {{ $fetchState.error }}
+            </v-alert>
+          </v-card-text>
+          <user-list :users="users" :filter="filter" />
         </v-card>
       </v-col>
     </v-row>
@@ -35,23 +35,15 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import API from '~/api/API'
 import { User } from '~/models'
-import { socketStore } from '~/store'
-
 
 @Component
 export default class Page extends Vue {
   users: User[] = []
+  filter = ''
 
   async fetch() {
-    this.users = await API.Users.index()
-  }
-
-   playing(user: User): boolean{
-    let ret:boolean =socketStore.playingUserIds.includes(user.id)
-    console.log('is playing? ' + ret)
-    return ret
+    this.users = await this.$axios.$get('/users')
   }
 }
 </script>

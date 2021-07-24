@@ -8,11 +8,8 @@
       </v-btn>
     </v-card-title>
     <v-list>
-      <achievement-empty v-if="!progresses.length" />
-      <v-list-item
-        v-for="progress in progresses"
-        :key="progress.achievement.id"
-      >
+      <achievement-empty v-if="!last3.length" />
+      <v-list-item v-for="progress in last3" :key="progress.achievement.id">
         <v-list-item-content>
           <achievement-card outlined :progress="progress" />
         </v-list-item-content>
@@ -38,6 +35,13 @@ export default class Dot extends Vue {
 
   refresh() {
     this.$emit('refresh')
+  }
+
+  get last3() {
+    return this.progresses
+      .filter((x) => x.unlocked)
+      .slice(-3)
+      .reverse()
   }
 }
 </script>

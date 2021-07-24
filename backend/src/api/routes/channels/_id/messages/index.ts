@@ -27,7 +27,7 @@ export default (app: express.Router) => {
     celebrate.celebrate({
       [celebrate.Segments.BODY]: {
         type: celebrate.Joi.string().valid(ChannelMessage.Type.TEXT).required(),
-        content: celebrate.Joi.string().required(),
+        content: celebrate.Joi.string().min(1).max(200).required(),
       },
     }),
     async (req, res, next) => {
@@ -48,7 +48,7 @@ export default (app: express.Router) => {
         message.type = type;
         message.content = content;
 
-        channelMessageService.create(message);
+        channelMessageService.create(message); // TODO add await
 
         res.status(200).send(message);
       } catch (error) {
@@ -56,6 +56,23 @@ export default (app: express.Router) => {
       }
     }
   );
+
+  route.delete("/", async (req, res, next) => {
+    const channel: Channel = res.locals.channel;
+    const user: User = req.user as any;
+
+    try {
+      if (!user.admin && !user.is(channel.owner)) {
+        return helpers.forbidden("only owner can clear messages");
+      }
+
+      await channelMessageService.deleteAllByChannel(channel);
+
+      res.status(204).end();
+    } catch (error) {
+      next(error);
+    }
+  });
 
   return route;
 };

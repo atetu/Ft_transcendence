@@ -1,0 +1,34 @@
+<template>
+  <v-list-item link :to="to">
+    <v-list-item-avatar size="60">
+      <user-avatar :user="user" />
+    </v-list-item-avatar>
+    <v-list-item-content>
+      <v-list-item-title>
+        {{ user.username }}
+        <v-icon v-if="user.admin" right> mdi-account-supervisor </v-icon>
+        <v-icon v-if="playing" right> controller-classic </v-icon>
+      </v-list-item-title>
+    </v-list-item-content>
+  </v-list-item>
+</template>
+
+<script lang="ts">
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { User } from '~/models'
+import { socketStore } from '~/store'
+
+@Component
+export default class Item extends Vue {
+  @Prop()
+  user!: User
+
+  get to() {
+    return `/users/${this.user.id}`
+  }
+
+  get playing(): boolean {
+    return socketStore.playingUserIds.includes(this.user.id)
+  }
+}
+</script>

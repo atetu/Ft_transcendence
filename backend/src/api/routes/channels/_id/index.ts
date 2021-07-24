@@ -1,3 +1,4 @@
+import { ValidationError } from "@hapi/joi";
 import * as celebrate from "celebrate";
 import * as express from "express";
 import Container from "typedi";
@@ -109,6 +110,16 @@ export default (app: express.Router) => {
 
         if (channel.isDirect()) {
           return helpers.forbidden("direct channel cannot be edited");
+        }
+
+        if (
+          !channel.isProtected() &&
+          visibility === ChannelVisibility.PROTECTED &&
+          !password
+        ) {
+          return helpers.bad(
+            "changing to a protected channel require a password"
+          );
         }
 
         channel.name = name;

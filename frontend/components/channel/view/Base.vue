@@ -75,6 +75,11 @@ export default class Viewer extends Vue {
     }
   }
 
+  @Socket('channel_update')
+  onChannelUpdate(channel: Channel) {
+    this.$emit('updated', channel)
+  }
+
   @Socket('channel_delete')
   onChannelDelete(channel: Channel) {
     this.$emit('deleted', channel)
@@ -88,6 +93,16 @@ export default class Viewer extends Vue {
   @Socket('channel_update_message')
   onChannelUpdateMessage(message: ChannelMessage) {
     this.$emit('message-update', message)
+  }
+
+  @Socket('channel_message_delete')
+  onChannelMessageDelete(message: ChannelMessage) {
+    this.$emit('message-deleted', message)
+  }
+
+  @Socket('channel_message_delete_all')
+  onChannelMessageDeleteAll(channel: Channel) {
+    this.$emit('message-deleted-all', channel)
   }
 
   @Socket('channel_user_join')

@@ -2,6 +2,7 @@ import * as socketio from "socket.io";
 import { Socket } from "socket.io";
 import Container, { Service } from "typedi";
 import { isObject } from "util";
+import AchievementProgress from "../entities/AchievementProgress";
 import Channel from "../entities/Channel";
 import ChannelMessage from "../entities/ChannelMessage";
 import ChannelUser from "../entities/ChannelUser";
@@ -22,9 +23,12 @@ export enum ClientEvent {
 export enum ChannelEvent {
   CONNECT = "channel_connect",
   DISCONNECT = "channel_disconnect",
+  UPDATE = "channel_update",
   DELETE = "channel_delete",
   MESSAGE = "channel_message",
   EDIT_MESSAGE = "edit_message",
+  MESSAGE_DELETE = "channel_message_delete",
+  MESSAGE_DELETE_ALL = "channel_message_delete_all",
   USER_JOIN = "channel_user_join",
   USER_LEAVE = "channel_user_leave",
   USER_UPDATE = "channel_user_update",
@@ -54,12 +58,17 @@ export enum UserEvent {
   RELATIONSHIP_DELETE = "relationship_delete",
 }
 
+export enum AchievementEvent {
+  UNLOCK = "achievement_unlock",
+}
+
 export type Event =
   | ClientEvent
   | ChannelEvent
   | DirectMessageEvent
   | GameEvent
-  | UserEvent;
+  | UserEvent
+  | AchievementEvent;
 
 @Service()
 export default class SocketService {
@@ -151,6 +160,11 @@ export default class SocketService {
     delete socket.data.currentChannelRoom;
   }
 
+  public broadcastChannelUpdate(channel: Channel, users: Array<User>) {
+    this.broadcastToChannel(channel, ChannelEvent.UPDATE, channel);
+    this.broadcastToUsers(users, ChannelEvent.UPDATE, channel);
+  }
+
   public broadcastChannelDelete(channel: Channel) {
     this.broadcastToChannel(channel, ChannelEvent.DELETE, channel);
   }
@@ -165,6 +179,16 @@ export default class SocketService {
     const channel = message.channel;
 
     this.broadcastToChannel(channel, ChannelEvent.EDIT_MESSAGE, message);
+  }
+  
+  public broadcastChannelMessageDelete(message: ChannelMessage) {
+    const channel = message.channel;
+
+    this.broadcastToChannel(channel, ChannelEvent.MESSAGE_DELETE, message);
+  }
+
+  public broadcastChannelMessageDeleteAll(channel: Channel) {
+    this.broadcastToChannel(channel, ChannelEvent.MESSAGE_DELETE_ALL, channel);
   }
 
   public broadcastChannelUserJoin(channelUser: ChannelUser) {
@@ -224,6 +248,13 @@ export default class SocketService {
       : ChannelEvent.ADD;
 
     this.broadcastToUser(user, event, channel);
+  }
+
+  public notifyAchievementUnlock(
+    user: User,
+    achievementProgress: AchievementProgress
+  ) {
+    this.broadcastToUser(user, AchievementEvent.UNLOCK, achievementProgress);
   }
 
   async askMatchMakingJoin(
@@ -316,22 +347,21 @@ export default class SocketService {
     }
   }
 
-  async gameRestart(socket, body){
-    console.log ('game restrt back')
+  async gameRestart(socket, body) {
+    console.log("game restrt back");
     const io = Container.get(socketio.Server);
-    const { gameId, option } = body
-    console.log("option first : " + option)
+    const { gameId, option } = body;
+    console.log("option first : " + option);
     const game: Game | false = this.gameService.gameRestartWaitingRoom(
       gameId,
       socket.data.user,
       option
-    )
-    console.log('game restart : ' + game)
-    if (game !== false)
-    {
-      io.to(game.toRoom()).emit('game_restart', { gameId: game.id })
-      game.restart()
-      console.log('starting....')
+    );
+    console.log("game restart : " + game);
+    if (game !== false) {
+      io.to(game.toRoom()).emit("game_restart", { gameId: game.id });
+      game.restart();
+      console.log("starting....");
     }
   }
 
@@ -365,14 +395,17 @@ export default class SocketService {
 
   async matchMaking(socket: Socket) {
     const io = Container.get(socketio.Server);
-    console.log('matchMaking')
-    const game: Game = this.matchMakingService.addSocket(socket)
-    console.log('game : ' + game)
-    if (game != undefined)
-    {
-      io.to(game.toRoom()).emit('game_starting', { player1: game.player1.id, player2: game.player2.id, gameId: game.id })
-      game.start()
-      console.log('starting....')
+    console.log("matchMaking");
+    const game: Game = this.matchMakingService.addSocket(socket);
+    console.log("game : " + game);
+    if (game != undefined) {
+      io.to(game.toRoom()).emit("game_starting", {
+        player1: game.player1.id,
+        player2: game.player2.id,
+        gameId: game.id,
+      });
+      game.start();
+      console.log("starting....");
     }
   }
 
@@ -405,7 +438,23 @@ export default class SocketService {
     this.broadcastToRoom(user.toRoom(), event, message);
   }
 
-  private broadcastToRoom(room: string, event: Event, message?: any) {
+  private broadcastToUsers(
+    users: Array<User>,
+    event: UserEvent | Event,
+    message?: any
+  ) {
+    this.broadcastToRoom(
+      users.map((x) => x.toRoom()),
+      event,
+      message
+    );
+  }
+
+  private broadcastToRoom(
+    room: string | Array<string>,
+    event: Event,
+    message?: any
+  ) {
     this.io.to(room).emit(event, message?.toJSON?.() || message);
 
     console.log(`[io]: {${room}} -> ${event}: ${JSON.stringify(message)}`);

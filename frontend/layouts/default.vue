@@ -1,15 +1,6 @@
 <template>
   <v-app dark :class="classes">
-    <v-system-bar app>
-      ft-transcendence
-      <v-spacer />
-      <template v-if="$socket.connected">
-        {{ connectedCount }}
-        <v-icon>mdi-account-group</v-icon>
-        <v-icon color="green">mdi-power-plug</v-icon>
-      </template>
-      <v-icon v-else color="red">mdi-power-plug-off</v-icon>
-    </v-system-bar>
+    <system-bar />
 
     <v-navigation-drawer v-model="drawer" app fixed mini-variant>
       <navigation-profile-dot />
@@ -31,6 +22,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { Socket } from 'vue-socket.io-extended'
+import { AchievementProgress } from '~/models'
 import { socketStore, uiStore } from '~/store'
 
 interface Link {
@@ -50,8 +43,8 @@ export default class Default extends Vue {
       url: '/',
     },
     {
-      title: 'direct messages',
-      icon: 'message',
+      title: 'social plaza',
+      icon: 'human-greeting-proximity',
       url: '/direct-messages',
     },
     {
@@ -63,11 +56,6 @@ export default class Default extends Vue {
       title: 'users',
       icon: 'account-multiple',
       url: '/users',
-    },
-    {
-      title: 'relationships',
-      icon: 'account-group',
-      url: '/relationships',
     },
     {
       title: 'achievements',
@@ -111,6 +99,13 @@ export default class Default extends Vue {
 
   get connectedCount() {
     return socketStore.connectedUserIds.length
+  }
+
+  @Socket('achievement_unlock')
+  onAchievementUnlock(progress: AchievementProgress) {
+    this.$dialog.message.success(`Unlocked: ${progress.achievement.name}`, {
+      dismissible: true,
+    })
   }
 }
 </script>

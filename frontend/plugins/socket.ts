@@ -5,17 +5,19 @@ import io from 'socket.io-client'
 import VueSocketIOExt from 'vue-socket.io-extended'
 import { initializeSocket } from '~/utils/api'
 
-const socket = io('http://localhost:3001', {
-  path: '/socket.io',
+const socket = io({
+  path: '/api/socket.io',
   autoConnect: false,
 })
 
-const plugin: Plugin = ({ store }) => {
+const plugin: Plugin = ({ store, isDev }) => {
   initializeSocket(socket)
 
-  socket.onAny((event, ...args) => {
-    console.log(`got ${event}:`, args)
-  })
+  if (isDev) {
+    socket.onAny((event, ...args) => {
+      console.log(`got ${event}:`, args)
+    })
+  }
 
   let retried = false
 

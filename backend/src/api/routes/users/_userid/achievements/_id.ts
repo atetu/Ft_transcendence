@@ -45,7 +45,7 @@ export default (app: express.Router) => {
           achievementProgress ||
           ({
             id: 0,
-            user: Promise.resolve(user),
+            user: user,
             achievement,
             value: 0,
             unlockedAt: null,

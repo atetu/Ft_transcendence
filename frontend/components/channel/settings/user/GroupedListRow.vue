@@ -15,7 +15,7 @@
     </v-list-item-content>
 
     <v-list-item-icon>
-      <template v-if="isOwner">
+      <template v-if="isOwner || isSiteAdmin">
         <channel-settings-action
           v-if="!isChannelOwner"
           icon="mdi-swap-horizontal-bold"
@@ -39,7 +39,7 @@
         </template>
       </template>
 
-      <template v-if="isAdmin">
+      <template v-if="isAdmin || isSiteAdmin">
         <channel-settings-action
           v-if="user.muted"
           icon="mdi-volume-mute"
@@ -106,6 +106,9 @@ export default class ComponentImpl extends Vue {
   @Prop({ type: Boolean })
   isAdmin!: boolean
 
+  @Prop({ type: Boolean })
+  isSiteAdmin!: boolean
+
   get isChannelOwner() {
     return this.channel.owner.id === this.user.id
   }
@@ -124,7 +127,7 @@ export default class ComponentImpl extends Vue {
 
           this.$emit('refresh')
         } catch (error) {
-          console.log(error)
+          this.$dialog.notify.error(`Failed: ${error}`)
         }
       }
     })

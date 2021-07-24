@@ -6,6 +6,10 @@ import ChannelMessageRepository from "../repositories/ChannelMessageRepository";
 import SocketService from "../services/SocketService";
 import ChannelService from "../services/ChannelService";
 import UserService from "../services/UserService";
+import AchievementService from "./AchievementService";
+import AchievementProgressService from "./AchievementProgressService";
+import Achievement from "../entities/Achievement";
+import Achievements from "../game/Achievements";
 
 @Service()
 export default class ChannelMessageService {
@@ -14,7 +18,10 @@ export default class ChannelMessageService {
     private repository: ChannelMessageRepository,
 
     @Inject()
-    private socketService: SocketService
+    private socketService: SocketService,
+
+    @Inject()
+    private achievementProgressService: AchievementProgressService
   ) {
     // setInterval(async () => {
     //   const channel = await Container.get(ChannelService).findById(1);
@@ -48,6 +55,10 @@ export default class ChannelMessageService {
     await this.repository.save(message);
 
     this.socketService.broadcastChannelMessage(message);
+    await this.achievementProgressService.increment(
+      Achievements.COMMUNITY_MEMBER,
+      message.user
+    );
 
     return message;
   }
@@ -60,9 +71,17 @@ export default class ChannelMessageService {
     return message;
   }
 
-  public async delete(message: ChannelMessage) {
+  public async delete(message: ChannelMessage): Promise<void> {
     await this.repository.delete(message);
 
-    // TODO Emit event to socket
+    this.socketService.broadcastChannelMessageDelete(message);
+  }
+
+  public async deleteAllByChannel(channel: Channel): Promise<void> {
+    await this.repository.delete({
+      channel,
+    });
+
+    this.socketService.broadcastChannelMessageDeleteAll(channel);
   }
 }

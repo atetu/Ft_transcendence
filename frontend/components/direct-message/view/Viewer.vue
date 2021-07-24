@@ -25,7 +25,7 @@
       </channel-user-menu>
     </template>
     <template #toolbar-right>
-      <direct-message-button-challenge :direct-message="directMessage" />
+      <direct-message-button-challenge :peer="directMessage.peer" />
     </template>
   </channel-view-base>
 </template>

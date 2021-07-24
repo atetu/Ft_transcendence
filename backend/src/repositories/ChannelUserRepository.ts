@@ -10,6 +10,14 @@ export class ChannelUserRepository extends Repository<ChannelUser> {
   async findByChannelAndUser(channel: Channel, user: User) {
     return await this.findOne({ channel, user });
   }
+
+  async findAllByChannelNotBanned(channel: Channel) {
+    return await this.find({
+      channel,
+      banned: false,
+    });
+  }
+
   async findAllByUserAndNotBannedIncludeChannel(user: User) {
     return await this.find({
       where: {
@@ -24,7 +32,7 @@ export class ChannelUserRepository extends Repository<ChannelUser> {
     return await this.find({
       where: {
         muted: true,
-        mutedUntil: LessThan(date)
+        mutedUntil: LessThan(date),
       },
     });
   }

@@ -96,12 +96,18 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { DirectMessage } from '~/models'
+import { User } from '~/models'
 
 @Component
 export default class Viewer extends Vue {
   @Prop({ type: Object, required: true })
-  directMessage!: DirectMessage
+  peer!: User
+
+  @Prop({ type: Boolean })
+  block!: boolean
+
+  @Prop({ type: Boolean })
+  neverSmall!: boolean
 
   loading = false
   dialog = false
@@ -118,6 +124,10 @@ export default class Viewer extends Vue {
   }
 
   get small() {
+    if (this.neverSmall) {
+      return false
+    }
+
     return this.$vuetify.breakpoint.name === 'xs'
   }
 
@@ -156,6 +166,8 @@ export default class Viewer extends Vue {
         paddleVelocity: this.inputs.paddleVelocity,
         nbGames: this.inputs.nbGames,
       })
+
+      this.$emit('success')
     } catch (error) {
       this.$dialog.notify.error(`Could not challenge: ${error}`)
     }

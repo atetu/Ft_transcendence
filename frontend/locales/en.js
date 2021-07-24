@@ -1,5 +1,26 @@
 export default {
   language: 'English',
+  relationship: {
+    tab: {
+      online: {
+        _: 'online',
+        top: 'online',
+      },
+      friends: {
+        _: 'friends',
+        top: 'all',
+      },
+      pending: {
+        _: 'pending',
+        top: 'pending',
+      },
+      blocked: {
+        _: 'blocked',
+        top: 'blocked',
+      },
+    },
+    nothing: 'nothing to see',
+  },
   channel: {
     create: {
       _: 'Create a channel',

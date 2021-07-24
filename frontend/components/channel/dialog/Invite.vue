@@ -97,7 +97,6 @@ export default class ComponentImpl extends Vue {
     API.Search.users(query)
       .then((response) => {
         const already = this.users.map((x) => x.id)
-        console.log(already)
 
         this.items = response.filter((x) => !already.includes(x.id))
       })

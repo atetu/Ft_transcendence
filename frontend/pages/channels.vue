@@ -45,7 +45,7 @@ import { channelsStore } from '~/store'
 export default class Page extends Vue {
   head() {
     return {
-      title: 'channels',
+      title: 'Channels',
     }
   }
 

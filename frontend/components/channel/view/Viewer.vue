@@ -6,8 +6,11 @@
     :title="title"
     :channel="channel"
     :messages="messages"
+    @updated="onUpdate"
     @deleted="onDeleted"
     @message="onNewMessage"
+    @message-deleted="onMessageDelete"
+    @message-deleted-all="onClear"
     @joined="onUserJoin"
     @leaved="onUserLeave"
     @update="onUserUpdate"
@@ -71,6 +74,12 @@ export default class Viewer extends Vue {
     this.messages = messages
   }
 
+  onUpdate(channel: Channel) {
+    if (this.channel?.id === channel.id) {
+      this.channel = channel
+    }
+  }
+
   onDeleted(channel: Channel) {
     channelsStore.deleteItem(channel)
 
@@ -80,6 +89,19 @@ export default class Viewer extends Vue {
 
   onNewMessage(message: ChannelMessage) {
     this.messages.push(message)
+  }
+
+  onMessageDelete(message: ChannelMessage) {
+    const { id } = message
+    const index = this.messages.findIndex((x) => x.id === id)
+
+    if (index !== -1) {
+      this.messages.splice(index, 1)
+    }
+  }
+
+  onClear(_channel: Channel) {
+    this.messages.splice(0)
   }
 
   onUserJoin(channelUser: ChannelUser) {
@@ -156,10 +178,6 @@ export default class Viewer extends Vue {
 
   get isOwner() {
     const user = authStore.user!
-
-    if (user.admin) {
-      return true
-    }
 
     if (this.id && this.channel) {
       return this.channel.owner.id === user.id

@@ -1,78 +1,80 @@
 <template>
-  <v-row justify="center" align="center">
-    <v-col cols="12" sm="8" md="6">
-      <div class="text-center">qsd</div>
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>
-            Vuetify is a progressive Material Design component framework for
-            Vue.js. It was designed to empower developers to create amazing
-            applications.
-          </p>
-          <p>
-            For more information on Vuetify, check out the
-            <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-              rel="noopener noreferrer"
+  <v-main class="fill-height">
+    <v-row justify="center" align="center">
+      <v-col justify="center" align="center">
+        <p class="text-center ma-10" style="font-size: 40px">
+          ft_transcendence
+        </p>
+        <v-img
+          lazy-src="https://media.giphy.com/media/4D7oYYeaW6pZC/giphy.gif"
+          max-height="600"
+          max-width="1000"
+          src="https://media.giphy.com/media/4D7oYYeaW6pZC/giphy.gif"
+          class="mt-12 mb-6"
+        ></v-img>
+        <div class="text-center">
+          <div>
+            <v-btn class="ma-10" dark style="min-width: 200px">
+              How to play
+              <v-icon dark right> mdi-help-circle </v-icon>
+            </v-btn>
+
+            <v-btn
+              v-if="friends.length"
+              to="/direct-messages"
+              class="ma-10"
+              style="min-width: 200px"
             >
-              documentation </a
-            >.
-          </p>
-          <p>
-            If you have questions, please join the official
-            <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="chat"
+              My friends
+              <v-icon dark right> mdi-human-greeting </v-icon>
+            </v-btn>
+
+            <v-btn
+              v-else
+              to="/users"
+              class="ma-10"
+              dark
+              style="min-width: 200px"
             >
-              discord </a
-            >.
-          </p>
-          <p>
-            Find a bug? Report it on the github
-            <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="contribute"
-            >
-              issue board </a
-            >.
-          </p>
-          <p>
-            Thank you for developing with Vuetify and I look forward to bringing
-            more exciting features in the future.
-          </p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
+              Find new friends
+              <v-icon dark right> mdi-human-greeting </v-icon>
+            </v-btn>
+
+            <v-btn class="ma-10" dark style="min-width: 200px">
+              socialize
+              <v-icon dark right> mdi-message </v-icon>
+            </v-btn>
           </div>
-          <hr class="my-3" />
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt Documentation
-          </a>
-          <br />
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="primary" nuxt to="/inspire"> Continue </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-col>
-  </v-row>
+
+          <div>
+            <v-btn
+              x-large
+              class="ma-10"
+              color="primary"
+              dark
+              style="min-width: 300px"
+            >
+              Quick play
+              <v-icon dark>mdi-play-circle</v-icon>
+            </v-btn>
+          </div>
+        </div>
+      </v-col>
+    </v-row>
+  </v-main>
 </template>
+
+<script lang="ts">
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { RelationshipType, User } from '~/models'
+import { relationshipsStore, socketStore } from '~/store'
+
+@Component
+export default class Page extends Vue {
+  get friends() {
+    return relationshipsStore.list.filter(
+      (x) => x.type === RelationshipType.FRIEND
+    )
+  }
+}
+</script>

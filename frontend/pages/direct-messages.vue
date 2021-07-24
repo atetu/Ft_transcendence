@@ -7,6 +7,9 @@
       :filterer="filterer"
       @refresh="$fetch"
     >
+      <template #before>
+        <relationship-top-item />
+      </template>
       <template #default="{ items }">
         <direct-message-list :direct-messages="items" />
       </template>
@@ -28,7 +31,7 @@ import { directMessageStore, relationshipsStore } from '~/store'
 export default class Index extends Vue {
   head() {
     return {
-      title: 'direct messages',
+      title: 'Direct  Messages',
     }
   }
 
