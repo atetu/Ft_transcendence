@@ -54,7 +54,8 @@
           :width="width"
           :height="height"
           tabindex="0"
-          @keydown="onPressed"
+          @keydown="onKeyDown"
+          @keyup="onKeyUp"
           style="position: absolute"
         ></canvas>
       </v-col>
@@ -181,20 +182,36 @@ export default class Game extends Vue {
     return this.$route.params.id
   }
 
-  onPressed(event: KeyboardEvent) {
-    // console.log(event.key)
+  onKeyDown(event: KeyboardEvent) {
     switch (event.key) {
       case 'ArrowDown': {
         if (this.status === Status.playing && !this.block) {
           this.down = true
-          // console.log('down')
-          // console.log('myside: ' + this.mySide)
           break
         }
       }
+      
       case 'ArrowUp': {
         if (this.status === Status.playing && !this.block) {
           this.up = true
+          break
+        }
+      }
+    }
+  }
+
+  onKeyUp(event: KeyboardEvent) {
+    switch (event.key) {
+      case 'ArrowDown': {
+        if (this.status === Status.playing && !this.block) {
+          this.down = false
+          break
+        }
+      }
+      
+      case 'ArrowUp': {
+        if (this.status === Status.playing && !this.block) {
+          this.up = false
           break
         }
       }
@@ -233,8 +250,6 @@ export default class Game extends Vue {
       let nb: number = 0
       if (this.up) nb = this.velPaddle * -1 * this.factor
       else if (this.down) nb = this.velPaddle * this.factor
-      this.up = false
-      this.down = false
       if (this.mySide == 1) {
         prevY = this.paddleLeftY
         this.paddleLeftY += nb
