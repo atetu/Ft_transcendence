@@ -32,4 +32,6 @@ export interface Game {
   countdown: number
   sprite: any
   factor: any
+  winner?: Player
+  scorer?: Player
 }
