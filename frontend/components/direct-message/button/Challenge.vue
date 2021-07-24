@@ -4,7 +4,13 @@
       <v-btn v-if="small" icon color="primary" v-bind="attrs" v-on="on">
         <v-icon>mdi-sword-cross</v-icon>
       </v-btn>
-      <v-btn v-else color="primary" v-bind="attrs" v-on="on" @click="dialog = true">
+      <v-btn
+        v-else
+        color="primary"
+        v-bind="attrs"
+        v-on="on"
+        @click="dialog = true"
+      >
         challenge
         <v-icon right>mdi-sword-cross</v-icon>
       </v-btn>
@@ -25,7 +31,7 @@
                 required
               ></v-select>
             </v-col>
-             <v-col cols="12" sm="6">
+            <v-col cols="12" sm="6">
               <v-select
                 v-model="inputs.nbGames"
                 :items="['1', '2', '3', '4']"
@@ -53,7 +59,7 @@
                     text: 'Very fast',
                     value: 1.5,
                   },
-                  ]"
+                ]"
                 label="Ball speed"
                 required
               ></v-select>
@@ -119,8 +125,8 @@ export default class Viewer extends Vue {
   inputs = {
     paddleVelocity: 1,
     maps: 0,
-    ballVelocity : 1,
-    nbGames : 3,
+    ballVelocity: 1,
+    nbGames: 3,
   }
 
   get small() {
@@ -153,14 +159,14 @@ export default class Viewer extends Vue {
     if (this.loading) {
       return
     }
-  console.log('INPU MAP: ' + this.inputs.maps)
+    console.log('INPU MAP: ' + this.inputs.maps)
     this.loading = true
-  //  console.log(this.inputs.map)
-  //     console.log(this.inputs.ballVelocity)
-  //     console.log(this.inputs.paddleVelocity)
+    //  console.log(this.inputs.map)
+    //     console.log(this.inputs.ballVelocity)
+    //     console.log(this.inputs.paddleVelocity)
     try {
       await this.$axios.post(`pending-games`, {
-        peerId: this.directMessage.peer.id,
+        peerId: this.peer.id,
         map: this.inputs.maps,
         ballVelocity: this.inputs.ballVelocity,
         paddleVelocity: this.inputs.paddleVelocity,
