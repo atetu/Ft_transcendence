@@ -63,7 +63,6 @@ export default class Page extends Vue {
   }
 
   destroyed() {
-    alert(this.joined)
     if (!this.joined) {
       this.$socket.client.emit('waiting_room_leave', {
         id: this.pendingGame.id,
