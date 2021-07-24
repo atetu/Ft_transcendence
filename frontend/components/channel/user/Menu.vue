@@ -50,8 +50,6 @@
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 
 import { Channel, ChannelUser, UserStatistics } from '~/models'
-import { User } from '~/models'
-import Game from '~/pages/game/_id/index.vue'
 import { socketStore } from '~/store'
 
 @Component
@@ -66,11 +64,10 @@ export default class ComponentImpl extends Vue {
   bottom!: boolean
 
   menu = false
-  statistics: UserStatistics | null = null
-
   loading = false
   error: any = null
 
+  statistics: UserStatistics | null = null
   game: any | null = null
 
   async fetchStatistics() {
@@ -92,28 +89,24 @@ export default class ComponentImpl extends Vue {
     this.loading = false
   }
 
-  playing(user: User): boolean {
-    let ret: boolean = socketStore.playingUserIds.includes(user.id)
-    console.log('is playing? ' + ret)
-    return ret
+  async fetchGame() {
+    try {
+      this.game = await this.$axios.$get(`/users/${this.user.id}/game`)
+    } catch (error) {
+      this.$dialog.message.error(`Could not fetch user game: ${error}`)
+    }
   }
+
+  get playing(): boolean {
+    return socketStore.playingUserIds.includes(this.user.id)
+  }
+
   get toProfile() {
     return `/users/${this.user.id}`
   }
 
   get toMessage() {
     return `/direct-messages/${this.user.id}`
-  }
-
-  //  async toGame() {
-  //    console.log('TO GAME')
-  //   let gameId = await this.$axios.$get(`users/${this.$store.state.auth.user.id}/game`)
-  //   console.log('IDDDD: ' + gameId)
-  //   return `/game/${gameId}`
-  // }
-
-  async fetchGameId() {
-    this.game = await this.$axios.$get(`/users/${this.user.id}/game`)
   }
 
   get toGame() {
@@ -128,11 +121,20 @@ export default class ComponentImpl extends Vue {
   onMenuOpenStateUpdate(val: boolean) {
     if (val) {
       this.fetchStatistics()
+
+      if (this.playing) {
+        this.fetchGame()
+      }
     }
   }
 
-  mounted() {
-    this.fetchGameId()
+  @Watch('playing')
+  onPlayingUpdate(val: boolean) {
+    this.game = null
+
+    if (val && this.menu) {
+      this.fetchGame()
+    }
   }
 }
 </script>
