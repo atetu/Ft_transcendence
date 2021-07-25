@@ -44,6 +44,7 @@ export default class Match {
 
   public toJSON() {
     return {
+      id: this.id,
       player1: this.player1,
       player2: this.player2,
       score1: this.score1,
