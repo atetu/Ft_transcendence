@@ -81,6 +81,9 @@ export default class ComponentImpl extends Vue {
     this.statistics = await this.$axios.$get(`/users/${this.userId}/statistics`)
     this.friends = await this.$axios.$get(`/users/${this.userId}/friends`)
 
+    this.matches.reverse()
+    this.friends.reverse()
+
     this.$axios
       .$get(`/users/@me/relationships/${this.userId}`)
       .then(relationshipsStore.updateItem)
