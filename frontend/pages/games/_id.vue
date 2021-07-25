@@ -280,9 +280,18 @@ export default class Page extends Vue {
 
   @Socket('game_end')
   onGameEnd(match: Match) {
-    this.$router.push({
-      path: `/matches/${match.id}`,
-    })
+    const { id } = match
+
+    if (id === undefined) {
+      this.$dialog.message.error(`No match returned`)
+      this.$router.replace({
+        path: '/',
+      })
+    } else {
+      this.$router.replace({
+        path: `/matches/${id}`,
+      })
+    }
   }
 
   @Socket('game_exit')
@@ -299,8 +308,8 @@ export default class Page extends Vue {
   mounted() {
     this.destroyed = false
 
-    this.canvas = <HTMLCanvasElement>document.getElementById('myCanvas')
-    this.ctx = <CanvasRenderingContext2D>this.canvas.getContext('2d')
+    this.canvas = document.getElementById('myCanvas') as HTMLCanvasElement
+    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
     this.ctx.fillStyle = `${this.$vuetify.theme.themes.dark.primary}`
     this.ctx.fillRect(0, 0, this.width, this.height)
 
