@@ -22,6 +22,7 @@ export default class DirectMessage {
   channel: Channel;
 
   @ManyToOne(() => User, {
+    eager: true,
     onDelete: "CASCADE",
   })
   user: User;

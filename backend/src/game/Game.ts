@@ -2,9 +2,11 @@ import * as socketio from "socket.io";
 import { Container } from "typedi";
 import Match from "../entities/Match";
 import User from "../entities/User";
+import AchievementProgressService from "../services/AchievementProgressService";
 import GameService from "../services/GameService";
 import MatchService from "../services/MatchService";
 import UserStatisticsService from "../services/UserStatisticsService";
+import Achievements from "./Achievements";
 import { Ball } from "./Ball";
 import { COLLISION_STEP, HEIGHT, WIDTH } from "./Constants";
 import { Direction, Side } from "./Enums";
@@ -52,6 +54,7 @@ export default class Game {
 
   public matchService = Container.get(MatchService);
   public userStatisticsService = Container.get(UserStatisticsService);
+  public achievementProgressService = Container.get(AchievementProgressService);
   public gameService = Container.get(GameService);
 
   public waitingRoom: User[] = new Array(2);
@@ -198,8 +201,8 @@ export default class Game {
       await this.userStatisticsService.incrementWinCount(
         this.player[Side.LEFT].user
       );
-      await this.userStatisticsService.incrementLossCount(
-        this.player[Side.RIGHT].user
+      await this.userStatisticsService.incrementWinCount(
+        this.player[Side.LEFT].user
       );
     } else {
       await this.userStatisticsService.incrementWinCount(
@@ -212,6 +215,42 @@ export default class Game {
 
     console.log(match);
     io.to(this.toRoom()).emit("game_end", match);
+
+    try {
+      await this.achievementProgressService.increment(
+        Achievements.FIRST_TIME,
+        winner.user
+      );
+      await this.achievementProgressService.increment(
+        Achievements.KING_OF_THE_HILL,
+        winner.user
+      );
+      await this.achievementProgressService.increment(
+        Achievements.AT_WHAT_COST,
+        winner.user
+      );
+
+      for (const user of this.users) {
+        await this.achievementProgressService.increment(
+          Achievements.BEGINNER,
+          user
+        );
+        await this.achievementProgressService.increment(
+          Achievements.INTERMEDIATE,
+          user
+        );
+        await this.achievementProgressService.increment(
+          Achievements.GAMER,
+          user
+        );
+        await this.achievementProgressService.increment(
+          Achievements.GO_OUTSIDE,
+          user
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
 
     this.gameService.delete(this);
     // TODO : enregistrer infos match

@@ -3,7 +3,9 @@ import { InjectRepository } from "typeorm-typedi-extensions";
 import ChannelMessage from "../entities/ChannelMessage";
 import PendingGame from "../entities/PendingGame";
 import User from "../entities/User";
+import Achievements from "../game/Achievements";
 import PendingGameRepository from "../repositories/PendingGameRepository";
+import AchievementProgressService from "./AchievementProgressService";
 import ChannelMessageService from "./ChannelMessageService";
 import DirectMessageService from "./DirectMessageService";
 
@@ -14,6 +16,9 @@ export default class PendingGameService {
     private readonly repository: PendingGameRepository,
 
     @Inject()
+    private readonly achievementProgressService: AchievementProgressService,
+
+    @Inject()
     private readonly directMessageService: DirectMessageService,
 
     @Inject()
@@ -21,10 +26,17 @@ export default class PendingGameService {
   ) {}
 
   async findById(id: number): Promise<PendingGame> {
-    return await this.repository.findOne({ id })
+    return await this.repository.findOne({ id });
   }
 
-  public async create(user: User, peer: User, map: number, ballVelocity: number, paddleVelocity: number, nbGames: number): Promise<PendingGame> {
+  public async create(
+    user: User,
+    peer: User,
+    map: number,
+    ballVelocity: number,
+    paddleVelocity: number,
+    nbGames: number
+  ): Promise<PendingGame> {
     const pendingGame = new PendingGame();
     pendingGame.user = user;
     pendingGame.peer = peer;
@@ -35,7 +47,8 @@ export default class PendingGameService {
 
     await this.repository.save(pendingGame);
 
-    const { channel } = await this.directMessageService.getOrCreate(user, peer);
+    const directMessage = await this.directMessageService.getOrCreate(user, peer);
+    const { channel } = directMessage
 
     const message = new ChannelMessage();
     message.channel = channel;
@@ -47,6 +60,7 @@ export default class PendingGameService {
     });
 
     await this.channelMessageService.create(message);
+    await this.achievementProgressService.increment(Achievements.CHALLENGER, user);
 
     pendingGame.message = Promise.resolve(message);
     await this.repository.save(pendingGame);

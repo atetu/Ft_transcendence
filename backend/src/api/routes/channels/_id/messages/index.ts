@@ -48,7 +48,7 @@ export default (app: express.Router) => {
         message.type = type;
         message.content = content;
 
-        channelMessageService.create(message); // TODO add await
+        await channelMessageService.create(message);
 
         res.status(200).send(message);
       } catch (error) {

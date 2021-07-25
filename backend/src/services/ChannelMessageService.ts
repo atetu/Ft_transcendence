@@ -10,6 +10,8 @@ import AchievementService from "./AchievementService";
 import AchievementProgressService from "./AchievementProgressService";
 import Achievement from "../entities/Achievement";
 import Achievements from "../game/Achievements";
+import DirectMessage from "../entities/DirectMessage";
+import DirectMessageService from "./DirectMessageService";
 
 @Service()
 export default class ChannelMessageService {
@@ -21,7 +23,10 @@ export default class ChannelMessageService {
     private socketService: SocketService,
 
     @Inject()
-    private achievementProgressService: AchievementProgressService
+    private achievementProgressService: AchievementProgressService,
+
+    @Inject()
+    private directMessageService: DirectMessageService
   ) {
     // setInterval(async () => {
     //   const channel = await Container.get(ChannelService).findById(1);
@@ -51,10 +56,24 @@ export default class ChannelMessageService {
     return await this.repository.findOne(id);
   }
 
-  public async create(message: ChannelMessage) {
+  public async create(message: ChannelMessage, directMessage?: DirectMessage) {
     await this.repository.save(message);
 
     this.socketService.broadcastChannelMessage(message);
+
+    if (message.channel.isDirect()) {
+      if (!directMessage) {
+        directMessage = await this.directMessageService.findByChannel(
+          message.channel
+        );
+      }
+
+      await this.achievementProgressService.increment(
+        Achievements.HELLO,
+        directMessage.user
+      );
+    }
+
     await this.achievementProgressService.increment(
       Achievements.COMMUNITY_MEMBER,
       message.user
