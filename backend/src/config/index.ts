@@ -30,4 +30,8 @@ export default dotenv.load({
     type: Number,
     default: 80,
   },
+  MATCHMAKING_ONLY_ONE: {
+    type: Boolean,
+    default: false,
+  },
 } as const);

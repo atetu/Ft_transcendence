@@ -13,6 +13,7 @@ import DirectMessageService from "./DirectMessageService";
 import { InjectRepository } from "typeorm-typedi-extensions";
 import ChannelMessage from "../entities/ChannelMessage";
 import Channel from "../entities/Channel";
+import config from "../config";
 
 function getUserId(socket: Socket): number {
   return socket.data.user.id;
@@ -30,7 +31,6 @@ class Room {
   public accept(socket: Socket): boolean {
     throw new Error("not implemented");
   }
-
 
   protected add(socket: Socket): void {
     if (this.contains(socket)) {
@@ -210,54 +210,55 @@ export default class MatchMakingService {
     this.gatekeeper = new Gatekeeper();
   }
 
-  
-
   async add(socket: Socket, pendingGame?: PendingGame): Promise<Game> {
     const io = Container.get(socketio.Server);
 
     const room = this.gatekeeper.add(socket, pendingGame);
 
-    // if (!room || room.size() < 2) {
-    //   return null;
-    // }
-    if (!room || room.size() < 1) {
-      return null;
+    let sockets: [Socket, Socket];
+
+    if (config.MATCHMAKING_ONLY_ONE) {
+      if (!room || room.size() < 1) {
+        return null;
+      }
+
+      const first = this.gatekeeper.pop1(room);
+      sockets = [first, first];
+    } else {
+      if (!room || room.size() < 2) {
+        return null;
+      }
+
+      const [first, second] = this.gatekeeper.pop2(room);
+      sockets = [first, second];
     }
-
-    // const [first, second] = this.gatekeeper.pop2(room);
-    const first = this.gatekeeper.pop1(room);
-
 
     if (room.isEmpty()) {
       this.gatekeeper.destroyRoom(room);
     }
 
-    // const game = this.gameService.start(first, second, pendingGame);
-    const game = this.gameService.start(first, first, pendingGame);
-    // io.to(pendingGame.toRoom()).emit("game_starting_btn");
+    const game = this.gameService.start(...sockets, pendingGame);
+
     this.socketService.broadcastGameStarting(game);
 
     // const { channel } = await this.directMessageService.getOrCreate(game.player1, game.player2);
-    
+
     if (pendingGame) {
-      const message: ChannelMessage = await pendingGame.message
+      const message: ChannelMessage = await pendingGame.message;
       message.content = JSON.stringify({
         id: pendingGame.id,
         state: "played",
       });
-  
+
       await this.channelMessageService.edit(message);
-  
+
       pendingGame.message = Promise.resolve(message);
     }
 
-    
     return game;
   }
 
   remove(socket: Socket, id?: number) {
     this.gatekeeper.remove(socket); // TODO use id
   }
-
-  
 }
