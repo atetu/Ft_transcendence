@@ -9,6 +9,7 @@ import directMessages from "./routes/direct-messages";
 import pendingGames from "./routes/pending-games";
 import matches from "./routes/matches";
 import maps from "./routes/maps";
+import ping from "./routes/ping";
 
 export default () => {
   const app = Router();
@@ -22,6 +23,7 @@ export default () => {
   search(app);
   matches(app);
   maps(app);
+  ping(app);
 
   return app;
 };
