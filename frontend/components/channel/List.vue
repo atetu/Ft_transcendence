@@ -1,7 +1,7 @@
 <template>
   <v-alert v-if="isEmpty" type="info" class="ma-4">
     You didn't joined any channel
-    <v-btn class="mt-2" block small color="primary" to="/channels/discover">
+    <v-btn class="mt-2" block small color="primary" to="/channels" exact>
       discover
     </v-btn>
   </v-alert>

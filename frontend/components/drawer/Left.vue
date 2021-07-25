@@ -8,6 +8,10 @@
     stateless
     touchless
   >
+    <template #prepend>
+      <slot name="prepend" />
+    </template>
+
     <slot />
 
     <template #append>
