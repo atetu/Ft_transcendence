@@ -50,6 +50,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { Match, User } from '~/models'
+import { Player, Side } from '~/models/Game'
 
 @Component
 export default class ComponentImpl extends Vue {
@@ -74,7 +75,7 @@ export default class ComponentImpl extends Vue {
   }
 
   to(match: Match) {
-    return `/users/${this.getEnemy(match).id}`
+    return `/matches/${match.id}`
   }
 
   hasWon(match: Match): boolean {
@@ -82,38 +83,30 @@ export default class ComponentImpl extends Vue {
   }
 
   getPlayer(match: Match): User {
-    return this.getSidedPlayer(true, match)
+    return this.getSidedPlayer(true, match).user
   }
 
   getEnemy(match: Match): User {
-    return this.getSidedPlayer(false, match)
+    return this.getSidedPlayer(false, match).user
   }
 
   getPlayerScore(match: Match): number {
-    return this.getSidedScore(true, match)
+    return this.getSidedPlayer(true, match).score
   }
 
   getEnemyScore(match: Match): number {
-    return this.getSidedScore(false, match)
+    return this.getSidedPlayer(false, match).score
   }
 
-  getSidedPlayer(me: boolean, match: Match): User {
-    return this.getSidedProperty('player', me, match)
+  getSidedPlayer(me: boolean, match: Match): Player {
+    return match.player[this.getSide(me, match)]
   }
 
-  getSidedScore(me: boolean, match: Match): number {
-    return this.getSidedProperty('score', me, match)
-  }
-
-  getSidedProperty(property: string, me: boolean, match: Match): any {
-    return (match as any)[property + [this.getSide(me, match)]]
-  }
-
-  getSide(mine: boolean, match: Match): number {
-    if (this.user.id === match.player1.id) {
-      return mine ? 1 : 2
+  getSide(mine: boolean, match: Match): Side {
+    if (this.user.id === match.player[Side.LEFT].user.id) {
+      return mine ? Side.LEFT : Side.RIGHT
     } else {
-      return mine ? 2 : 1
+      return mine ? Side.RIGHT : Side.LEFT
     }
   }
 
