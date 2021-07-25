@@ -35,15 +35,6 @@
         <v-icon v-else large color="red">mdi-emoticon-dead</v-icon>
       </template>
     </v-data-table>
-    <!-- <v-list>
-      <match-empty v-if="!matches.length" />
-      <match-list-item
-        v-for="match in matches"
-        :key="match.id"
-        :user="user"
-        :match="match"
-      />
-    </v-list> -->
   </v-card>
 </template>
 
