@@ -1,12 +1,10 @@
 <template>
-  <v-container fill-height>
-    <v-row>
-      <v-col cols="1" align="center" justify="center">
-        {{ state }}
-        <game-score v-if="leftPlayer" :player="leftPlayer" />
+  <v-main class="fill-height">
+    <v-row class="fill-height">
+      <v-col cols="2" align="center" class="vertical">
+        <game-score v-if="leftPlayer" :player="leftPlayer" :max="maxRound" />
       </v-col>
-
-      <v-col cols="10">
+      <v-col cols="8">
         <canvas
           id="myCanvas"
           :width="width"
@@ -17,32 +15,22 @@
           style="position: absolute"
         ></canvas>
       </v-col>
-      <v-col cols="1" align="center" justify="center">
-        <game-score v-if="rightPlayer" :player="rightPlayer" />
+      <v-col cols="2" align="center" class="vertical">
+        <game-score v-if="rightPlayer" :player="rightPlayer" :max="maxRound" />
       </v-col>
     </v-row>
-  </v-container>
+  </v-main>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator' // propre a nuxt
 import { Socket } from 'vue-socket.io-extended'
 import { Match, User } from '~/models'
-import { Game, Player, Rectangle, Side } from '~/models/Game'
+import { Game, Player, Rectangle, Settings, Side } from '~/models/Game'
 
 enum State {
   WAITING,
   PLAYING,
-  SCORED,
-}
-
-class Sprite {
-  constructor(
-    public x: number,
-    public y: number,
-    public width: number,
-    public height: number
-  ) {}
 }
 
 class VisibleObject {
@@ -118,13 +106,11 @@ export default class Page extends Vue {
 
   side: Side = Side.LEFT
   obstacles: Array<Rectangle> = []
+  settings: Settings | null = null
 
   message: string = ''
   countdown: number = 3
   state = State.WAITING
-  velPaddle: number = 4
-  factor: number = 1
-  block: boolean = false
 
   keys = {
     up: false,
@@ -182,9 +168,9 @@ export default class Page extends Vue {
       const prevY = newY
 
       if (this.keys.up && !this.keys.down) {
-        newY += this.velPaddle * -1 * this.factor
+        newY -= 4 * (this.settings?.paddleVelocity || 1)
       } else if (this.keys.down && !this.keys.up) {
-        newY += this.velPaddle * this.factor
+        newY += 4 * (this.settings?.paddleVelocity || 1)
       }
 
       if (newY !== prevY) {
@@ -206,10 +192,6 @@ export default class Page extends Vue {
     }
   }
 
-  get myPaddle(): Paddle {
-    return this.paddle[this.side]
-  }
-
   loop(): void {
     if (!this.ctx) {
       return
@@ -225,12 +207,7 @@ export default class Page extends Vue {
 
     for (const obstacle of this.obstacles) {
       this.ctx.fillStyle = 'white'
-      this.ctx.fillRect(
-        obstacle.x,
-        obstacle.y,
-        obstacle.width,
-        obstacle.height
-      )
+      this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height)
     }
 
     this.ball.draw(this.ctx)
@@ -240,43 +217,57 @@ export default class Page extends Vue {
     this.paddle[Side.LEFT].draw(this.ctx)
     this.paddle[Side.RIGHT].draw(this.ctx)
 
-    switch (this.state) {
-      case State.WAITING: {
-        this.ctx.font = '80px Nunito'
-        this.ctx.fillStyle = 'white'
-        this.ctx.textAlign = 'center'
-        this.ctx.fillText('' + this.countdown, this.width / 2, this.height / 2)
+    if (this.state === State.WAITING) {
+      if (this.countdown !== -1) {
+        this.ctx.save()
+        const x = this.width / 2
+        const y = this.height / 8
 
-        break
+        this.ctx.font = '80px Nunito'
+        this.ctx.textAlign = 'center'
+        this.ctx.strokeStyle = 'black'
+        this.ctx.lineWidth = 4
+        this.ctx.strokeText(`${this.countdown}`, x, y)
+        this.ctx.fillStyle = 'white'
+        this.ctx.fillText(`${this.countdown}`, x, y)
+        this.ctx.restore()
       }
 
-      case State.SCORED: {
-        this.ctx.font = '80px Nunito'
-        this.ctx.fillStyle = 'white'
-        this.ctx.textAlign = 'center'
-        this.ctx.fillText(this.message, this.width / 2, this.height / 2)
+      if (this.message) {
+        this.ctx.save()
+        const x = this.width / 2
+        const y = (this.height / 8) * 7
 
-        break
+        this.ctx.font = '40px Nunito'
+        this.ctx.textAlign = 'center'
+        this.ctx.strokeStyle = 'black'
+        this.ctx.lineWidth = 4
+        this.ctx.strokeText(this.message, x, y)
+        this.ctx.fillStyle = 'white'
+        this.ctx.fillText(this.message, x, y)
+        this.ctx.restore()
       }
     }
   }
 
   @Socket('game_state')
   onGameState(data: Game) {
-    const { paddle, ball, countdown, sprite, factor } = data
+    const { paddle, player, ball, countdown } = data
 
     this.ball.copyPosition(ball)
+
+    this.player = player
 
     this.paddle[Side.LEFT].y = paddle[Side.LEFT].y
     this.paddle[Side.RIGHT].y = paddle[Side.RIGHT].y
 
     this.countdown = countdown
-    this.factor = factor
 
     if (countdown !== -1) {
       this.state = State.WAITING
     } else if (this.state !== State.PLAYING) {
       this.state = State.PLAYING
+      this.message = ''
     }
   }
 
@@ -285,7 +276,6 @@ export default class Page extends Vue {
     const { scorer } = data
 
     this.message = `${scorer!.user.username} scored!`
-    this.state = State.SCORED
   }
 
   @Socket('game_end')
@@ -338,6 +328,7 @@ export default class Page extends Vue {
           paddle,
           countdown,
           map: { obstacles },
+          settings,
         } = body
 
         if (player[Side.LEFT].user.id === this.$store.state.auth.user.id) {
@@ -354,7 +345,7 @@ export default class Page extends Vue {
 
         this.countdown = countdown
         this.obstacles = obstacles
-        console.log(body)
+        this.settings = settings
 
         this.loopInterval = setInterval(() => this.loop(), 1000 / 60)
       }
@@ -371,8 +362,12 @@ export default class Page extends Vue {
     }
   }
 
+  get myPaddle(): Paddle {
+    return this.paddle[this.side]
+  }
+
   get inputEnabled(): boolean {
-    return this.state === State.PLAYING && !this.block
+    return this.state === State.PLAYING
   }
 
   get leftPlayer(): Player {
@@ -381,6 +376,10 @@ export default class Page extends Vue {
 
   get rightPlayer(): Player {
     return this.player[Side.RIGHT]
+  }
+
+  get maxRound() {
+    return this.settings?.nbGames
   }
 }
 </script>
@@ -399,7 +398,9 @@ export default class Page extends Vue {
     border: 1px solid black;
   }
 
-  #custom-disabled.v-btn--disabled {
-    background-color: red !important;
+  .vertical {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 </style>

@@ -2,7 +2,10 @@
   <div>
     <user-avatar :user="player.user" />
     <p class="login">{{ player.user.username }}</p>
-    <p class="score">{{ player.score }}</p>
+    <p class="score">
+      {{ player.score }}
+      <small v-if="max">/ {{ max }}</small>
+    </p>
   </div>
 </template>
 
@@ -14,6 +17,9 @@ import { Player } from '~/models/Game'
 export default class Score extends Vue {
   @Prop()
   player!: Player
+
+  @Prop()
+  max!: Number
 }
 </script>
 

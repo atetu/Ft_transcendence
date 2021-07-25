@@ -23,6 +23,13 @@ export interface Map {
   obstacles: Array<Rectangle>
 }
 
+export interface Settings {
+  map: number
+  ballVelocity: number
+  paddleVelocity: number
+  nbGames: number
+}
+
 export interface Game {
   id: number
   player: {
@@ -42,4 +49,5 @@ export interface Game {
   winner?: Player
   scorer?: Player
   map: Map
+  settings: Settings
 }
