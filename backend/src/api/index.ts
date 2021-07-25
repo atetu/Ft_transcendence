@@ -7,6 +7,7 @@ import achievements from "./routes/achievements";
 import search from "./routes/search";
 import directMessages from "./routes/direct-messages";
 import pendingGames from "./routes/pending-games";
+import matches from "./routes/matches";
 
 export default () => {
   const app = Router();
@@ -17,7 +18,8 @@ export default () => {
   achievements(app);
   directMessages(app);
   pendingGames(app);
-  search(app)
+  search(app);
+  matches(app);
 
   return app;
 };
