@@ -11,18 +11,25 @@ export interface Player {
   connected: boolean
 }
 
+export interface Rectangle {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export interface Map {
+  name: string
+  obstacles: Array<Rectangle>
+}
+
 export interface Game {
   id: number
   player: {
     [key in Side]: Player
   }
   paddle: {
-    [key in Side]: {
-      x: number
-      y: number
-      width: number
-      height: number
-    }
+    [key in Side]: Rectangle
   }
   ball: {
     x: number
@@ -34,4 +41,5 @@ export interface Game {
   factor: any
   winner?: Player
   scorer?: Player
+  map: Map
 }

@@ -28,7 +28,7 @@
 import { Component, Vue } from 'nuxt-property-decorator' // propre a nuxt
 import { Socket } from 'vue-socket.io-extended'
 import { Match, User } from '~/models'
-import { Game, Player, Side } from '~/models/Game'
+import { Game, Player, Rectangle, Side } from '~/models/Game'
 
 enum State {
   WAITING,
@@ -117,11 +117,11 @@ export default class Page extends Vue {
   }
 
   side: Side = Side.LEFT
+  obstacles: Array<Rectangle> = []
 
   message: string = ''
   countdown: number = 3
   state = State.WAITING
-  sprite: Sprite | null = null
   velPaddle: number = 4
   factor: number = 1
   block: boolean = false
@@ -223,13 +223,13 @@ export default class Page extends Vue {
     this.ctx.lineTo(400, 580)
     this.ctx.stroke()
 
-    if (this.sprite != null) {
+    for (const obstacle of this.obstacles) {
       this.ctx.fillStyle = 'white'
       this.ctx.fillRect(
-        this.sprite.x,
-        this.sprite.y,
-        this.sprite.width,
-        this.sprite.height
+        obstacle.x,
+        obstacle.y,
+        obstacle.width,
+        obstacle.height
       )
     }
 
@@ -271,7 +271,6 @@ export default class Page extends Vue {
     this.paddle[Side.RIGHT].y = paddle[Side.RIGHT].y
 
     this.countdown = countdown
-    this.sprite = sprite
     this.factor = factor
 
     if (countdown !== -1) {
@@ -321,25 +320,43 @@ export default class Page extends Vue {
         gameId: this.id,
       },
       (error: any, body: Game) => {
-        if (!error) {
-          const { player, ball, paddle, countdown } = body
-
-          if (player[Side.LEFT].user.id === this.$store.state.auth.user.id) {
-            this.side = Side.LEFT
-          } else {
-            this.side = Side.RIGHT
-          }
-
-          this.player = player
-
-          this.ball.copyPosition(ball)
-          this.paddle[Side.LEFT].copyPosition(paddle[Side.LEFT])
-          this.paddle[Side.RIGHT].copyPosition(paddle[Side.RIGHT])
-
-          this.countdown = countdown
-
-          this.loopInterval = setInterval(() => this.loop(), 1000 / 60)
+        if (this.destroyed) {
+          return
         }
+
+        if (error) {
+          this.$router.push({
+            path: `/`,
+          })
+
+          this.$dialog.message.error(`Could not connect to game: ${error}`)
+          return
+        }
+        const {
+          player,
+          ball,
+          paddle,
+          countdown,
+          map: { obstacles },
+        } = body
+
+        if (player[Side.LEFT].user.id === this.$store.state.auth.user.id) {
+          this.side = Side.LEFT
+        } else {
+          this.side = Side.RIGHT
+        }
+
+        this.player = player
+
+        this.ball.copyPosition(ball)
+        this.paddle[Side.LEFT].copyPosition(paddle[Side.LEFT])
+        this.paddle[Side.RIGHT].copyPosition(paddle[Side.RIGHT])
+
+        this.countdown = countdown
+        this.obstacles = obstacles
+        console.log(body)
+
+        this.loopInterval = setInterval(() => this.loop(), 1000 / 60)
       }
     )
   }
