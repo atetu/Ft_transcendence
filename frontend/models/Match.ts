@@ -1,10 +1,8 @@
 import { User } from './User'
+import { Player, Side } from './Game'
 
 export interface Match {
   id: number
-  player1: User
-  player2: User
-  score1: number
-  score2: number
+  player: { [key in Side]: Player }
   winner: User
 }
