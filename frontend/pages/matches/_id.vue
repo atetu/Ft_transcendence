@@ -7,8 +7,8 @@
           <v-card-text>
             <v-row>
               <v-col
-                v-for="player in [left, right]"
-                :key="player.user.id"
+                v-for="(player, index) in [left, right]"
+                :key="index"
                 cols="12"
                 sm="6"
               >
