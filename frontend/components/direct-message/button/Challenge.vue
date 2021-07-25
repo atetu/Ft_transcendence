@@ -20,7 +20,10 @@
             <v-col cols="12" sm="6">
               <v-select
                 v-model="inputs.map"
-                :items="[1, 2, 3, 4]"
+                :loading="maps.length === 0"
+                :items="maps"
+                item-value="id"
+                item-text="name"
                 label="Map"
                 required
               />
@@ -28,8 +31,8 @@
             <v-col cols="12" sm="6">
               <v-select
                 v-model="inputs.nbGames"
-                :items="[1, 2, 3, 4]"
-                label="Number of games per set"
+                :items="[3, 5, 7, 9, 12]"
+                label="Point to win"
                 required
               />
             </v-col>
@@ -96,8 +99,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { watch } from '@chenfengyuan/vue-qrcode'
+import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import { User } from '~/models'
+import { Map } from '~/models/Game'
 
 @Component
 export default class Viewer extends Vue {
@@ -119,6 +124,8 @@ export default class Viewer extends Vue {
     ballVelocity: 1,
     nbGames: 3, // TODO Rename
   }
+
+  maps: Array<Map> = []
 
   get small() {
     if (this.neverSmall) {
@@ -148,6 +155,21 @@ export default class Viewer extends Vue {
     }
 
     this.loading = false
+  }
+
+  async fetchMaps() {
+    try {
+      this.maps = await this.$axios.$get(`/maps`)
+    } catch (error) {
+      this.$dialog.notify.error(`Could not fetch maps: ${error}`)
+    }
+  }
+
+  @Watch('dialog')
+  onDialogOpen(val: boolean) {
+    if (val && !this.maps.length) {
+      this.fetchMaps()
+    }
   }
 }
 </script>
