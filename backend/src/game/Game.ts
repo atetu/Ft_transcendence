@@ -29,6 +29,13 @@ class Circle extends GameObject {
   }
 }
 
+enum CollisionResult {
+  NONE = 0,
+  VERTICAL,
+  HORIZONTAL,
+  BOTH,
+}
+
 class Rectangle extends GameObject {
   constructor(
     x: number,
@@ -40,7 +47,8 @@ class Rectangle extends GameObject {
   }
 
   // http://www.jeffreythompson.org/collision-detection/circle-rect.php
-  collide(circle: Circle): boolean {
+  // https://stackoverflow.com/a/62586006/7292958
+  collide(circle: Circle): CollisionResult {
     const { x: cx, y: cy, radius } = circle;
     const { x: rx, y: ry, width: rw, height: rh } = this;
 
@@ -56,15 +64,32 @@ class Rectangle extends GameObject {
     else if (cy > ry + rh) testY = ry + rh; // bottom edge
 
     // get distance from closest edges
-    const distX = cx - testX;
-    const distY = cy - testY;
+    const distX = Math.abs(cx - testX);
+    const distY = Math.abs(cy - testY);
+
+    // const distX = Math.abs(cx - rx) - rw / 2;
+    // const distY = Math.abs(cx - ry) - rh / 2;
+
+    if (distX > radius || distY > radius) {
+      return CollisionResult.NONE;
+    }
+
+    if (distX <= 0) {
+      return CollisionResult.HORIZONTAL;
+    }
+
+    if (distY <= 0) {
+      return CollisionResult.VERTICAL;
+    }
+
     const distance = Math.sqrt(distX * distX + distY * distY);
 
     // if the distance is less than the radius, collision!
     if (distance <= radius) {
-      return true;
+      return CollisionResult.BOTH;
     }
-    return false;
+
+    return CollisionResult.NONE;
   }
 }
 
@@ -115,11 +140,27 @@ class World {
   ) {}
 
   collideX(circle: Ball) {
-    return this.leftWall.collide(circle) || this.rightWall.collide(circle);
+    // console.log({
+    //   left: this.leftWall.collide(circle),
+    //   right: this.rightWall.collide(circle),
+    // });
+
+    return (
+      this.leftWall.collide(circle) !== CollisionResult.NONE ||
+      this.rightWall.collide(circle) !== CollisionResult.NONE
+    );
   }
 
   collideY(circle: Ball) {
-    return this.topWall.collide(circle) || this.bottomWall.collide(circle);
+    // console.log({
+    //   top: this.topWall.collide(circle),
+    //   bottom: this.bottomWall.collide(circle),
+    // });
+
+    return (
+      this.topWall.collide(circle) !== CollisionResult.NONE ||
+      this.bottomWall.collide(circle) !== CollisionResult.NONE
+    );
   }
 }
 
@@ -183,17 +224,17 @@ enum Direction {
   RIGHT = 1,
 }
 
-const sprites: Sprite[] = [
-  new Sprite(0, 0, 0, 0),
-  new Sprite(200, 150, 100, 200),
-  new Sprite(600, 300, 50, 200),
-  new Sprite(300, 300, 150, 50),
+const sprites: Rectangle[] = [
+  new Rectangle(200, 150, 100, 200),
+  new Rectangle(0, 0, 0, 0),
+  new Rectangle(600, 300, 50, 200),
+  new Rectangle(300, 300, 150, 50),
 ];
 
 const WIDTH = 800;
 const HEIGHT = 600;
 const WALL_THICKNESS = 100;
-const COLLISION_STEP = 3;
+const COLLISION_STEP = 6;
 
 export default class Game {
   public id: number | null = null;
@@ -261,8 +302,8 @@ export default class Game {
   ) {
     this.settings = settings || {
       map: 0,
-      paddleVelocity: 1,
-      ballVelocity: 1,
+      paddleVelocity: 3,
+      ballVelocity: 3,
       nbGames: 3,
     };
     this.sprite = sprites[this.settings.map];
@@ -327,6 +368,35 @@ export default class Game {
     }
   }
 
+  handleBallCollision(rectanble: Rectangle, nextDirection: Direction) {
+    const result = rectanble.collide(this.ball);
+
+    if (
+      result === CollisionResult.HORIZONTAL ||
+      result === CollisionResult.BOTH
+    ) {
+      this.ball.yVelocity *= -1;
+    }
+
+    if (
+      result === CollisionResult.VERTICAL ||
+      result === CollisionResult.BOTH
+    ) {
+      this.ball.xVelocity *= -1;
+      
+      this.direction = nextDirection;
+
+      console.log(
+        {
+          [CollisionResult.NONE]: "none",
+          [CollisionResult.HORIZONTAL]: "hor",
+          [CollisionResult.VERTICAL]: "ver",
+          [CollisionResult.BOTH]: "both",
+        }[result]
+      );
+    }
+  }
+
   updateBall() {
     for (let i = 0; i < COLLISION_STEP; i++) {
       if (this.world.collideX(this.ball)) {
@@ -337,21 +407,15 @@ export default class Game {
         this.ball.yVelocity *= -1;
       }
 
-      if (
-        this.direction == Direction.RIGHT &&
-        this.paddle[Side.RIGHT].collide(this.ball)
-      ) {
-        this.direction = Direction.LEFT;
-        this.ball.xVelocity *= -1;
+      if (this.direction == Direction.RIGHT) {
+        this.handleBallCollision(this.paddle[Side.RIGHT], Direction.LEFT);
       }
 
-      if (
-        this.direction == Direction.LEFT &&
-        this.paddle[Side.LEFT].collide(this.ball)
-      ) {
-        this.direction = Direction.RIGHT;
-        this.ball.xVelocity *= -1;
+      if (this.direction == Direction.LEFT) {
+        this.handleBallCollision(this.paddle[Side.LEFT], Direction.RIGHT);
       }
+
+      this.handleBallCollision(this.sprite, this.direction == Direction.LEFT ? Direction.RIGHT : Direction.LEFT);
 
       this.ball.applyVelocity(this.settings.ballVelocity / COLLISION_STEP);
     }
