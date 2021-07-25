@@ -31,7 +31,7 @@ export default class Game {
 
   private interval?: ReturnType<typeof setInterval>;
 
-  private ball: Ball = new Ball(300, HEIGHT - 50, 3.5, 1.5);
+  private ball: Ball = new Ball(0, 0, 3.5, 1.5);
   private direction: Direction;
 
   private paddle = {
@@ -75,6 +75,8 @@ export default class Game {
 
     this.paddle[Side.LEFT].toMiddleOf(HEIGHT);
     this.paddle[Side.RIGHT].toMiddleOf(HEIGHT);
+
+    this.repositionBall();
   }
 
   start() {
@@ -89,9 +91,13 @@ export default class Game {
     this.decount();
   }
 
-  async restart() {
+  repositionBall() {
     this.ball.x = WIDTH / 2;
     this.ball.y = getRandomArbitrary(250, 350);
+  }
+
+  restart() {
+    this.repositionBall();
 
     this.direction = this.nextDirection();
     this.ball.setDirection(this.direction);
@@ -204,10 +210,10 @@ export default class Game {
       );
     }
 
-    console.log(match)
+    console.log(match);
     io.to(this.toRoom()).emit("game_end", match);
 
-    this.gameService.delete(this)
+    this.gameService.delete(this);
     // TODO : enregistrer infos match
     // envoyer infos au front pour dire que c'est la fin des fins
   }
