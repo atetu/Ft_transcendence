@@ -1,211 +1,22 @@
-import { Container } from "typedi";
 import * as socketio from "socket.io";
+import { Container } from "typedi";
+import Match from "../entities/Match";
 import User from "../entities/User";
 import MatchService from "../services/MatchService";
-
-import { AdvancedConsoleLogger } from "typeorm";
-import Match from "../entities/Match";
 import UserStatisticsService from "../services/UserStatisticsService";
-import { throws } from "assert";
-
-let nbGames: number = 0;
-
-enum setStatus {
-  playing,
-  over,
-}
-
-class GameObject {
-  constructor(public x: number, public y: number) {}
-}
-
-class Circle extends GameObject {
-  constructor(x: number, y: number, public radius: number) {
-    super(x, y);
-  }
-
-  get radiusSquare() {
-    return Math.pow(this.radius, 2);
-  }
-}
-
-enum CollisionResult {
-  NONE = 0,
-  VERTICAL,
-  HORIZONTAL,
-  BOTH,
-}
-
-class Rectangle extends GameObject {
-  constructor(
-    x: number,
-    y: number,
-    public width: number,
-    public height: number
-  ) {
-    super(x, y);
-  }
-
-  // http://www.jeffreythompson.org/collision-detection/circle-rect.php
-  // https://stackoverflow.com/a/62586006/7292958
-  collide(circle: Circle): CollisionResult {
-    const { x: cx, y: cy, radius } = circle;
-    const { x: rx, y: ry, width: rw, height: rh } = this;
-
-    let testX = cx;
-    let testY = cy;
-
-    // which edge is closest?
-    if (cx < rx) testX = rx;
-    // compare to left edge
-    else if (cx > rx + rw) testX = rx + rw; // right edge
-    if (cy < ry) testY = ry;
-    // top edge
-    else if (cy > ry + rh) testY = ry + rh; // bottom edge
-
-    // get distance from closest edges
-    const distX = Math.abs(cx - testX);
-    const distY = Math.abs(cy - testY);
-
-    // const distX = Math.abs(cx - rx) - rw / 2;
-    // const distY = Math.abs(cx - ry) - rh / 2;
-
-    if (distX > radius || distY > radius) {
-      return CollisionResult.NONE;
-    }
-
-    if (distX <= 0) {
-      return CollisionResult.HORIZONTAL;
-    }
-
-    if (distY <= 0) {
-      return CollisionResult.VERTICAL;
-    }
-
-    const distance = Math.sqrt(distX * distX + distY * distY);
-
-    // if the distance is less than the radius, collision!
-    if (distance <= radius) {
-      return CollisionResult.BOTH;
-    }
-
-    return CollisionResult.NONE;
-  }
-}
-
-class Ball extends Circle {
-  constructor(
-    x: number,
-    y: number,
-    public xVelocity: number,
-    public yVelocity: number
-  ) {
-    super(x, y, 15);
-  }
-
-  applyVelocity(multiplier: number) {
-    this.x += this.xVelocity * multiplier;
-    this.y += this.yVelocity * multiplier;
-  }
-
-  setDirection(direction: Direction) {
-    if (direction === Direction.LEFT && this.xVelocity > 0) {
-      this.xVelocity *= -1;
-    }
-
-    if (direction === Direction.RIGHT && this.xVelocity < 0) {
-      this.xVelocity *= -1;
-    }
-  }
-}
-
-class Paddle extends Rectangle {
-  constructor(x: number, y: number) {
-    super(x, y, 20, 100);
-  }
-}
-
-class Sprite extends Rectangle {
-  constructor(x: number, y: number, width: number, height: number) {
-    super(x, y, width, height);
-  }
-}
-
-class World {
-  constructor(
-    public readonly topWall: Rectangle,
-    public readonly bottomWall: Rectangle,
-    public readonly leftWall: Rectangle,
-    public readonly rightWall: Rectangle
-  ) {}
-
-  collideX(circle: Ball) {
-    // console.log({
-    //   left: this.leftWall.collide(circle),
-    //   right: this.rightWall.collide(circle),
-    // });
-
-    return (
-      this.leftWall.collide(circle) !== CollisionResult.NONE ||
-      this.rightWall.collide(circle) !== CollisionResult.NONE
-    );
-  }
-
-  collideY(circle: Ball) {
-    // console.log({
-    //   top: this.topWall.collide(circle),
-    //   bottom: this.bottomWall.collide(circle),
-    // });
-
-    return (
-      this.topWall.collide(circle) !== CollisionResult.NONE ||
-      this.bottomWall.collide(circle) !== CollisionResult.NONE
-    );
-  }
-}
-
-class Player {
-  public readonly user: User;
-  public score: number = 0;
-
-  constructor(public socket: socketio.Socket) {
-    this.user = socket.data.user;
-  }
-
-  setDisconnected() {
-    this.socket = null;
-  }
-
-  setConnected(socket: socketio.Socket) {
-    this.socket = socket;
-  }
-
-  get connected(): boolean {
-    return !!this.socket;
-  }
-
-  public toJSON(): any {
-    return {
-      user: this.user,
-      score: this.score,
-      connected: this.connected,
-    };
-  }
-}
-
-export interface GameSettings {
-  map: number;
-  ballVelocity: number;
-  paddleVelocity: number;
-  nbGames: number;
-}
+import { Ball } from "./Ball";
+import { COLLISION_STEP, HEIGHT, WALL_THICKNESS, WIDTH } from "./Constants";
+import { Direction, Side } from "./Enums";
+import { Map } from "./Map";
+import Maps from "./Maps";
+import { Paddle } from "./Paddle";
+import { Player } from "./Player";
+import { GameSettings, defaults as defaultsGameSettings } from "./Settings";
+import { Circle, CollisionResult, Rectangle } from "./Shape";
+import { World } from "./World";
 
 function getRandomArbitrary(min: number, max: number) {
   return Math.random() * (max - min) + min;
-}
-
-function getRandomInt(max: number) {
-  return Math.floor(Math.random() * max);
 }
 
 function sleep(ms: number) {
@@ -213,28 +24,6 @@ function sleep(ms: number) {
     setTimeout(resolve, ms);
   });
 }
-
-enum Side {
-  LEFT,
-  RIGHT,
-}
-
-enum Direction {
-  LEFT = -1,
-  RIGHT = 1,
-}
-
-const sprites: Rectangle[] = [
-  new Rectangle(200, 150, 100, 200),
-  new Rectangle(0, 0, 0, 0),
-  new Rectangle(600, 300, 50, 200),
-  new Rectangle(300, 300, 150, 50),
-];
-
-const WIDTH = 800;
-const HEIGHT = 600;
-const WALL_THICKNESS = 100;
-const COLLISION_STEP = 6;
 
 export default class Game {
   public id: number | null = null;
@@ -254,37 +43,11 @@ export default class Game {
     [Side.RIGHT]: null as Player,
   };
 
-  private world = new World(
-    new Rectangle(
-      -WALL_THICKNESS,
-      -WALL_THICKNESS,
-      WIDTH + WALL_THICKNESS * 2,
-      WALL_THICKNESS
-    ),
-    new Rectangle(
-      -WALL_THICKNESS,
-      HEIGHT,
-      WIDTH + WALL_THICKNESS * 2,
-      WALL_THICKNESS
-    ),
-    new Rectangle(
-      -WALL_THICKNESS,
-      -WALL_THICKNESS,
-      WALL_THICKNESS,
-      HEIGHT + WALL_THICKNESS * 2
-    ),
-    new Rectangle(
-      WIDTH,
-      -WALL_THICKNESS,
-      WALL_THICKNESS,
-      HEIGHT + WALL_THICKNESS * 2
-    )
-  );
+  private world = new World();
+  private map: Map;
 
   public connected: number = 0;
   public state: number = 3;
-  public status: setStatus = setStatus.playing;
-  public sprite: Sprite | null;
   public change: boolean = false;
   public settings: GameSettings;
   public roundNumber: number = 0;
@@ -300,13 +63,8 @@ export default class Game {
     second: socketio.Socket,
     settings?: GameSettings
   ) {
-    this.settings = settings || {
-      map: 0,
-      paddleVelocity: 3,
-      ballVelocity: 3,
-      nbGames: 3,
-    };
-    this.sprite = sprites[this.settings.map];
+    this.settings = settings || defaultsGameSettings();
+    this.map = Maps[this.settings.map];
     this.leaving = [];
 
     this.player[Side.LEFT] = new Player(first);
@@ -314,10 +72,9 @@ export default class Game {
 
     this.direction = this.nextDirection();
     this.ball.setDirection(this.direction);
-  }
 
-  public toRoom(): string {
-    return `game_${this.id}`;
+    this.paddle[Side.LEFT].toMiddleOf(HEIGHT);
+    this.paddle[Side.RIGHT].toMiddleOf(HEIGHT);
   }
 
   async decount() {
@@ -340,16 +97,13 @@ export default class Game {
   }
 
   async restart() {
-    this.ball.x = getRandomArbitrary(350, 450);
+    this.ball.x = WIDTH / 2;
     this.ball.y = getRandomArbitrary(250, 350);
-    this.paddle[Side.LEFT].y = 15;
-    this.paddle[Side.RIGHT].y = 15;
 
     this.direction = this.nextDirection();
     this.ball.setDirection(this.direction);
     this.state = 3;
 
-    this.status = setStatus.playing;
     this.waitingRoomOption.length = 0;
     this.waitingRoom.length = 0;
 
@@ -383,17 +137,17 @@ export default class Game {
       result === CollisionResult.BOTH
     ) {
       this.ball.xVelocity *= -1;
-      
+
       this.direction = nextDirection;
 
-      console.log(
-        {
-          [CollisionResult.NONE]: "none",
-          [CollisionResult.HORIZONTAL]: "hor",
-          [CollisionResult.VERTICAL]: "ver",
-          [CollisionResult.BOTH]: "both",
-        }[result]
-      );
+      // console.log(
+      //   {
+      //     [CollisionResult.NONE]: "none",
+      //     [CollisionResult.HORIZONTAL]: "hor",
+      //     [CollisionResult.VERTICAL]: "ver",
+      //     [CollisionResult.BOTH]: "both",
+      //   }[result]
+      // );
     }
   }
 
@@ -415,7 +169,12 @@ export default class Game {
         this.handleBallCollision(this.paddle[Side.LEFT], Direction.RIGHT);
       }
 
-      this.handleBallCollision(this.sprite, this.direction == Direction.LEFT ? Direction.RIGHT : Direction.LEFT);
+      for (const obstacle of this.map.obstacles) {
+        this.handleBallCollision(
+          obstacle,
+          this.direction == Direction.LEFT ? Direction.RIGHT : Direction.LEFT
+        );
+      }
 
       this.ball.applyVelocity(this.settings.ballVelocity / COLLISION_STEP);
     }
@@ -434,7 +193,7 @@ export default class Game {
     match.score1 = this.player[Side.LEFT].score;
     match.score2 = this.player[Side.RIGHT].score;
     match.winner = winner.user;
-    match = await this.matchService.save(match);
+    await this.matchService.save(match);
 
     if (winner == this.player[Side.LEFT]) {
       await this.userStatisticsService.incrementWinCount(
@@ -474,7 +233,6 @@ export default class Game {
       this.roundNumber++;
 
       if (this.roundNumber === this.settings.nbGames) {
-        this.status = setStatus.over;
         this.stopGame(scorer);
         return;
       }
@@ -578,8 +336,12 @@ export default class Game {
       paddle: this.paddle,
       ball: this.ball,
       countdown: this.state,
-      sprite: this.sprite,
+      map: this.map,
       factor: this.settings.paddleVelocity,
     };
+  }
+
+  public toRoom(): string {
+    return `game_${this.id}`;
   }
 }
