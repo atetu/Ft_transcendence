@@ -42,11 +42,7 @@ export default (app: express.Router) => {
         paddleVelocity: number;
         nbGames: number;
       };
-      console.log('inside index')
-      console.log('MAP: ' + map)
-      console.log('Ball: ' + ballVelocity)
-      console.log('Paddle: ' + paddleVelocity)
-      console.log('Nb Games: ' + nbGames)
+      
       try {
         const peer = await userService.findById(peerId);
 

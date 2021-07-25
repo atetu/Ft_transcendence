@@ -1,12 +1,5 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Side } from "../game/Enums";
-import Channel from "./Channel";
 import User from "./User";
 
 @Entity({
@@ -44,13 +37,7 @@ export default class Match {
   })
   winner: User;
 
-  // @Column({
-  //   default: false,
-  // })
-  // winner: User;
-
   public toJSON() {
-    console.log(this)
     return {
       id: this.id,
       player: {

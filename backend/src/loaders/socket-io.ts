@@ -54,7 +54,6 @@ export default async ({ server }: { server: http.Server }) => {
     });
 
     socket.on('game_disconnect', () => {
-      console.log('first step')
       socketService.gameDisconnect(socket)
     });
     
