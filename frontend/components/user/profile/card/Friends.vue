@@ -8,6 +8,7 @@
       </v-btn>
     </v-card-title>
     <v-list>
+      <user-friend-empty v-if="!last.length" />
       <user-friend-item
         v-for="{ peer: user } in last"
         :key="user.id"
