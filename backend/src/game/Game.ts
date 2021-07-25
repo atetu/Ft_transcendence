@@ -2,6 +2,7 @@ import * as socketio from "socket.io";
 import { Container } from "typedi";
 import Match from "../entities/Match";
 import User from "../entities/User";
+import GameService from "../services/GameService";
 import MatchService from "../services/MatchService";
 import UserStatisticsService from "../services/UserStatisticsService";
 import { Ball } from "./Ball";
@@ -51,6 +52,8 @@ export default class Game {
 
   public matchService = Container.get(MatchService);
   public userStatisticsService = Container.get(UserStatisticsService);
+  public gameService = Container.get(GameService);
+
   public waitingRoom: User[] = new Array(2);
   public waitingRoomOption: number[] = new Array(2);
   private leaving: Array<User>;
@@ -201,7 +204,10 @@ export default class Game {
       );
     }
 
+    console.log(match)
     io.to(this.toRoom()).emit("game_end", match);
+
+    this.gameService.delete(this)
     // TODO : enregistrer infos match
     // envoyer infos au front pour dire que c'est la fin des fins
   }
@@ -318,6 +324,10 @@ export default class Game {
       }
     }
     return false;
+  }
+
+  get players(): [Player, Player] {
+    return [this.player[Side.LEFT], this.player[Side.RIGHT]];
   }
 
   get users(): [User, User] {

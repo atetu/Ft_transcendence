@@ -10,7 +10,6 @@ import Relationship from "../entities/Relationship";
 import User from "../entities/User";
 import Game from "../game/Game";
 import ChannelService from "./ChannelService";
-import GameService from "./GameService";
 
 export type Callback = (err: Error, answer: any) => void;
 
@@ -18,6 +17,9 @@ export enum ClientEvent {
   CONNECTED_JOIN = "client_connected_join",
   CONNECTED_QUIT = "client_connected_quit",
   CONNECTED_LIST = "client_connected_list",
+  PLAYING_JOIN = "client_playing_join",
+  PLAYING_QUIT = "client_playing_quit",
+  PLAYING_LIST = "client_playing_list",
 }
 
 export enum ChannelEvent {
@@ -70,9 +72,65 @@ export type Event =
   | UserEvent
   | AchievementEvent;
 
+class SessionCounter {
+  sessions: { [key: number]: number } = {};
+
+  constructor(
+    private readonly io: socketio.Server,
+    private readonly joinEvent: ClientEvent,
+    private readonly quitEvent: ClientEvent,
+    private readonly listEvent: ClientEvent,
+    private readonly preventSelf: boolean = false
+  ) {}
+
+  onJoin(socket: Socket) {
+    const { user } = socket.data as { user: User };
+    const { id } = user;
+
+    if (this.sessions[id]) {
+      this.sessions[id] += 1;
+    } else {
+      socket.broadcast.emit(this.joinEvent, id);
+
+      this.sessions[id] = 1;
+    }
+
+    this.emitSessons(socket);
+  }
+
+  onQuit(socket: Socket) {
+    const user: User = socket.data.user;
+    const { id } = user;
+
+    if (this.sessions[id]) {
+      const now = (this.sessions[id] -= 1);
+
+      if (now === 0) {
+        if (this.preventSelf) {
+          this.io.emit(this.quitEvent, id);
+        } else {
+          socket.broadcast.emit(this.quitEvent, id);
+        }
+
+        delete this.sessions[id];
+      }
+    }
+  }
+
+  emitSessons(socket: Socket) {
+    socket.emit(this.listEvent, this.connectedIds);
+  }
+
+  get connectedIds() {
+    return Object.keys(this.sessions);
+  }
+}
+
 @Service()
 export default class SocketService {
-  private gameService = Container.get(GameService);
+  private get gameService(): any {
+    return Container.get(require("./GameService").default);
+  }
   private get matchMakingService(): any {
     return Container.get(require("./MatchMakingService").default);
   }
@@ -82,41 +140,45 @@ export default class SocketService {
     return Container.get(socketio.Server);
   }
 
-  connectedUserSessionCounts: { [key: number]: number } = {};
+  private _connectedUsers?: SessionCounter;
+  get connectedUsers(): SessionCounter {
+    if (!this._connectedUsers) {
+      this._connectedUsers = new SessionCounter(
+        this.io,
+        ClientEvent.CONNECTED_JOIN,
+        ClientEvent.CONNECTED_QUIT,
+        ClientEvent.CONNECTED_LIST
+      );
+    }
 
-  get connectedUserIds() {
-    return Object.keys(this.connectedUserSessionCounts);
+    return this._connectedUsers;
+  }
+
+  private _playingUsers?: SessionCounter;
+  get playingUsers(): SessionCounter {
+    if (!this._playingUsers) {
+      this._playingUsers = new SessionCounter(
+        this.io,
+        ClientEvent.PLAYING_JOIN,
+        ClientEvent.PLAYING_QUIT,
+        ClientEvent.PLAYING_LIST,
+        true
+      );
+    }
+
+    return this._playingUsers;
   }
 
   onConnect(socket: Socket) {
-    const { user } = socket.data as { user: User };
-    const { id } = user;
+    this.connectedUsers.onJoin(socket);
+    this.playingUsers.emitSessons(socket);
 
-    if (this.connectedUserSessionCounts[id]) {
-      this.connectedUserSessionCounts[id] += 1;
-    } else {
-      socket.broadcast.emit(ClientEvent.CONNECTED_JOIN, id);
-
-      this.connectedUserSessionCounts[id] = 1;
-    }
-
-    socket.emit(ClientEvent.CONNECTED_LIST, this.connectedUserIds);
-
+    const user: User = socket.data.user;
     socket.join(user.toRoom());
   }
 
   onDisconnect(socket: any) {
-    const { id } = socket.data.user;
-
-    if (this.connectedUserSessionCounts[id]) {
-      const now = (this.connectedUserSessionCounts[id] -= 1);
-
-      if (now === 0) {
-        socket.broadcast.emit(ClientEvent.CONNECTED_QUIT, id);
-
-        delete this.connectedUserSessionCounts[id];
-      }
-    }
+    this.connectedUsers.onQuit(socket);
 
     this.matchMakingService.remove(socket);
   }
@@ -262,7 +324,6 @@ export default class SocketService {
     body: { id: number },
     callback: Callback
   ) {
-    const gameService = Container.get(GameService);
     const pendingGameService = Container.get(
       require("./PendingGameService").default
     ) as any;

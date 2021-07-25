@@ -64,7 +64,6 @@ class SocketModule extends VuexModule {
     const index = this.playingUserIds.indexOf(id)
 
     if (index !== -1) {
-      console.log('QUIT')
       this.playingUserIds.splice(index, 1)
     }
   }

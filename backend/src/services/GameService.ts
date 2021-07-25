@@ -1,15 +1,21 @@
 import * as socketio from "socket.io";
 import { Socket } from "socket.io";
-import Container, { Service } from "typedi";
+import Container, { Inject, Service } from "typedi";
 import { isUndefined } from "util";
 import PendingGame from "../entities/PendingGame";
 import User from "../entities/User";
 import Game from "../game/Game";
+import SocketService from "./SocketService";
 
 @Service()
 export default class GameService {
   private repository: { [key: string]: Game } = {};
   private players: { [key: number]: Game } = {};
+
+  constructor(
+    @Inject()
+    private readonly socketService: SocketService
+  ) {}
 
   private incrementalId = 0;
 
@@ -58,17 +64,31 @@ export default class GameService {
     return this.repository[id];
   }
 
-  private save(game: Game): Game {
+  public save(game: Game): Game {
     if (!game.id) {
       this.provideId(game);
     }
 
     this.repository[game.id] = game;
-    for (const { id } of game.users) {
-      this.players[id] = game;
+    for (const player of game.players) {
+      this.socketService.playingUsers.onJoin(player.socket);
+      this.players[player.user.id] = game;
     }
 
     return game;
+  }
+
+  public delete(game: Game): void {
+    if (!game.id) {
+      throw new Error("cannot delete game without an id");
+    }
+
+    delete this.repository[game.id];
+
+    for (const player of game.players) {
+      this.socketService.playingUsers.onQuit(player.socket);
+      delete this.players[player.user.id];
+    }
   }
 
   private provideId(game: Game): void {
