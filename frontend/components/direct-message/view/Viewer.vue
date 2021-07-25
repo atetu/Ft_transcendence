@@ -19,7 +19,7 @@
         <template #activator="{ on, attrs }">
           <v-list-item rounded shaped v-bind="attrs" v-on="on">
             <v-list-item-avatar>
-              <user-avatar :user="peer" />
+              <user-avatar :user="peer" :size="40" />
             </v-list-item-avatar>
 
             <v-list-item-title>
