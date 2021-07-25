@@ -12,6 +12,7 @@
           tabindex="0"
           @keydown="onKeyDown"
           @keyup="onKeyUp"
+          @blur="refocus"
           style="position: absolute"
         ></canvas>
       </v-col>
@@ -157,6 +158,14 @@ export default class Page extends Vue {
     }
   }
 
+  refocus() {
+    this.$nextTick(() => {
+      if (!this.destroyed) {
+        this.canvas?.focus()
+      }
+    })
+  }
+
   updatePaddles() {
     if (
       this.player[Side.LEFT].user.id === this.$store.state.auth.user.id ||
@@ -283,7 +292,7 @@ export default class Page extends Vue {
     const { id } = match
 
     if (id === undefined) {
-      this.$dialog.message.error(`No match returned`)
+      this.$dialog.notify.error(`No match returned`)
       this.$router.replace({
         path: '/',
       })
@@ -307,6 +316,7 @@ export default class Page extends Vue {
 
   mounted() {
     this.destroyed = false
+    this.refocus()
 
     this.canvas = document.getElementById('myCanvas') as HTMLCanvasElement
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
@@ -328,7 +338,7 @@ export default class Page extends Vue {
             path: `/`,
           })
 
-          this.$dialog.message.error(`Could not connect to game: ${error}`)
+          this.$dialog.notify.error(`Could not connect to game: ${error}`)
           return
         }
         const {
