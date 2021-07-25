@@ -9,8 +9,6 @@ import DirectMessageService from "./DirectMessageService";
 
 @Service()
 export default class PendingGameService {
-  private waiters: { [key: number]: PendingGame } = {};
-
   constructor(
     @InjectRepository()
     private readonly repository: PendingGameRepository,

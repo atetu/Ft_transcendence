@@ -61,7 +61,7 @@ export default class Game {
     settings?: GameSettings
   ) {
     this.settings = settings || defaultsGameSettings();
-    this.map = Maps[this.settings.map];
+    this.map = Maps.find(this.settings.map);
     this.leaving = [];
 
     this.player[Side.LEFT] = new Player(first);

@@ -8,6 +8,7 @@ import search from "./routes/search";
 import directMessages from "./routes/direct-messages";
 import pendingGames from "./routes/pending-games";
 import matches from "./routes/matches";
+import maps from "./routes/maps";
 
 export default () => {
   const app = Router();
@@ -20,6 +21,7 @@ export default () => {
   pendingGames(app);
   search(app);
   matches(app);
+  maps(app);
 
   return app;
 };

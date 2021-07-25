@@ -7,6 +7,7 @@ import { Container } from "typeorm-typedi-extensions";
 import helpers from "../../helpers";
 import PendingGameService from "../../../services/PendingGameService";
 import _id from "./_id";
+import Maps from "../../../game/Maps";
 
 export default (app: express.Router) => {
   const userService = Container.get(UserService);
@@ -22,7 +23,7 @@ export default (app: express.Router) => {
       {
         [celebrate.Segments.BODY]: {
           peerId: celebrate.Joi.number().required(),
-          map: celebrate.Joi.number().required(),
+          map: celebrate.Joi.number().valid(...Maps.pool.map((x) => x.id)).required(),
           ballVelocity: celebrate.Joi.number().required(),
           paddleVelocity: celebrate.Joi.number().required(),
           nbGames: celebrate.Joi.number().required(),
