@@ -103,7 +103,7 @@ export default class Index extends Vue {
     const left = Math.round(window.screenX + (window.outerWidth - width) / 2)
     const top = Math.round(window.screenY + (window.outerHeight - height) / 2.5)
 
-    const url = `/api/auth/oauth/${key}`
+    const url = `/auth/${key}/redirect`
 
     const childWindow = window.open(
       url,
