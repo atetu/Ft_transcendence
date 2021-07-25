@@ -40,7 +40,7 @@ export default class GameService {
   public start(first: Socket, second: Socket, pendingGame?: PendingGame): Game {
     const io = Container.get(socketio.Server);
 
-    const game = new Game(first, second, pendingGame);
+    const game = new Game(first, second, pendingGame?.settings);
     this.provideId(game);
 
     first.join(game.toRoom());
