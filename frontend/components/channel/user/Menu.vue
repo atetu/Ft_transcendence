@@ -98,7 +98,7 @@ export default class ComponentImpl extends Vue {
     try {
       this.game = await this.$axios.$get(`/users/${this.user.id}/game`)
     } catch (error) {
-      this.$dialog.message.error(`Could not fetch user game: ${error}`)
+      this.$dialog.notify.error(`Could not fetch user game: ${error}`)
     }
   }
 
