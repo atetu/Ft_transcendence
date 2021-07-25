@@ -5,14 +5,14 @@ import User from "../entities/User";
 import MatchService from "../services/MatchService";
 import UserStatisticsService from "../services/UserStatisticsService";
 import { Ball } from "./Ball";
-import { COLLISION_STEP, HEIGHT, WALL_THICKNESS, WIDTH } from "./Constants";
+import { COLLISION_STEP, HEIGHT, WIDTH } from "./Constants";
 import { Direction, Side } from "./Enums";
 import { Map } from "./Map";
 import Maps from "./Maps";
 import { Paddle } from "./Paddle";
 import { Player } from "./Player";
-import { GameSettings, defaults as defaultsGameSettings } from "./Settings";
-import { Circle, CollisionResult, Rectangle } from "./Shape";
+import { defaults as defaultsGameSettings, GameSettings } from "./Settings";
+import { CollisionResult, Rectangle } from "./Shape";
 import { World } from "./World";
 
 function getRandomArbitrary(min: number, max: number) {
@@ -46,17 +46,14 @@ export default class Game {
   private world = new World();
   private map: Map;
 
-  public connected: number = 0;
-  public state: number = 3;
-  public change: boolean = false;
+  public countdown: number = 3;
   public settings: GameSettings;
-  public roundNumber: number = 0;
+
   public matchService = Container.get(MatchService);
   public userStatisticsService = Container.get(UserStatisticsService);
   public waitingRoom: User[] = new Array(2);
   public waitingRoomOption: number[] = new Array(2);
   private leaving: Array<User>;
-  private stopIndex: boolean = false;
 
   constructor(
     first: socketio.Socket,
@@ -77,13 +74,6 @@ export default class Game {
     this.paddle[Side.RIGHT].toMiddleOf(HEIGHT);
   }
 
-  async decount() {
-    while (this.state != -1) {
-      await sleep(10);
-      this.state--;
-    }
-  }
-
   start() {
     const io = Container.get(socketio.Server);
 
@@ -102,7 +92,7 @@ export default class Game {
 
     this.direction = this.nextDirection();
     this.ball.setDirection(this.direction);
-    this.state = 3;
+    this.countdown = 3;
 
     this.waitingRoomOption.length = 0;
     this.waitingRoom.length = 0;
@@ -219,20 +209,19 @@ export default class Game {
   loop() {
     const io = Container.get(socketio.Server);
 
-    if (this.state === -1 && this.updateBall() === 0) {
+    if (this.countdown === -1 && this.updateBall() === 0) {
       clearInterval(this.interval);
 
       let scorer: Player;
       if (this.direction == Direction.LEFT) {
-        scorer = this.player[Side.LEFT];
-      } else {
         scorer = this.player[Side.RIGHT];
+      } else {
+        scorer = this.player[Side.LEFT];
       }
 
       scorer.score++;
-      this.roundNumber++;
 
-      if (this.roundNumber === this.settings.nbGames) {
+      if (scorer.score === this.settings.nbGames) {
         this.stopGame(scorer);
         return;
       }
@@ -244,10 +233,17 @@ export default class Game {
 
       clearInterval(this.interval);
 
-      setTimeout(() => this.restart(), 500);
+      setTimeout(() => this.restart(), 1000);
     }
 
     io.to(this.toRoom()).emit("game_state", this.toJSON());
+  }
+
+  async decount() {
+    while (this.countdown != -1) {
+      await sleep(800);
+      this.countdown--;
+    }
   }
 
   movePaddle(user: User, y: number) {
@@ -300,7 +296,6 @@ export default class Game {
   }
 
   disconnect(player: User) {
-    this.stopIndex = true;
     let found: User | null;
     if (this.leaving && this.leaving.length !== 0) {
       found = this.leaving.find(function (element) {
@@ -335,9 +330,10 @@ export default class Game {
       player: this.player,
       paddle: this.paddle,
       ball: this.ball,
-      countdown: this.state,
+      countdown: this.countdown,
       map: this.map,
       factor: this.settings.paddleVelocity,
+      settings: this.settings,
     };
   }
 

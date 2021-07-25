@@ -7,8 +7,8 @@ const tenthHeight = HEIGHT / 10
 
 export default [
   new Map("pause", [
-    new Rectangle(tenthWidth * 3, tenthHeight * 2, tenthWidth, tenthHeight * 6),
-    new Rectangle(tenthWidth * 6, tenthHeight * 2, tenthWidth, tenthHeight * 6),
+    new Rectangle(tenthWidth * 3, tenthHeight * 2, tenthWidth, tenthHeight * 5),
+    new Rectangle(tenthWidth * 6, tenthHeight * 2, tenthWidth, tenthHeight * 5),
   ]),
   new Map("normal", []),
   new Map("pipe", [
