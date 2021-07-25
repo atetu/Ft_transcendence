@@ -86,8 +86,12 @@ export default class Viewer extends Vue {
   }
 
   updateMessage(message: ChannelMessage) {
-    let index = this.messages.findIndex((x) => x === message)
-    if (index != -1) this.messages[index].content = message.content
+    const { id } = message
+    const index = this.messages.findIndex((x) => x.id === id)
+
+    if (index !== -1) {
+      this.messages[index].content = message.content
+    }
   }
 }
 </script>
