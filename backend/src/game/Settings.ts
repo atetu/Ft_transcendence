@@ -1,5 +1,3 @@
-import Game from "./Game";
-
 export interface GameSettings {
   map: number;
   ballVelocity: number;

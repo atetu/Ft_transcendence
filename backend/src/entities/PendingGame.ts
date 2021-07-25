@@ -1,5 +1,4 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { GameSettings } from "../game/Game";
 import { GameSettings } from "../game/Settings";
 import ChannelMessage from "./ChannelMessage";
 import User from "./User";
