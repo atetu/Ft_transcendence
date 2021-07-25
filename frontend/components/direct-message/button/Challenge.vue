@@ -42,19 +42,19 @@
                 :items="[
                   {
                     text: 'Slow',
-                    value: 0.8,
-                  },
-                  {
-                    text: 'Normal',
                     value: 1,
                   },
                   {
+                    text: 'Normal',
+                    value: 1.5,
+                  },
+                  {
                     text: 'Fast',
-                    value: 1.2,
+                    value: 3,
                   },
                   {
                     text: 'Very fast',
-                    value: 1.5,
+                    value: 5,
                   },
                 ]"
                 label="Ball speed"
@@ -67,19 +67,19 @@
                 :items="[
                   {
                     text: 'Slow',
-                    value: 0.8,
-                  },
-                  {
-                    text: 'Normal',
                     value: 1,
                   },
                   {
+                    text: 'Normal',
+                    value: 2,
+                  },
+                  {
                     text: 'Fast',
-                    value: 1.2,
+                    value: 3,
                   },
                   {
                     text: 'Very fast',
-                    value: 1.5,
+                    value: 4,
                   },
                 ]"
                 label="Paddle speed"
@@ -99,7 +99,6 @@
 </template>
 
 <script lang="ts">
-import { watch } from '@chenfengyuan/vue-qrcode'
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import { User } from '~/models'
 import { Map } from '~/models/Game'
@@ -119,9 +118,9 @@ export default class Viewer extends Vue {
   dialog = false
 
   inputs = {
-    paddleVelocity: 1,
     map: 1,
-    ballVelocity: 1,
+    ballVelocity: 1.5,
+    paddleVelocity: 2,
     nbGames: 3, // TODO Rename
   }
 
