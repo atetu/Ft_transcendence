@@ -43,7 +43,7 @@ export default class WaitingRoom extends Vue {
   @Socket('game_starting')
   onGameStarting(data: any) {
     console.log({ data })
-    const { player1, player2, id } = data
+    const { id } = data
     this.joined = true
     this.$router.replace({ path: `/games/${id}` })
   }
