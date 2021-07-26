@@ -105,7 +105,7 @@ import { relationshipsStore, socketStore } from '~/store'
 
 @Component
 export default class Page extends Vue {
-  dialog = true
+  dialog = false
 
   get friends() {
     return relationshipsStore.list.filter(
