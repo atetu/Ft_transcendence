@@ -32,7 +32,7 @@
                 <v-card-title> Press up and down arrows to move your pad  </v-card-title>
 
                 <v-card-text>
-                  A small ball, moves across the screen, bouncing off the top
+                  A small ball moves across the screen, bouncing off the top
                   and bottom ledges, and the two players each control a pad,
                   sliding it vertically between the ends of the screen using
                   the controls. If the ball hits the pad, it bounces back to
