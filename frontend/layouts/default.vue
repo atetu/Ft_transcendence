@@ -14,6 +14,10 @@
         :icon="link.icon"
         :url="link.url"
       />
+
+      <template #append>
+        <navigation-dot title="logout" icon="logout" url="/logout" />
+      </template>
     </v-navigation-drawer>
 
     <nuxt style="height: 100vh" />
@@ -30,6 +34,7 @@ interface Link {
   icon: string
   title: string
   url: string
+  last?: boolean
 }
 
 @Component({
@@ -61,11 +66,6 @@ export default class Default extends Vue {
       title: 'achievements',
       icon: 'trophy-award',
       url: '/achievements',
-    },
-    {
-      title: 'logout',
-      icon: 'logout',
-      url: '/logout',
     },
     {
       title: 'games',

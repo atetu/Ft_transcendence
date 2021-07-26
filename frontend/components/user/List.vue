@@ -1,10 +1,10 @@
 <template>
   <v-list>
-    <v-card-text v-if="!nonBlocked.length" class="text-center">
+    <v-card-text v-if="!withHidden.length" class="text-center">
       <template v-if="filter"> no result with filter `{{ filter }}` </template>
       <template v-else> no user available </template>
     </v-card-text>
-    <user-item v-for="user in nonBlocked" :key="user.id" :user="user" />
+    <user-item v-for="user in withHidden" :key="user.id" :user="user" />
     <v-card-text v-if="hiddenCount" class="text-center text--secondary">
       hiding {{ hiddenCount }} user(s)
     </v-card-text>
@@ -24,6 +24,12 @@ export default class List extends Vue {
   @Prop()
   filter!: string
 
+  @Prop()
+  hideBlocked!: boolean
+
+  @Prop()
+  hideBanned!: boolean
+
   get filtered() {
     const { filter } = this
 
@@ -34,14 +40,24 @@ export default class List extends Vue {
     return this.users.filter((x) => x.username.includes(filter))
   }
 
-  get nonBlocked() {
+  get withHidden() {
     const { blockedPeerIds } = relationshipsStore
 
-    return this.filtered.filter((x) => !blockedPeerIds.includes(x.id))
+    let list = this.filtered
+
+    if (this.hideBlocked) {
+      list = list.filter((x) => !blockedPeerIds.includes(x.id))
+    }
+
+    if (this.hideBanned) {
+      list = list.filter((x) => !x.banned)
+    }
+
+    return list
   }
 
   get hiddenCount() {
-    return this.filtered.length - this.nonBlocked.length
+    return this.filtered.length - this.withHidden.length
   }
 }
 </script>

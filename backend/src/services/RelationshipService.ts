@@ -1,11 +1,12 @@
 import { Inject, Service } from "typedi";
 import { InjectRepository } from "typeorm-typedi-extensions";
-import relationships from "../api/routes/users/me/relationships";
 import Relationship, {
-  Type as RelationshipType,
+  Type as RelationshipType
 } from "../entities/Relationship";
 import User from "../entities/User";
+import Achievements from "../game/Achievements";
 import RelationshipRepository from "../repositories/RelationshipRepository";
+import AchievementProgressService from "./AchievementProgressService";
 import SocketService from "./SocketService";
 
 @Service()
@@ -15,13 +16,16 @@ export default class RelationshipService {
     private readonly repository: RelationshipRepository,
 
     @Inject()
+    private readonly achievementProgressService: AchievementProgressService,
+
+    @Inject()
     private readonly socketService: SocketService
   ) {}
 
   async all(user: User) {
     return this.repository.findAllByUser(user);
   }
-  
+
   async findAllFriends(user: User) {
     return this.repository.findAllByUserAndType(user, RelationshipType.FRIEND);
   }
@@ -47,6 +51,24 @@ export default class RelationshipService {
     await this.repository.save(a);
     await this.repository.save(b);
 
+    await this.achievementProgressService.increment(Achievements.YOU, a.user);
+
+    for (const user of [a.user, b.user]) {
+      await this.achievementProgressService.increment(
+        Achievements.SMALL_GROUP,
+        user
+      );
+      await this.achievementProgressService.increment(
+        Achievements.FOOTBALL_TEAM,
+        user
+      );
+      await this.achievementProgressService.increment(Achievements.STAR, user);
+      await this.achievementProgressService.increment(
+        Achievements.WORLD_KNOWN,
+        user
+      );
+    }
+
     this.socketService.broadcastUserRelationshipUpdate(a);
     this.socketService.broadcastUserRelationshipUpdate(b);
   }
@@ -56,6 +78,8 @@ export default class RelationshipService {
 
     await this.repository.save(a);
     await this.repository.delete(b);
+
+    await this.achievementProgressService.increment(Achievements.NOPE, a.user);
 
     this.socketService.broadcastUserRelationshipUpdate(a);
     this.socketService.broadcastUserRelationshipDelete(a.peer, a.user);
@@ -75,6 +99,15 @@ export default class RelationshipService {
     await this.repository.save(a);
     await this.repository.save(b);
 
+    await this.achievementProgressService.increment(
+      Achievements.A_FRIEND_OUT,
+      user
+    );
+    await this.achievementProgressService.increment(
+      Achievements.A_FRIEND_IN,
+      peer
+    );
+
     this.socketService.broadcastUserRelationshipNew(a);
     this.socketService.broadcastUserRelationshipNew(b);
 
@@ -91,6 +124,8 @@ export default class RelationshipService {
 
     this.socketService.broadcastUserRelationshipUpdate(a);
 
+    await this.achievementProgressService.increment(Achievements.NOPE, user);
+
     return a;
   }
 
@@ -102,6 +137,10 @@ export default class RelationshipService {
       await this.repository.delete(a);
 
       this.socketService.broadcastUserRelationshipDelete(user, peer);
+
+      if (a.type === RelationshipType.INCOMING) {
+        await this.achievementProgressService.increment(Achievements.NOT_YOU, user);
+      }
     }
 
     if (b && !b.isBlock()) {

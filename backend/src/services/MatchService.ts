@@ -10,9 +10,9 @@ export default class MatchService {
     @InjectRepository()
     private readonly repository: MatchRepository
   ) {}
-  
+
   async findById(id: number): Promise<Match> {
-    return await this.repository.findById(id)
+    return await this.repository.findById(id);
   }
 
   async findAllByUser(user: User): Promise<Array<Match>> {
@@ -20,6 +20,8 @@ export default class MatchService {
   }
 
   async save(match: Match): Promise<Match> {
-    return this.repository.save(match);
+    this.repository.save(match);
+
+    return match;
   }
 }

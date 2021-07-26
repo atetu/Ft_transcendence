@@ -8,7 +8,7 @@
       @refresh="$fetch"
     >
       <template #before>
-        <relationship-top-item />
+        <direct-message-top-link />
       </template>
       <template #default="{ items }">
         <direct-message-list :direct-messages="items" />

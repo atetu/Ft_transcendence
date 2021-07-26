@@ -39,7 +39,10 @@
         <v-spacer />
 
         <v-btn text :to="toProfile" color="primary"> profile </v-btn>
-        <v-btn text :to="toMessage"> message </v-btn>
+        <v-btn v-if="!withoutMessageButton" text :to="toMessage">
+          message
+        </v-btn>
+        <v-btn v-if="game" text :to="toGame"> Watch game </v-btn>
       </v-card-actions>
     </v-card>
   </v-menu>
@@ -49,6 +52,7 @@
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 
 import { Channel, ChannelUser, UserStatistics } from '~/models'
+import { socketStore } from '~/store'
 
 @Component
 export default class ComponentImpl extends Vue {
@@ -61,11 +65,15 @@ export default class ComponentImpl extends Vue {
   @Prop({ type: Boolean })
   bottom!: boolean
 
-  menu = false
-  statistics: UserStatistics | null = null
+  @Prop({ type: Boolean })
+  withoutMessageButton!: boolean
 
+  menu = false
   loading = false
   error: any = null
+
+  statistics: UserStatistics | null = null
+  game: any | null = null
 
   async fetchStatistics() {
     if (this.loading) {
@@ -86,6 +94,18 @@ export default class ComponentImpl extends Vue {
     this.loading = false
   }
 
+  async fetchGame() {
+    try {
+      this.game = await this.$axios.$get(`/users/${this.user.id}/game`)
+    } catch (error) {
+      this.$dialog.notify.error(`Could not fetch user game: ${error}`)
+    }
+  }
+
+  get playing(): boolean {
+    return socketStore.playingUserIds.includes(this.user.id)
+  }
+
   get toProfile() {
     return `/users/${this.user.id}`
   }
@@ -94,10 +114,31 @@ export default class ComponentImpl extends Vue {
     return `/direct-messages/${this.user.id}`
   }
 
+  get toGame() {
+    if (!this.game) {
+      return null
+    }
+
+    return `/game/${this.game.id}`
+  }
+
   @Watch('menu')
   onMenuOpenStateUpdate(val: boolean) {
     if (val) {
       this.fetchStatistics()
+
+      if (this.playing) {
+        this.fetchGame()
+      }
+    }
+  }
+
+  @Watch('playing')
+  onPlayingUpdate(val: boolean) {
+    this.game = null
+
+    if (val && this.menu) {
+      this.fetchGame()
     }
   }
 }

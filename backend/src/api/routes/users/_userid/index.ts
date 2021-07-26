@@ -9,6 +9,7 @@ import matches from "./matches";
 import achievements from "./achievements";
 import avatar from "./avatar";
 import statistics from "./statistics";
+import game from "./game";
 import friends from "./friends";
 
 export default (app: express.Router) => {
@@ -73,6 +74,7 @@ export default (app: express.Router) => {
   avatar(route);
   matches(route);
   statistics(route);
+  game(route);
   friends(route);
 
   return route;

@@ -14,7 +14,7 @@ async function main() {
   });
 
   server.listen(config.PORT, () => {
-    console.log(`Startedd http://localhost:${config.PORT}`);
+    console.log(`Started http://localhost:${config.PORT}`);
   });
 }
 

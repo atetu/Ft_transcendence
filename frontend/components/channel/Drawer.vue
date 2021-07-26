@@ -1,36 +1,38 @@
 <template>
   <drawer-left>
-    <v-row class="ma-2">
-      <v-col cols="10">
-        <slot name="search">
-          <v-text-field
-            v-model="query"
-            background-color="grey lighten-1"
-            dense
-            flat
-            hide-details
-            solo
-            clearable
-          />
-        </slot>
-      </v-col>
-      <v-col cols="2" class="pl-0">
-        <v-btn icon :loading="loading" @click="refresh">
-          <v-icon>mdi-refresh</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
+    <template #prepend>
+      <v-row class="ma-2">
+        <v-col cols="10">
+          <slot name="search">
+            <v-text-field
+              v-model="query"
+              background-color="grey lighten-1"
+              dense
+              flat
+              hide-details
+              solo
+              clearable
+            />
+          </slot>
+        </v-col>
+        <v-col cols="2" class="pl-0">
+          <v-btn icon :loading="loading" @click="refresh">
+            <v-icon>mdi-refresh</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+
+      <v-divider />
+
+      <template v-if="$scopedSlots['before']">
+        <slot name="before" />
+        <v-divider />
+      </template>
+    </template>
 
     <v-alert v-if="error" type="error" class="ma-2">
       {{ error.message || 'error when fetching' }}
     </v-alert>
-
-    <v-divider />
-
-    <template v-if="$scopedSlots['before']">
-      <slot name="before" />
-      <v-divider />
-    </template>
 
     <slot :items="filteredItems" />
 

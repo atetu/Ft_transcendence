@@ -1,4 +1,5 @@
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { GameSettings } from "../game/Settings";
 import ChannelMessage from "./ChannelMessage";
 import User from "./User";
 
@@ -29,11 +30,37 @@ export default class PendingGame {
   })
   message: Promise<ChannelMessage>;
 
+  @Column()
+  map: number;
+
+  @Column()
+  ballVelocity: number;
+
+  @Column()
+  paddleVelocity: number;
+
+  @Column()
+  nbGames: number;
+
   public toJSON() {
     return {
       id: this.id,
       user: this.user,
       peer: this.peer,
+      settings: this.settings,
+    };
+  }
+
+  public toRoom(): string {
+    return `pending_games${this.id}`;
+  }
+
+  get settings(): GameSettings {
+    return {
+      map: this.map,
+      ballVelocity: this.ballVelocity,
+      paddleVelocity: this.paddleVelocity,
+      nbGames: this.nbGames,
     };
   }
 }

@@ -9,6 +9,7 @@ import { Channel, User, Relationship } from '~/models'
 class SocketModule extends VuexModule {
   connectedUserIds: Array<number> = []
   playingUserIds: Array<number> = []
+  gameIds: Array<number> = []
 
   @Mutation
   SOCKET_CLIENT_CONNECTED_LIST(ids: Array<string>) {
@@ -26,6 +27,25 @@ class SocketModule extends VuexModule {
 
     if (index !== -1) {
       this.connectedUserIds.splice(index, 1)
+    }
+  }
+
+  @Mutation
+  SOCKET_GAME_STATUS_LIST(ids: Array<string>) {
+    this.gameIds = ids.map((x) => parseInt(x, 10))
+  }
+
+  @Mutation
+  SOCKET_GAME_STATUS_JOIN(id: number) {
+    this.gameIds.push(id)
+  }
+
+  @Mutation
+  SOCKET_GAME_STATUS_QUIT(id: number) {
+    const index = this.gameIds.indexOf(id)
+
+    if (index !== -1) {
+      this.gameIds.splice(index, 1)
     }
   }
 

@@ -7,18 +7,16 @@
       :filterer="filterer"
       @refresh="$fetch"
     >
+      <template #before>
+        <channel-top-link />
+      </template>
+
       <template #default="{ items }">
         <channel-list :channels="items" />
       </template>
 
       <template #append>
         <v-list>
-          <v-list-item>
-            <v-btn block color="primary" link to="/channels/discover">
-              {{ $t('channel.discover.action') }}
-              <v-icon right>mdi-flare</v-icon>
-            </v-btn>
-          </v-list-item>
           <v-list-item>
             <v-btn block color="primary" link to="/channels/create">
               {{ $t('channel.create.action') }}

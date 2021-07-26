@@ -56,14 +56,12 @@ export default class Page extends Vue {
 
   @Socket('game_starting')
   onGameStarting(data: any) {
-    console.log({ data })
-    const { player1, player2, id } = data
+    const { id } = data
     this.joined = true
-    this.$router.push({ path: `/game/${id}` })
+    this.$router.push({ path: `/games/${id}` })
   }
 
   destroyed() {
-    alert(this.joined)
     if (!this.joined) {
       this.$socket.client.emit('waiting_room_leave', {
         id: this.pendingGame.id,

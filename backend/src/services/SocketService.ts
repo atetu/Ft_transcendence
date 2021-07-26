@@ -10,7 +10,6 @@ import Relationship from "../entities/Relationship";
 import User from "../entities/User";
 import Game from "../game/Game";
 import ChannelService from "./ChannelService";
-import GameService from "./GameService";
 
 export type Callback = (err: Error, answer: any) => void;
 
@@ -18,6 +17,9 @@ export enum ClientEvent {
   CONNECTED_JOIN = "client_connected_join",
   CONNECTED_QUIT = "client_connected_quit",
   CONNECTED_LIST = "client_connected_list",
+  PLAYING_JOIN = "client_playing_join",
+  PLAYING_QUIT = "client_playing_quit",
+  PLAYING_LIST = "client_playing_list",
 }
 
 export enum ChannelEvent {
@@ -26,6 +28,7 @@ export enum ChannelEvent {
   UPDATE = "channel_update",
   DELETE = "channel_delete",
   MESSAGE = "channel_message",
+  EDIT_MESSAGE = "edit_message",
   MESSAGE_DELETE = "channel_message_delete",
   MESSAGE_DELETE_ALL = "channel_message_delete_all",
   USER_JOIN = "channel_user_join",
@@ -69,9 +72,65 @@ export type Event =
   | UserEvent
   | AchievementEvent;
 
+class SessionCounter {
+  sessions: { [key: number]: number } = {};
+
+  constructor(
+    private readonly io: socketio.Server,
+    private readonly joinEvent: ClientEvent,
+    private readonly quitEvent: ClientEvent,
+    private readonly listEvent: ClientEvent,
+    private readonly preventSelf: boolean = false
+  ) {}
+
+  onJoin(socket: Socket) {
+    const { user } = socket.data as { user: User };
+    const { id } = user;
+
+    if (this.sessions[id]) {
+      this.sessions[id] += 1;
+    } else {
+      socket.broadcast.emit(this.joinEvent, id);
+
+      this.sessions[id] = 1;
+    }
+
+    this.emitSessons(socket);
+  }
+
+  onQuit(socket: Socket) {
+    const user: User = socket.data.user;
+    const { id } = user;
+
+    if (this.sessions[id]) {
+      const now = (this.sessions[id] -= 1);
+
+      if (now === 0) {
+        if (this.preventSelf) {
+          this.io.emit(this.quitEvent, id);
+        } else {
+          socket.broadcast.emit(this.quitEvent, id);
+        }
+
+        delete this.sessions[id];
+      }
+    }
+  }
+
+  emitSessons(socket: Socket) {
+    socket.emit(this.listEvent, this.connectedIds);
+  }
+
+  get connectedIds() {
+    return Object.keys(this.sessions);
+  }
+}
+
 @Service()
 export default class SocketService {
-  private gameService = Container.get(GameService);
+  private get gameService(): any {
+    return Container.get(require("./GameService").default);
+  }
   private get matchMakingService(): any {
     return Container.get(require("./MatchMakingService").default);
   }
@@ -81,41 +140,45 @@ export default class SocketService {
     return Container.get(socketio.Server);
   }
 
-  connectedUserSessionCounts: { [key: number]: number } = {};
+  private _connectedUsers?: SessionCounter;
+  get connectedUsers(): SessionCounter {
+    if (!this._connectedUsers) {
+      this._connectedUsers = new SessionCounter(
+        this.io,
+        ClientEvent.CONNECTED_JOIN,
+        ClientEvent.CONNECTED_QUIT,
+        ClientEvent.CONNECTED_LIST
+      );
+    }
 
-  get connectedUserIds() {
-    return Object.keys(this.connectedUserSessionCounts);
+    return this._connectedUsers;
+  }
+
+  private _playingUsers?: SessionCounter;
+  get playingUsers(): SessionCounter {
+    if (!this._playingUsers) {
+      this._playingUsers = new SessionCounter(
+        this.io,
+        ClientEvent.PLAYING_JOIN,
+        ClientEvent.PLAYING_QUIT,
+        ClientEvent.PLAYING_LIST,
+        true
+      );
+    }
+
+    return this._playingUsers;
   }
 
   onConnect(socket: Socket) {
-    const { user } = socket.data as { user: User };
-    const { id } = user;
+    this.connectedUsers.onJoin(socket);
+    this.playingUsers.emitSessons(socket);
 
-    if (this.connectedUserSessionCounts[id]) {
-      this.connectedUserSessionCounts[id] += 1;
-    } else {
-      socket.broadcast.emit(ClientEvent.CONNECTED_JOIN, id);
-
-      this.connectedUserSessionCounts[id] = 1;
-    }
-
-    socket.emit(ClientEvent.CONNECTED_LIST, this.connectedUserIds);
-
+    const user: User = socket.data.user;
     socket.join(user.toRoom());
   }
 
   onDisconnect(socket: any) {
-    const { id } = socket.data.user;
-
-    if (this.connectedUserSessionCounts[id]) {
-      const now = (this.connectedUserSessionCounts[id] -= 1);
-
-      if (now === 0) {
-        socket.broadcast.emit(ClientEvent.CONNECTED_QUIT, id);
-
-        delete this.connectedUserSessionCounts[id];
-      }
-    }
+    this.connectedUsers.onQuit(socket);
 
     this.matchMakingService.remove(socket);
   }
@@ -172,6 +235,12 @@ export default class SocketService {
     const channel = message.channel;
 
     this.broadcastToChannel(channel, ChannelEvent.MESSAGE, message);
+  }
+
+  public broadcastChannelEditMessage(message: ChannelMessage) {
+    const channel = message.channel;
+
+    this.broadcastToChannel(channel, ChannelEvent.EDIT_MESSAGE, message);
   }
 
   public broadcastChannelMessageDelete(message: ChannelMessage) {
@@ -271,7 +340,8 @@ export default class SocketService {
           throw new Error(`no pending game found for id = '${id}'`);
         }
       }
-
+      // if (gameService.findByUser(socket.data.user) || this.matchMakingService.contains(socket))
+      //    callback(error, null)
       const game: Game | null = this.matchMakingService.add(
         socket,
         pendingGame
@@ -279,7 +349,6 @@ export default class SocketService {
 
       callback(null, 1);
     } catch (error) {
-      console.log(error);
       callback(error, null);
     }
   }
@@ -296,6 +365,12 @@ export default class SocketService {
   }
 
   async askGameConnect(socket: Socket, body: any, callback: Callback) {
+    const { currentGameRoom } = socket.data;
+    if (currentGameRoom !== undefined) {
+      socket.leave(currentGameRoom);
+      delete socket.data.currentGameRoom;
+    }
+
     try {
       this.ensureBody(body);
 
@@ -307,10 +382,12 @@ export default class SocketService {
         throw new Error("game not found");
       }
 
-      callback(null, {
-        player1: game.player1,
-        player2: game.player2,
-      });
+      const newGameRoom = game.toRoom();
+
+      socket.join(newGameRoom);
+      socket.data.currentGameRoom = newGameRoom;
+
+      callback(null, game.toJSON());
     } catch (error) {
       callback(error, null);
     }
@@ -356,28 +433,50 @@ export default class SocketService {
     }
   }
 
+  gameDisconnect(socket) {
+    console.log("DISCONNECT");
+    const io = Container.get(socketio.Server);
+    const { game, ret } = this.gameService.gameDisconnect(socket.data.user);
+    // console.log('game restart : ' + game)
+    // if (game !== false)
+    // {
+    //   io.to(game.toRoom()).emit('game_disconnect', { gameId: game.id })
+    //   game.restart()
+    //   console.log('starting....')
+    // }
+    console.log("game exit");
+    console.log("RET: " + ret);
+    if (game && !ret) {
+      console.log("game exit");
+      io.to(game.toRoom()).emit("game_exit", { gameId: game.id });
+    }
+    // if (game && ret)
+    // {
+    //   console.log('game exit BOTH')
+    //   io.emit("client_playing_quit", game.player1.id);
+    //   io.emit("client_playing_quit", game.player2.id);
+    // }
+  }
+
   async matchMaking(socket: Socket) {
     const io = Container.get(socketio.Server);
     console.log("matchMaking");
     const game: Game = this.matchMakingService.addSocket(socket);
     console.log("game : " + game);
     if (game != undefined) {
-      io.to(game.toRoom()).emit("game_starting", {
-        player1: game.player1.id,
-        player2: game.player2.id,
-        gameId: game.id,
-      });
+      io.to(game.toRoom()).emit("game_starting", game.toJSON());
       game.start();
       console.log("starting....");
     }
   }
 
   public broadcastGameStarting(game: Game) {
-    this.broadcastToGame(game, GameEvent.STARTING, {
-      id: game.id,
-      player1: game.player2,
-      player2: game.player2,
-    });
+    this.broadcastToGame(game, GameEvent.STARTING, game.toJSON());
+
+    const io = Container.get(socketio.Server);
+    for (const user of game.users) {
+      io.emit("client_playing_join", user);
+    }
   }
 
   private broadcastToChannel(

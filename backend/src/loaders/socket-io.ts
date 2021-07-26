@@ -47,12 +47,15 @@ export default async ({ server }: { server: http.Server }) => {
 
     socket.on('game_restart', (body) => {
       socketService.gameRestart(socket, body)
-    })
+    });
 
     socket.on('waiting_room', () => {
-      console.log('first step')
       socketService.matchMaking(socket)
-    })
+    });
+
+    socket.on('game_disconnect', () => {
+      socketService.gameDisconnect(socket)
+    });
     
     socket.on(MatchMakingEvent.WAITING_ROOM_LEAVE, (body) => {
       socketService.askMatchMakingLeave(socket, body);

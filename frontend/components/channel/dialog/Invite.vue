@@ -101,7 +101,7 @@ export default class ComponentImpl extends Vue {
         this.items = response.filter((x) => !already.includes(x.id))
       })
       .catch((error) => {
-        console.log(error) // TODO
+        this.$dialog.notify.error(`Could not search: ${error}`)
       })
       .then(() => this.queryLoading--)
   }
@@ -112,7 +112,16 @@ export default class ComponentImpl extends Vue {
       this.error = null
 
       try {
-        await API.ChannelUsers.create(this.channel, this.select as number)
+        const channelUser = await API.ChannelUsers.create(
+          this.channel,
+          this.select as number
+        )
+
+        this.$dialog.notify.success(
+          `Successfully invited ${channelUser.username} to the channel`
+        )
+
+        this.select = null
 
         this.$emit('invited')
       } catch (error) {

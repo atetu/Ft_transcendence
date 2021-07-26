@@ -14,4 +14,8 @@ export class DirectMessageRepository extends Repository<DirectMessage> {
   async findAllByUser(user: User): Promise<Array<DirectMessage>> {
     return await this.find({ user });
   }
+
+  async findByChannel(channel: Channel): Promise<DirectMessage> {
+    return await this.findOne({ channel });
+  }
 }
