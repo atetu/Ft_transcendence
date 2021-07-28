@@ -6,10 +6,9 @@
           ft_transcendence
         </p>
         <v-img
-          lazy-src="https://media.giphy.com/media/4D7oYYeaW6pZC/giphy.gif"
           max-height="600"
           max-width="1000"
-          src="https://media.giphy.com/media/4D7oYYeaW6pZC/giphy.gif"
+          :src="require('@/assets/intro.gif')"
           class="mt-12 mb-6"
         ></v-img>
         <div class="text-center">
