@@ -52,6 +52,14 @@ class RelationshipsModule extends VuexModule {
     return this.blocked.map((x) => x.peer.id)
   }
 
+  get friends(): Array<Relationship> {
+    return this.list.filter((x) => x.type === RelationshipType.FRIEND)
+  }
+
+  get friendPeerIds(): Array<number> {
+    return this.friends.map((x) => x.peer.id)
+  }
+
   @Action({ commit: 'set', rawError: true })
   async fetchAll() {
     const relationships: Relationship[] = await $axios.$get(
