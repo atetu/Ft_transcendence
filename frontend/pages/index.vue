@@ -1,5 +1,5 @@
 <template>
-  <v-main class="fill-height">
+  <v-main class="fill-height" style="overflow: scroll">
     <v-row justify="center" align="center">
       <v-col justify="center" align="center">
         <p class="text-center ma-10" style="font-size: 40px">
