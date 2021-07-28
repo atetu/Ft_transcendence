@@ -9,6 +9,9 @@
         <icon-tooltip v-if="user.admin" icon-right top text="Administrator">
           mdi-account-supervisor
         </icon-tooltip>
+        <icon-tooltip v-if="friend" icon-right top text="Friend">
+          mdi-account-heart
+        </icon-tooltip>
         <icon-tooltip v-if="playing" icon-right top text="Playing">
           mdi-controller-classic
         </icon-tooltip>
@@ -43,6 +46,10 @@ export default class Item extends Vue {
 
   get blocked(): boolean {
     return relationshipsStore.blockedPeerIds.includes(this.user.id)
+  }
+
+  get friend(): boolean {
+    return relationshipsStore.friendPeerIds.includes(this.user.id)
   }
 }
 </script>
