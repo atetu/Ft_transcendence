@@ -6,6 +6,10 @@
     @click="$fetch()"
   />
   <div v-else class="fill-height" style="overflow: auto">
+    <v-toolbar v-if="smallScreen">
+      <drawer-menu />
+    </v-toolbar>
+
     <v-tabs v-model="tab" fixed-tabs>
       <v-tab v-for="{ category, icon } in tabs" :key="category">
         <v-icon left>mdi-{{ icon }}</v-icon>
@@ -27,7 +31,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { Relationship, RelationshipType } from '~/models'
-import { relationshipsStore, socketStore } from '~/store'
+import { relationshipsStore, socketStore, uiStore } from '~/store'
 
 @Component
 export default class Page extends Vue {
@@ -61,6 +65,10 @@ export default class Page extends Vue {
     return {
       title: 'Relationships',
     }
+  }
+
+  get smallScreen() {
+    return uiStore.smallScreen
   }
 
   get friends() {

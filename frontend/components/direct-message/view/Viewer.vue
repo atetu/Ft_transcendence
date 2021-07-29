@@ -17,12 +17,18 @@
         without-message-button
       >
         <template #activator="{ on, attrs }">
-          <v-list-item rounded shaped v-bind="attrs" v-on="on">
+          <v-list-item
+            rounded
+            shaped
+            style="display: inline-block"
+            v-bind="attrs"
+            v-on="on"
+          >
             <v-list-item-avatar>
               <user-avatar :user="peer" :size="40" />
             </v-list-item-avatar>
 
-            <v-list-item-title>
+            <v-list-item-title style="display: inline">
               {{ title }}
             </v-list-item-title>
           </v-list-item>

@@ -12,6 +12,12 @@ class UIModule extends VuexModule {
   setDrawer(value: boolean) {
     this.drawer = value
   }
+
+  get smallScreen() {
+    return ['xs', 'sm', 'md'].includes(
+      window.$nuxt.$root.$vuetify.breakpoint.name
+    )
+  }
 }
 
 export default UIModule

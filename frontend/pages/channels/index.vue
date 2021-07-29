@@ -13,7 +13,10 @@
   />
   <div v-else class="pa-4 fill-height" style="overflow-y: scroll">
     <v-app-bar app clipped-right>
-      <v-toolbar-title> {{ $t('channel.discover._') }} </v-toolbar-title>
+      <v-toolbar-title>
+        <drawer-menu />
+        {{ $t('channel.discover._') }}
+      </v-toolbar-title>
     </v-app-bar>
 
     <v-row v-if="notAddedChannels.length">

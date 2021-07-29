@@ -2,7 +2,14 @@
   <v-app dark :class="classes">
     <system-bar />
 
-    <v-navigation-drawer v-model="drawer" app fixed mini-variant stateless>
+    <v-navigation-drawer
+      :value="true"
+      app
+      fixed
+      mini-variant
+      stateless
+      touchless
+    >
       <navigation-profile-dot />
 
       <v-divider class="mx-3 my-5" />
@@ -79,21 +86,13 @@ export default class Default extends Vue {
     },
   ]
 
-  get drawer(): boolean {
-    return uiStore.drawer
-  }
-
-  set drawer(value: boolean) {
-    uiStore.setDrawer(value)
-  }
-
   get classes(): object {
     const isDark = this.$vuetify.theme.dark
 
     return {
       dark: isDark,
       light: !isDark,
-      'mini-drawer-open': this.drawer,
+      'mini-drawer-open': uiStore.drawer,
     }
   }
 

@@ -4,9 +4,12 @@
   <div v-else class="fill-height">
     <v-app-bar app clipped-right>
       <v-toolbar-title>
-        <slot name="title">
-          {{ title }}
-        </slot>
+        <drawer-menu />
+        <div style="display: inline-block">
+          <slot name="title">
+            {{ title }}
+          </slot>
+        </div>
       </v-toolbar-title>
       <template v-if="$scopedSlots['toolbar-right']">
         <v-spacer />

@@ -1,12 +1,10 @@
 <template>
   <v-navigation-drawer
-    :value="drawer"
+    v-model="drawer"
     width="300"
     class="mini-drawer-offset"
     fixed
     app
-    stateless
-    touchless
   >
     <template #prepend>
       <slot name="prepend" />
@@ -28,6 +26,10 @@ import { uiStore } from '~/store'
 export default class Left extends Vue {
   get drawer(): boolean {
     return uiStore.drawer
+  }
+
+  set drawer(val: boolean) {
+    uiStore.setDrawer(val)
   }
 }
 </script>
