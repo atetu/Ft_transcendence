@@ -123,6 +123,8 @@ export default class Page extends Vue {
   countdown: number = 3
   state = State.WAITING
 
+  stateReceived = 0
+
   keys = {
     up: false,
     down: false,
@@ -277,8 +279,11 @@ export default class Page extends Vue {
 
     this.player = player
 
-    this.paddle[Side.LEFT].y = paddle[Side.LEFT].y
-    this.paddle[Side.RIGHT].y = paddle[Side.RIGHT].y
+    if (++this.stateReceived % 50) {
+      this.paddle[this.side].y = paddle[this.side].y
+    }
+
+    this.paddle[this.otherSide].y = paddle[this.otherSide].y
 
     this.countdown = countdown
 
@@ -393,6 +398,10 @@ export default class Page extends Vue {
 
   get myPaddle(): Paddle {
     return this.paddle[this.side]
+  }
+
+  get otherSide(): Side {
+    return this.side === Side.LEFT ? Side.RIGHT : Side.LEFT
   }
 
   get inputEnabled(): boolean {
