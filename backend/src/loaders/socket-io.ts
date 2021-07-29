@@ -23,6 +23,7 @@ export default async ({ server }: { server: http.Server }) => {
 
     socket.on("disconnect", () => {
       socketService.onDisconnect(socket);
+      socketService.askMatchMakingLeave(socket);
       socketService.askGameDisconnect(socket);
     });
 
@@ -50,8 +51,8 @@ export default async ({ server }: { server: http.Server }) => {
       socketService.askMatchMakingJoin(socket, body, callback);
     });
 
-    socket.on(MatchMakingEvent.WAITING_ROOM_LEAVE, (body) => {
-      socketService.askMatchMakingLeave(socket, body);
+    socket.on(MatchMakingEvent.WAITING_ROOM_LEAVE, () => {
+      socketService.askMatchMakingLeave(socket);
     });
   });
 };

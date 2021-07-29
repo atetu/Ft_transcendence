@@ -8,6 +8,23 @@ import cronLoader from "./cron";
 import { Container } from "typeorm-typedi-extensions";
 import AvatarService from "../services/AvatarService";
 
+function makeErrorJSONCompatible() {
+  if (!("toJSON" in Error.prototype))
+    Object.defineProperty(Error.prototype, "toJSON", {
+      value: function () {
+        var alt = {};
+
+        Object.getOwnPropertyNames(this).forEach(function (key) {
+          alt[key] = this[key];
+        }, this);
+
+        return alt;
+      },
+      configurable: true,
+      writable: true,
+    });
+}
+
 export default async ({
   app,
   server,
@@ -15,6 +32,8 @@ export default async ({
   app: express.Application;
   server: http.Server;
 }) => {
+  makeErrorJSONCompatible();
+
   await ormLoader();
   await expressLoader({ app });
   await socketioLoader({ server });

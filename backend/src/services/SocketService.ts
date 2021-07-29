@@ -348,12 +348,8 @@ export default class SocketService {
           throw new Error(`no pending game found for id = '${id}'`);
         }
       }
-      // if (gameService.findByUser(socket.data.user) || this.matchMakingService.contains(socket))
-      //    callback(error, null)
-      const game: Game | null = this.matchMakingService.add(
-        socket,
-        pendingGame
-      );
+
+      await this.matchMakingService.add(socket, pendingGame);
 
       callback(null, 1);
     } catch (error) {
@@ -361,12 +357,9 @@ export default class SocketService {
     }
   }
 
-  async askMatchMakingLeave(socket: Socket, body: { id: number }) {
+  async askMatchMakingLeave(socket: Socket) {
     try {
-      this.ensureBody(body);
-      const { id } = body;
-
-      this.matchMakingService.remove(socket, id);
+      this.matchMakingService.remove(socket);
     } catch (error) {
       console.log(error);
     }
@@ -401,7 +394,7 @@ export default class SocketService {
 
   async askGameDisconnect(socket: Socket, toReconnect = false) {
     const { currentGameRoom } = socket.data;
-    
+
     if (currentGameRoom !== undefined) {
       socket.leave(currentGameRoom);
       delete socket.data.currentGameRoom;

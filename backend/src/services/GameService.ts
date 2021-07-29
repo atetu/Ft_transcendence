@@ -1,7 +1,5 @@
-import * as socketio from "socket.io";
 import { Socket } from "socket.io";
-import Container, { Inject, Service } from "typedi";
-import { isUndefined } from "util";
+import { Inject, Service } from "typedi";
 import PendingGame from "../entities/PendingGame";
 import User from "../entities/User";
 import Game from "../game/Game";
@@ -30,6 +28,8 @@ export default class GameService {
     this.save(game);
 
     game.start();
+
+    this.socketService.broadcastGameStarting(game);
 
     return game;
   }
