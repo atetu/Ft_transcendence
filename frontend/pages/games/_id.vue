@@ -417,7 +417,7 @@ export default class Page extends Vue {
   }
 
   get maxRound() {
-    return this.settings?.nbGames
+    return this.settings?.pointToWin
   }
 }
 </script>

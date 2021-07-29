@@ -30,7 +30,7 @@
             </v-col>
             <v-col cols="12" sm="6">
               <v-select
-                v-model="inputs.nbGames"
+                v-model="inputs.pointToWin"
                 :items="[3, 5, 7, 9, 12]"
                 label="Point to win"
                 required
@@ -121,7 +121,7 @@ export default class Viewer extends Vue {
     map: 1,
     ballVelocity: 1.5,
     paddleVelocity: 2,
-    nbGames: 3, // TODO Rename
+    pointToWin: 3,
   }
 
   maps: Array<Map> = []

@@ -27,7 +27,7 @@ export interface Settings {
   map: number
   ballVelocity: number
   paddleVelocity: number
-  nbGames: number
+  pointToWin: number
 }
 
 export interface Game {
