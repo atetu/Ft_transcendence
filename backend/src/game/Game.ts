@@ -1,7 +1,5 @@
 import * as socketio from "socket.io";
 import { Container } from "typedi";
-import Channel from "../entities/Channel";
-import ChannelMessage from "../entities/ChannelMessage";
 import Match from "../entities/Match";
 import PendingGame from "../entities/PendingGame";
 import User from "../entities/User";
@@ -21,10 +19,6 @@ import { Player } from "./Player";
 import { defaults as defaultsGameSettings, GameSettings } from "./Settings";
 import { CollisionResult, Rectangle } from "./Shape";
 import { World } from "./World";
-
-function getRandomArbitrary(min: number, max: number) {
-  return Math.random() * (max - min) + min;
-}
 
 function sleep(ms: number) {
   return new Promise((resolve) => {
@@ -96,7 +90,7 @@ export default class Game {
 
   repositionBall() {
     this.ball.x = WIDTH / 2;
-    this.ball.y = getRandomArbitrary(250, 350);
+    this.ball.y = HEIGHT / 2;
   }
 
   restart() {
@@ -194,9 +188,13 @@ export default class Game {
     match.winner = winner.user;
     await this.matchService.save(match);
 
-    console.log(match, this.pendingGame)
+    console.log(match, this.pendingGame);
     if (match.id && this.pendingGame) {
-      const message = await this.channelMessageService.findById((await this.pendingGame.message)?.id);
+      const message = await this.channelMessageService.findById(
+        (
+          await this.pendingGame.message
+        )?.id
+      );
 
       if (message) {
         const channel = await message.channel;
@@ -207,7 +205,7 @@ export default class Game {
           state: "played",
           matchId: match.id,
         });
-  
+
         await this.channelMessageService.edit(message);
       }
     }
