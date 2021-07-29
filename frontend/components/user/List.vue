@@ -14,7 +14,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { User } from '~/models'
-import { relationshipsStore } from '~/store'
+import { relationshipsStore, socketStore } from '~/store'
 
 @Component
 export default class List extends Vue {
@@ -42,6 +42,7 @@ export default class List extends Vue {
 
   get withHidden() {
     const { blockedPeerIds } = relationshipsStore
+    const { connectedUserIds } = socketStore
 
     let list = this.filtered
 
@@ -53,7 +54,12 @@ export default class List extends Vue {
       list = list.filter((x) => !x.banned)
     }
 
-    return list
+    return list.sort(({ id: a }, { id: b }) => {
+      const first = +connectedUserIds.includes(a)
+      const second = +connectedUserIds.includes(b)
+
+      return second - first
+    })
   }
 
   get hiddenCount() {
