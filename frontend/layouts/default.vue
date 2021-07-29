@@ -2,7 +2,7 @@
   <v-app dark :class="classes">
     <system-bar />
 
-    <v-navigation-drawer v-model="drawer" app fixed mini-variant>
+    <v-navigation-drawer v-model="drawer" app fixed mini-variant stateless>
       <navigation-profile-dot />
 
       <v-divider class="mx-3 my-5" />
