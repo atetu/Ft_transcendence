@@ -188,7 +188,6 @@ export default class Game {
     match.winner = winner.user;
     await this.matchService.save(match);
 
-    console.log(match, this.pendingGame);
     if (match.id && this.pendingGame) {
       const message = await this.channelMessageService.findById(
         (
