@@ -1,5 +1,5 @@
 <template>
-  <drawer-right>
+  <drawer-right v-model="drawerState">
     <channel-user-list :channel="channel" :users="users" />
     <template #append>
       <v-list>
@@ -62,6 +62,9 @@ import { Channel, ChannelUser, ChannelVisibility } from '~/models'
 
 @Component
 export default class Index extends Vue {
+  @Prop({ type: Boolean, default: true })
+  value!: boolean
+
   @Prop({ type: Object })
   channel!: Channel
 
@@ -82,6 +85,14 @@ export default class Index extends Vue {
 
   @Prop({ type: Boolean, default: false })
   loading!: boolean
+
+  get drawerState(): boolean {
+    return this.value
+  }
+
+  set drawerState(val) {
+    this.$emit('input', val)
+  }
 
   public get toSettings() {
     const id = this.channel?.id

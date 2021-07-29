@@ -16,6 +16,12 @@
     @update="onUserUpdate"
     @transfer="onOwnerTransfer"
   >
+    <template slot="toolbar-right">
+      <v-btn v-model="rightDrawer" icon @click="rightDrawer = !rightDrawer">
+        <v-icon>mdi-account-group</v-icon>
+      </v-btn>
+    </template>
+
     <template slot="input">
       <channel-message-input
         v-if="hasJoined || isSiteAdmin"
@@ -25,6 +31,7 @@
     </template>
 
     <channel-drawer-right
+      v-model="rightDrawer"
       :channel="channel"
       :users="users"
       :has-joined="hasJoined"
@@ -53,6 +60,8 @@ export default class Viewer extends Vue {
   channel: Channel | null = null
   users: Array<ChannelUser> = []
   messages: Array<ChannelMessage> = []
+
+  rightDrawer = true
 
   loadingMessage = ''
 

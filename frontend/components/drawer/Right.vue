@@ -1,6 +1,6 @@
 <template>
   <v-navigation-drawer
-    v-model="rightDrawer"
+    v-model="state"
     app
     clipped
     fixed
@@ -16,11 +16,19 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
-export default Vue.extend({
-  data: () => ({
-    rightDrawer: true,
-  }),
-})
+@Component
+export default class Right extends Vue {
+  @Prop({ type: Boolean, default: true })
+  value!: boolean
+
+  get state(): boolean {
+    return this.value
+  }
+
+  set state(val) {
+    this.$emit('input', val)
+  }
+}
 </script>
