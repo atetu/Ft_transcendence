@@ -27,7 +27,13 @@ const plugin: Plugin = ({ $axios, store, redirect }) => {
           return Promise.reject(error)
         }
 
-        if (error?.response?.data?.message === 'invalid token') {
+        const message = error?.response?.data?.message
+
+        if (
+          message === 'invalid token' ||
+          message === 'inactive token' ||
+          message === 'expired token'
+        ) {
           redirect('/auth')
           return Promise.reject(error)
         }
