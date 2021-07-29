@@ -13,9 +13,14 @@ export default (app: express.Router) => {
 
   route.get("/", async (req, res, next) => {
     const user: User = res.locals.user;
-    const statistics = await userStatisticsService.getByUser(user);
 
-    res.status(200).send(statistics);
+    try {
+      const statistics = await userStatisticsService.getByUser(user);
+
+      res.status(200).send(statistics);
+    } catch (error) {
+      next(error);
+    }
   });
 
   return route;

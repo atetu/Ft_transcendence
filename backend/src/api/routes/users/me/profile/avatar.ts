@@ -2,7 +2,6 @@ import * as express from "express";
 import * as fileUpload from "express-fileupload";
 import Container from "typedi";
 import User from "../../../../../entities/User";
-import AvatarService from "../../../../../services/AvatarService";
 import UserService from "../../../../../services/UserService";
 
 export default (app: express.Router) => {
@@ -20,11 +19,11 @@ export default (app: express.Router) => {
 
       try {
         if (!req.files || !req.files.image) {
-          throw new Error("Missing `image` file");
+          throw new Error("missing `image` file");
         }
-        
+
         if (Array.isArray(req.files.image)) {
-          throw new Error("Multiple `image` file");
+          throw new Error("multiple `image` file");
         }
 
         const image: fileUpload.UploadedFile = req.files.image;

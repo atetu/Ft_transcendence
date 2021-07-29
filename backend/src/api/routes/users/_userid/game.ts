@@ -1,11 +1,8 @@
-import * as celebrate from "celebrate";
 import * as express from "express";
 import Container from "typedi";
 import User from "../../../../entities/User";
 import GameService from "../../../../services/GameService";
-import UserService from "../../../../services/UserService";
 import helpers from "../../../helpers";
-import achievements from "./achievements";
 
 export default (app: express.Router) => {
   const gameService = Container.get(GameService);

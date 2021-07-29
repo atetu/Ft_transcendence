@@ -40,7 +40,7 @@ export default (app: express.Router) => {
         map: number;
         ballVelocity: number;
         paddleVelocity: number;
-        nbGames: number;
+        nbGames: number; // TODO rename
       };
       
       try {

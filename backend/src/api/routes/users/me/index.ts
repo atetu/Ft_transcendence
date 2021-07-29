@@ -12,7 +12,11 @@ export default (app: express.Router) => {
   app.use("/@me", middlewares.authorize(false), route);
 
   route.get("/", (req, res, next) => {
-    res.status(200).send(req.user);
+    try {
+      res.status(200).send(req.user);
+    } catch (error) {
+      next(error);
+    }
   });
 
   achievements(route);

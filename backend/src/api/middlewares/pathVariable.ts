@@ -4,7 +4,12 @@ import helpers from "../helpers";
 
 export function pathVariable(
   variableName: string,
-  handler: (variable: number, req: Request, res: Response, next: NextFunction) => any
+  handler: (
+    variable: number,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => any
 ) {
   return [
     celebrate.celebrate({
@@ -13,9 +18,13 @@ export function pathVariable(
       },
     }),
     async (req: Request, res: Response, next: NextFunction) => {
-      const variable = Number(req.params[variableName]);
+      try {
+        const variable = Number(req.params[variableName]);
 
-      await handler(variable, req, res, next);
+        await handler(variable, req, res, next);
+      } catch (error) {
+        next(error);
+      }
     },
   ];
 }

@@ -46,7 +46,11 @@ export default (app: express.Router) => {
   route.get("/", middlewares.authorize(false), async (req, res, next) => {
     const user: User = res.locals.user;
 
-    res.status(200).send(user.toJSON());
+    try {
+      res.status(200).send(user.toJSON());
+    } catch (error) {
+      next(error);
+    }
   });
 
   route.post(
@@ -62,11 +66,15 @@ export default (app: express.Router) => {
 
       const { banned }: { banned?: boolean } = req.body;
 
-      if (banned !== undefined) {
-        await userService.setBanned(user, banned);
-      }
+      try {
+        if (banned !== undefined) {
+          await userService.setBanned(user, banned);
+        }
 
-      res.status(200).send(user.toJSON());
+        res.status(200).send(user.toJSON());
+      } catch (error) {
+        next(error);
+      }
     }
   );
 

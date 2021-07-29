@@ -17,9 +17,14 @@ export default (app: express.Router) => {
 
   route.get("/", async (req, res, next) => {
     const channel: Channel = res.locals.channel;
-    const messages = await channelMessageService.allByChannel(channel);
 
-    res.status(200).send(messages);
+    try {
+      const messages = await channelMessageService.allByChannel(channel);
+
+      res.status(200).send(messages);
+    } catch (error) {
+      next(error);
+    }
   });
 
   route.post(

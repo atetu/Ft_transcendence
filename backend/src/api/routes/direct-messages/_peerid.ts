@@ -24,9 +24,13 @@ export default (app: express.Router) => {
     const user: User = req.user as any;
     const peer: User = res.locals.peer;
 
-    const directMessage = await directMessageService.getOrCreate(user, peer);
+    try {
+      const directMessage = await directMessageService.getOrCreate(user, peer);
 
-    res.status(200).send(directMessage);
+      res.status(200).send(directMessage);
+    } catch (error) {
+      next(error);
+    }
   });
 
   return route;

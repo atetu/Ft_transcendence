@@ -68,7 +68,11 @@ export default (app: express.Router) => {
   route.get("/", async (req, res, next) => {
     const channel: Channel = res.locals.channel;
 
-    res.status(200).send(channel.toJSON());
+    try {
+      res.status(200).send(channel.toJSON());
+    } catch (error) {
+      next(error);
+    }
   });
 
   route.post(

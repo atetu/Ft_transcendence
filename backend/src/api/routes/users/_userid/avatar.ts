@@ -1,10 +1,7 @@
-import * as celebrate from "celebrate";
 import * as express from "express";
 import Container from "typedi";
 import User from "../../../../entities/User";
 import AvatarService from "../../../../services/AvatarService";
-import UserService from "../../../../services/UserService";
-import achievements from "./achievements";
 
 export default (app: express.Router) => {
   const avatarService = Container.get(AvatarService);
@@ -16,13 +13,17 @@ export default (app: express.Router) => {
   route.get("/", async (req, res, next) => {
     const user: User = res.locals.user;
 
-    res.sendFile(avatarService.getDestination(user.picture), {
-      root: ".",
-      headers: {
-        "Cache-Control": "max-age=3600",
-        "Content-Type": "image/png",
+    res.sendFile(
+      avatarService.getDestination(user.picture),
+      {
+        root: ".",
+        headers: {
+          "Cache-Control": "max-age=3600",
+          "Content-Type": "image/png",
+        },
       },
-    });
+      (error) => next(error)
+    );
   });
 
   return route;

@@ -1,4 +1,3 @@
-import * as celebrate from "celebrate";
 import * as express from "express";
 import Container from "typedi";
 import Achievement from "../../../entities/Achievement";
@@ -21,7 +20,11 @@ export default (app: express.Router) => {
   route.get("/", async (req, res, next) => {
     const achievement: Achievement = res.locals.achievement;
 
-    res.status(200).send(achievement);
+    try {
+      res.status(200).send(achievement);
+    } catch (error) {
+      next(error);
+    }
   });
 
   return route;

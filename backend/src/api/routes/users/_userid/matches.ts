@@ -13,9 +13,14 @@ export default (app: express.Router) => {
 
   route.get("/", async (req, res, next) => {
     const user: User = res.locals.user;
-    const matches = await matchService.findAllByUser(user);
 
-    res.status(200).send(matches);
+    try {
+      const matches = await matchService.findAllByUser(user);
+
+      res.status(200).send(matches);
+    } catch (error) {
+      next(error);
+    }
   });
 
   return route;

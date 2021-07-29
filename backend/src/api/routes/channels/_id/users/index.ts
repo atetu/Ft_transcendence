@@ -37,25 +37,30 @@ export default (app: express.Router) => {
       const userId: number = req.body.userId;
 
       const channel: Channel = res.locals.channel;
-      const user: User = await userService.findById(userId);
 
-      if (!user) {
-        helpers.notFound("user not found");
+      try {
+        const user: User = await userService.findById(userId);
+
+        if (!user) {
+          helpers.notFound("user not found");
+        }
+
+        let channelUser: ChannelUser =
+          await channelUserService.findByChannelAndUser(channel, user);
+
+        if (!channelUser) {
+          channelUser = await channelUserService.create(
+            channel,
+            user,
+            false,
+            currentUser
+          );
+        }
+
+        res.status(200).send(channelUser);
+      } catch (error) {
+        next(error);
       }
-
-      let channelUser: ChannelUser =
-        await channelUserService.findByChannelAndUser(channel, user);
-
-      if (!channelUser) {
-        channelUser = await channelUserService.create(
-          channel,
-          user,
-          false,
-          currentUser
-        );
-      }
-
-      res.status(200).send(channelUser);
     }
   );
 

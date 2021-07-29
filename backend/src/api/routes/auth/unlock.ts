@@ -30,17 +30,17 @@ export default (app: express.Router) => {
       },
     }),
     async (req, res, next) => {
-      try {
-        const {
-          token,
-          phase,
-          otp,
-        }: {
-          token: string;
-          phase: Phase;
-          otp?: string;
-        } = await req.body;
+      const {
+        token,
+        phase,
+        otp,
+      }: {
+        token: string;
+        phase: Phase;
+        otp?: string;
+      } = await req.body;
 
+      try {
         const phaseToken = await phaseTokenService.findByTokenAndPhase(
           token,
           phase

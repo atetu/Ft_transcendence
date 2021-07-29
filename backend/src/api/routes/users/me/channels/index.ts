@@ -21,9 +21,16 @@ export default (app: express.Router) => {
 
   route.get("/", async (req, res, next) => {
     const user: User = req.user as any;
-    const channels: Channel[] = await channelService.findAllWhereUserIn(user);
 
-    res.status(200).send(channels);
+    try {
+      const channels: Array<Channel> = await channelService.findAllWhereUserIn(
+        user
+      );
+
+      res.status(200).send(channels);
+    } catch (error) {
+      next(error);
+    }
   });
 
   route.post(

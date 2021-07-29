@@ -19,14 +19,18 @@ export default (app: express.Router) => {
   route.get("/", async (req, res, next) => {
     const user: User = req.user as any;
 
-    let channels: Array<Channel>;
-    if (user.admin) {
-      channels = await channelService.allNotDirect()
-    } else {
-      channels = await channelService.allNotPrivate();
-    }
+    try {
+      let channels: Array<Channel>;
+      if (user.admin) {
+        channels = await channelService.allNotDirect();
+      } else {
+        channels = await channelService.allNotPrivate();
+      }
 
-    res.status(200).send(channels);
+      res.status(200).send(channels);
+    } catch (error) {
+      next(error);
+    }
   });
 
   route.post(

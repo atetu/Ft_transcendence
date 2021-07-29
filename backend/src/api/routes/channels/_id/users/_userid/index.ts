@@ -41,7 +41,11 @@ export default (app: express.Router) => {
   route.get("/", async (req, res, next) => {
     const channelUser: ChannelUser = res.locals.channelUser;
 
-    res.status(200).send(channelUser);
+    try {
+      res.status(200).send(channelUser);
+    } catch (error) {
+      next(error);
+    }
   });
 
   route.delete("/", async (req, res, next) => {

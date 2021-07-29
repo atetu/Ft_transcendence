@@ -20,7 +20,11 @@ export default (app: express.Router) => {
   route.get("/", async (req, res, next) => {
     const match: Match = res.locals.match;
 
-    res.status(200).send(match);
+    try {
+      res.status(200).send(match);
+    } catch (error) {
+      next(error);
+    }
   });
 
   return route;

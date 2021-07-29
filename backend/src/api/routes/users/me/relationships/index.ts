@@ -20,9 +20,14 @@ export default (app: express.Router) => {
 
   route.get("/", async (req, res, next) => {
     const user: User = req.user as any;
-    const relationships = await relationshipService.all(user);
 
-    res.status(200).send(relationships);
+    try {
+      const relationships = await relationshipService.all(user);
+
+      res.status(200).send(relationships);
+    } catch (error) {
+      next(error);
+    }
   });
 
   route.post(
@@ -84,7 +89,7 @@ export default (app: express.Router) => {
             result = await relationshipService.blockUser(user, peer);
           }
         }
-        
+
         res.status(200).send(result);
       } catch (error) {
         next(error);

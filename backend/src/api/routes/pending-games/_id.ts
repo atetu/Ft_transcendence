@@ -21,7 +21,11 @@ export default (app: express.Router) => {
   route.get("/", async (req, res, next) => {
     const pendingGame: PendingGame = res.locals.pendingGame;
 
-    res.status(200).send(pendingGame);
+    try {
+      res.status(200).send(pendingGame);
+    } catch (error) {
+      next(error);
+    }
   });
 
   return route;

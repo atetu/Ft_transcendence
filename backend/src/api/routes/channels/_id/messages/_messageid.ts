@@ -11,24 +11,36 @@ export default (app: express.Router) => {
 
   app.use(
     "/:messageid",
-    middlewares.simplePathVariable("messageid", "channelMessage", async (id) => {
-      return await channelMessageService.findById(id);
-    }),
+    middlewares.simplePathVariable(
+      "messageid",
+      "channelMessage",
+      async (id) => {
+        return await channelMessageService.findById(id);
+      }
+    ),
     route
   );
 
   route.get("/", async (_req, res, next) => {
     const channelMessage: ChannelMessage = res.locals.channelMessage;
 
-    res.status(200).send(channelMessage);
+    try {
+      res.status(200).send(channelMessage);
+    } catch (error) {
+      next(error);
+    }
   });
 
   route.delete("/", async (_req, res, next) => {
     const channelMessage: ChannelMessage = res.locals.channelMessage;
 
-    await channelMessageService.delete(channelMessage)
+    try {
+      await channelMessageService.delete(channelMessage);
 
-    res.status(204).end();
+      res.status(204).end();
+    } catch (error) {
+      next(error);
+    }
   });
 
   return route;

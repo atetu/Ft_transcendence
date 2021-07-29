@@ -6,7 +6,7 @@ import ChannelService from "../../../../services/ChannelService";
 import DirectMessageService from "../../../../services/DirectMessageService";
 
 export default (app: express.Router) => {
-  const directMessageService = Container.get(DirectMessageService)
+  const directMessageService = Container.get(DirectMessageService);
 
   const route = express.Router();
 
@@ -14,9 +14,14 @@ export default (app: express.Router) => {
 
   route.get("/", async (req, res, next) => {
     const user: User = req.user as any;
-    const directMessages = await directMessageService.findAllByUser(user);
 
-    res.status(200).send(directMessages);
+    try {
+      const directMessages = await directMessageService.findAllByUser(user);
+
+      res.status(200).send(directMessages);
+    } catch (error) {
+      next(error);
+    }
   });
 
   return route;
