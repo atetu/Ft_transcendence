@@ -79,11 +79,11 @@ export default class Default extends Vue {
       icon: 'controller-classic',
       url: '/games',
     },
-    {
-      title: 'debug',
-      icon: 'developer-board',
-      url: '/debug',
-    },
+    // {
+    //   title: 'debug',
+    //   icon: 'developer-board',
+    //   url: '/debug',
+    // },
   ]
 
   get classes(): object {
