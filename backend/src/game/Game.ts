@@ -283,7 +283,7 @@ export default class Game {
 
       scorer.score++;
 
-      if (scorer.score === this.settings.nbGames) {
+      if (scorer.score === this.settings.pointToWin) {
         this.stopGame(scorer);
         return;
       }

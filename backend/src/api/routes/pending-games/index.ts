@@ -26,7 +26,7 @@ export default (app: express.Router) => {
           map: celebrate.Joi.number().valid(...Maps.pool.map((x) => x.id)).required(),
           ballVelocity: celebrate.Joi.number().required(),
           paddleVelocity: celebrate.Joi.number().required(),
-          nbGames: celebrate.Joi.number().required(),
+          pointToWin: celebrate.Joi.number().required(),
         },
       },
       {
@@ -35,12 +35,12 @@ export default (app: express.Router) => {
     ),
     async (req, res, next) => {
       const user: User = req.user as any;
-      const { peerId, map, ballVelocity, paddleVelocity, nbGames } = req.body as {
+      const { peerId, map, ballVelocity, paddleVelocity, pointToWin } = req.body as {
         peerId: number;
         map: number;
         ballVelocity: number;
         paddleVelocity: number;
-        nbGames: number; // TODO rename
+        pointToWin: number;
       };
       
       try {
@@ -50,7 +50,7 @@ export default (app: express.Router) => {
           return helpers.notFound(`peer not found`);
         }
 
-        const pendingGame = await pendingGameService.create(user, peer, map, ballVelocity, paddleVelocity, nbGames);
+        const pendingGame = await pendingGameService.create(user, peer, map, ballVelocity, paddleVelocity, pointToWin);
 
         res.status(200).send(pendingGame.toJSON());
       } catch (error) {

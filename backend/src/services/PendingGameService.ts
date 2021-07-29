@@ -35,7 +35,7 @@ export default class PendingGameService {
     map: number,
     ballVelocity: number,
     paddleVelocity: number,
-    nbGames: number
+    pointToWin: number
   ): Promise<PendingGame> {
     const pendingGame = new PendingGame();
     pendingGame.user = user;
@@ -43,7 +43,7 @@ export default class PendingGameService {
     pendingGame.map = map;
     pendingGame.ballVelocity = ballVelocity;
     pendingGame.paddleVelocity = paddleVelocity;
-    pendingGame.nbGames = nbGames;
+    pendingGame.pointToWin = pointToWin;
 
     await this.repository.save(pendingGame);
 

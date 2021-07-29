@@ -40,7 +40,7 @@ export default class PendingGame {
   paddleVelocity: number;
 
   @Column()
-  nbGames: number;
+  pointToWin: number;
 
   public toJSON() {
     return {
@@ -60,7 +60,7 @@ export default class PendingGame {
       map: this.map,
       ballVelocity: this.ballVelocity,
       paddleVelocity: this.paddleVelocity,
-      nbGames: this.nbGames,
+      pointToWin: this.pointToWin,
     };
   }
 }

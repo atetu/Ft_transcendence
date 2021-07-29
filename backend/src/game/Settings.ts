@@ -2,7 +2,7 @@ export interface GameSettings {
   map: number;
   ballVelocity: number;
   paddleVelocity: number;
-  nbGames: number;
+  pointToWin: number;
 }
 
 export function defaults(): GameSettings {
@@ -10,6 +10,6 @@ export function defaults(): GameSettings {
     map: 0,
     paddleVelocity: 3,
     ballVelocity: 3,
-    nbGames: 3,
+    pointToWin: 3,
   };
 }
