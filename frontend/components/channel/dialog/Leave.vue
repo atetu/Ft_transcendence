@@ -1,29 +1,8 @@
 <template>
-  <v-dialog v-model="dialog" max-width="600px">
-    <template #activator="{ on, attrs }">
-      <slot name="activator" :bind="attrs" :on="on" />
-    </template>
-    <v-card>
-      <v-card-title>
-        {{ $t('channel.leave.title', { name: channel.name }) }}
-        <v-spacer />
-        <button-close @click="dialog = false" />
-      </v-card-title>
-      <v-card-text>
-        <v-alert v-if="errorMessage" type="error"> {{ errorMessage }} </v-alert>
-        <v-btn
-          large
-          block
-          color="primary"
-          height="48"
-          :loading="loading"
-          @click="submit()"
-        >
-          leave
-        </v-btn>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
+  <v-btn block color="primary" @click="promptLeave">
+    {{ $t('channel.leave.button') }}
+    <v-icon right>mdi-logout-variant</v-icon>
+  </v-btn>
 </template>
 
 <script lang="ts">
@@ -37,40 +16,38 @@ export default class ComponentImpl extends Vue {
   @Prop({ type: Object })
   channel!: Channel
 
-  dialog = false
-  loading = false
-  error: any = null
+  promptLeave() {
+    this.$dialog.confirm({
+      title: this.$t('channel.leave.title', {
+        name: this.channel.name,
+      }) as string,
+      actions: [
+        {
+          key: 'yes',
+          text: 'Yes',
+          color: 'error',
+          handler: async () => {
+            try {
+              const user: User = authStore.user!
+              await API.ChannelUsers.destroy(this.channel, user)
 
-  get errorMessage() {
-    if (this.error) {
-      return (
-        this.error?.response?.data?.errors?.message ||
-        'could not leave the channel'
-      )
-    }
+              this.$emit('leaved')
 
-    return null
-  }
-
-  async submit() {
-    if (this.loading) {
-      return
-    }
-
-    this.loading = true
-    this.error = null
-
-    try {
-      const user: User = authStore.user!
-      await API.ChannelUsers.destroy(this.channel, user)
-
-      this.$emit('leaved')
-      this.dialog = false
-    } catch (error) {
-      this.error = error
-    }
-
-    this.loading = false
+              this.$dialog.notify.success('Channel leaved')
+            } catch (error) {
+              this.$dialog.notify.error(
+                error?.response?.data?.errors?.message ||
+                  'could not leave the channel'
+              )
+            }
+          },
+        },
+        {
+          key: 'cancel',
+          text: 'Cancel',
+        },
+      ],
+    })
   }
 }
 </script>

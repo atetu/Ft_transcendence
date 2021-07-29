@@ -38,14 +38,7 @@
         </v-list-item>
 
         <v-list-item v-show="hasJoined && !isOwner">
-          <channel-dialog-leave :channel="channel" @leaved="onLeaved()">
-            <template #activator="{ on, attrs }">
-              <v-btn block color="primary" v-bind="attrs" v-on="on">
-                {{ $t('channel.leave.button') }}
-                <v-icon right>mdi-logout-variant</v-icon>
-              </v-btn>
-            </template>
-          </channel-dialog-leave>
+          <channel-dialog-leave :channel="channel" @leaved="onLeaved()" />
         </v-list-item>
 
         <v-list-item v-if="isSiteAdmin && !hasJoined">
