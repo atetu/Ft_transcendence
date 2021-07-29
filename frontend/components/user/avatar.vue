@@ -49,15 +49,14 @@ export default class Avatar extends Vue {
     return socketStore.connectedUserIds.includes(this.user.id)
   }
 
-  get playing(): boolean{
-    let ret:boolean =socketStore.playingUserIds.includes(this.user.id)
-    return ret
+  get playing(): boolean {
+    return socketStore.playingUserIds.includes(this.user.id)
   }
 
   get color(): string {
     let color: string
     color = this.online ? 'green' : 'red'
-    color = this.playing? 'yellow' : color
+    color = this.playing ? 'yellow' : color
     return color
   }
 
@@ -75,7 +74,7 @@ export default class Avatar extends Vue {
       return 0
     }
 
-    return 10
+    return 4
   }
 
   get avatarSize() {
