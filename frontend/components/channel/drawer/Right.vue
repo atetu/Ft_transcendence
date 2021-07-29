@@ -87,7 +87,7 @@ export default class Index extends Vue {
     this.$emit('input', val)
   }
 
-  public get toSettings() {
+  get toSettings() {
     const id = this.channel?.id
 
     if (id === undefined) {

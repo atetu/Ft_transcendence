@@ -35,8 +35,8 @@
 </template>
 
 <script lang="ts">
+import { groupByTypes } from '@/utils/groups'
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-
 import { Channel, ChannelUser } from '~/models'
 
 @Component
@@ -45,7 +45,7 @@ export default class Drawer extends Vue {
   channel!: Channel
 
   @Prop({ type: Array })
-  users!: ChannelUser[]
+  users!: Array<ChannelUser>
 
   @Prop({ type: Boolean })
   loading!: boolean
@@ -60,37 +60,11 @@ export default class Drawer extends Vue {
   isSiteAdmin!: boolean
 
   get groups() {
-    const makeGroup = (name: string) => ({
-      name: this.$t(`channel.group.${name}`),
-      users: [] as ChannelUser[],
-      push(user: ChannelUser) {
-        this.users.push(user)
-      },
-    })
-
-    const owners = makeGroup('owner')
-    const admins = makeGroup('admin')
-    const users = makeGroup('user')
-    const banned = makeGroup('banned')
-
-    for (const user of this.users) {
-      if (user.id === this.channel.owner.id) {
-        owners.push(user)
-      } else if (user.banned) {
-        banned.push(user)
-      } else if (user.admin) {
-        admins.push(user)
-      } else {
-        users.push(user)
-      }
-    }
-
-    return {
-      owners,
-      admins,
-      users,
-      banned,
-    }
+    return groupByTypes(
+      (key) => this.$t(key) as string,
+      this.users,
+      this.channel
+    )
   }
 }
 </script>

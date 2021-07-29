@@ -9,15 +9,7 @@
         <v-list-item-content>
           <v-list-item-title v-text="user.username" />
           <v-list-item-subtitle>
-            <v-chip
-              v-if="channel.owner && user.id === channel.owner.id"
-              x-small
-            >
-              owner
-            </v-chip>
-            <v-chip v-if="user.admin" x-small>admin</v-chip>
             <v-chip v-if="user.muted" x-small>muted</v-chip>
-            <v-chip v-if="user.banned" x-small>banned</v-chip>
           </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
