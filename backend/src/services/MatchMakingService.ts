@@ -211,8 +211,6 @@ export default class MatchMakingService {
   }
 
   async add(socket: Socket, pendingGame?: PendingGame): Promise<Game> {
-    const io = Container.get(socketio.Server);
-
     const room = this.gatekeeper.add(socket, pendingGame);
 
     let sockets: [Socket, Socket];
@@ -240,20 +238,6 @@ export default class MatchMakingService {
     const game = this.gameService.start(...sockets, pendingGame);
 
     this.socketService.broadcastGameStarting(game);
-
-    // const { channel } = await this.directMessageService.getOrCreate(game.player1, game.player2);
-
-    if (pendingGame) {
-      const message: ChannelMessage = await pendingGame.message;
-      message.content = JSON.stringify({
-        id: pendingGame.id,
-        state: "played",
-      });
-
-      await this.channelMessageService.edit(message);
-
-      pendingGame.message = Promise.resolve(message);
-    }
 
     return game;
   }

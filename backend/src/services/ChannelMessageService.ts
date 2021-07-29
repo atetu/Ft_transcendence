@@ -61,11 +61,11 @@ export default class ChannelMessageService {
 
     this.socketService.broadcastChannelMessage(message);
 
-    if (message.channel.isDirect()) {
+    const channel = await message.channel;
+
+    if (channel.isDirect()) {
       if (!directMessage) {
-        directMessage = await this.directMessageService.findByChannel(
-          message.channel
-        );
+        directMessage = await this.directMessageService.findByChannel(channel);
       }
 
       await this.achievementProgressService.increment(

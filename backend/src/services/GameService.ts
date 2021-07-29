@@ -24,7 +24,7 @@ export default class GameService {
   }
 
   public start(first: Socket, second: Socket, pendingGame?: PendingGame): Game {
-    const game = new Game(first, second, pendingGame?.settings);
+    const game = new Game(first, second, pendingGame);
     this.provideId(game);
 
     this.save(game);

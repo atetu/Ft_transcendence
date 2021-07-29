@@ -1,8 +1,12 @@
 import * as socketio from "socket.io";
 import { Container } from "typedi";
+import Channel from "../entities/Channel";
+import ChannelMessage from "../entities/ChannelMessage";
 import Match from "../entities/Match";
+import PendingGame from "../entities/PendingGame";
 import User from "../entities/User";
 import AchievementProgressService from "../services/AchievementProgressService";
+import ChannelMessageService from "../services/ChannelMessageService";
 import GameService from "../services/GameService";
 import MatchService from "../services/MatchService";
 import UserStatisticsService from "../services/UserStatisticsService";
@@ -56,13 +60,14 @@ export default class Game {
   public userStatisticsService = Container.get(UserStatisticsService);
   public achievementProgressService = Container.get(AchievementProgressService);
   public gameService = Container.get(GameService);
+  public channelMessageService = Container.get(ChannelMessageService);
 
   constructor(
     first: socketio.Socket,
     second: socketio.Socket,
-    settings?: GameSettings
+    private pendingGame?: PendingGame
   ) {
-    this.settings = settings || defaultsGameSettings();
+    this.settings = pendingGame?.settings || defaultsGameSettings();
     this.map = Maps.find(this.settings.map);
 
     this.player[Side.LEFT] = new Player(first);
@@ -79,7 +84,7 @@ export default class Game {
 
   start() {
     for (const player of this.players) {
-      player.socket.emit("game_connect", this.toJSON())
+      player.socket.emit("game_connect", this.toJSON());
     }
 
     if (this.interval === undefined) {
@@ -188,6 +193,24 @@ export default class Game {
     match.score2 = this.player[Side.RIGHT].score;
     match.winner = winner.user;
     await this.matchService.save(match);
+
+    console.log(match, this.pendingGame)
+    if (match.id && this.pendingGame) {
+      const message = await this.channelMessageService.findById((await this.pendingGame.message)?.id);
+
+      if (message) {
+        const channel = await message.channel;
+
+        message.channel = Promise.resolve(channel); /* just in case */
+        message.content = JSON.stringify({
+          id: this.pendingGame.id,
+          state: "played",
+          matchId: match.id,
+        });
+  
+        await this.channelMessageService.edit(message);
+      }
+    }
 
     if (winner == this.player[Side.LEFT]) {
       await this.userStatisticsService.incrementWinCount(

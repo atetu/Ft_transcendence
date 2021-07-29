@@ -20,7 +20,7 @@ export default class MatchService {
   }
 
   async save(match: Match): Promise<Match> {
-    this.repository.save(match);
+    await this.repository.save(match);
 
     return match;
   }

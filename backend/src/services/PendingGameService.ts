@@ -51,7 +51,7 @@ export default class PendingGameService {
     const { channel } = directMessage
 
     const message = new ChannelMessage();
-    message.channel = channel;
+    message.channel = Promise.resolve(channel);
     message.user = user;
     message.type = ChannelMessage.Type.INVITE;
     message.content = JSON.stringify({

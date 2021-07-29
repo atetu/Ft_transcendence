@@ -28,7 +28,7 @@ export enum ChannelEvent {
   UPDATE = "channel_update",
   DELETE = "channel_delete",
   MESSAGE = "channel_message",
-  EDIT_MESSAGE = "edit_message",
+  EDIT_MESSAGE = "channel_message_update",
   MESSAGE_DELETE = "channel_message_delete",
   MESSAGE_DELETE_ALL = "channel_message_delete_all",
   USER_JOIN = "channel_user_join",
@@ -239,24 +239,20 @@ export default class SocketService {
     this.broadcastToChannel(channel, ChannelEvent.DELETE, channel);
   }
 
-  public broadcastChannelMessage(message: ChannelMessage) {
-    const channel = message.channel;
+  public async broadcastChannelMessage(message: ChannelMessage) {
+    const channel = await message.channel;
 
     this.broadcastToChannel(channel, ChannelEvent.MESSAGE, message);
   }
 
-  public broadcastChannelEditMessage(message: ChannelMessage) {
-    const channel = message.channel;
-
-    if (!channel) {
-      return;
-    }
+  public async broadcastChannelEditMessage(message: ChannelMessage) {
+    const channel = await message.channel;
 
     this.broadcastToChannel(channel, ChannelEvent.EDIT_MESSAGE, message);
   }
 
-  public broadcastChannelMessageDelete(message: ChannelMessage) {
-    const channel = message.channel;
+  public async broadcastChannelMessageDelete(message: ChannelMessage) {
+    const channel = await message.channel;
 
     this.broadcastToChannel(channel, ChannelEvent.MESSAGE_DELETE, message);
   }

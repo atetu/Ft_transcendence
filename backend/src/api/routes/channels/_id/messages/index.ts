@@ -43,7 +43,7 @@ export default (app: express.Router) => {
         const { type, content } = req.body;
 
         const message = new ChannelMessage();
-        message.channel = channel;
+        message.channel = Promise.resolve(channel);
         message.user = user;
         message.type = type;
         message.content = content;

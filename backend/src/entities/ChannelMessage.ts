@@ -17,7 +17,7 @@ export default class ChannelMessage {
   @ManyToOne(() => Channel, {
     onDelete: "CASCADE",
   })
-  channel: Channel;
+  channel: Promise<Channel>;
 
   @ManyToOne(() => User, {
     eager: true,
