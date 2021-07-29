@@ -57,7 +57,7 @@ export default class XInvite extends Vue {
       }
 
       case PendinGameState.PLAYED: {
-        return 'Playing'
+        return 'Played'
       }
     }
   }
