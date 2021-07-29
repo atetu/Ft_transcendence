@@ -3,7 +3,7 @@
     <template #activator="{ on, attrs }">
       <v-list-item v-bind="attrs" v-on="on">
         <v-list-item-avatar>
-          <user-avatar :user="user" size="40" />
+          <user-avatar :user="user" :size="40" />
         </v-list-item-avatar>
 
         <v-list-item-content>
