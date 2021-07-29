@@ -98,7 +98,7 @@ export default class ChannelMessageService {
 
   public async deleteAllByChannel(channel: Channel): Promise<void> {
     await this.repository.delete({
-      channel,
+      channel: Promise.resolve(channel),
     });
 
     this.socketService.broadcastChannelMessageDeleteAll(channel);
