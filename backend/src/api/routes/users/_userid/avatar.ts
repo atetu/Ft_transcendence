@@ -21,8 +21,7 @@ export default (app: express.Router) => {
           "Cache-Control": "max-age=3600",
           "Content-Type": "image/png",
         },
-      },
-      (error) => next(error)
+      }
     );
   });
 
