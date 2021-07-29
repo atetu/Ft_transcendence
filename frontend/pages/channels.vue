@@ -37,7 +37,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { Channel } from '~/models'
-import { channelsStore } from '~/store'
+import { channelsStore, uiStore } from '~/store'
 
 @Component
 export default class Page extends Vue {
@@ -61,6 +61,10 @@ export default class Page extends Vue {
 
   get channels(): Array<Channel> {
     return channelsStore.list
+  }
+
+  mounted() {
+    uiStore.setDrawer(true)
   }
 }
 </script>

@@ -25,7 +25,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { DirectMessage } from '~/models'
-import { directMessageStore, relationshipsStore } from '~/store'
+import { directMessageStore, relationshipsStore, uiStore } from '~/store'
 
 @Component
 export default class Index extends Vue {
@@ -57,6 +57,10 @@ export default class Index extends Vue {
     }
 
     return item.peer.username.includes(query)
+  }
+
+  mounted() {
+    uiStore.setDrawer(true)
   }
 }
 </script>
