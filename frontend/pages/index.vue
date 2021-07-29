@@ -1,6 +1,6 @@
 <template>
-  <v-main class="fill-height" style="overflow-y: scroll">
-    <v-row justify="center" align="center">
+  <v-main class="fill-height" style="overflow: auto">
+    <v-row class="ma-2" justify="center" align="center">
       <v-col justify="center" align="center">
         <p class="text-center ma-10" style="font-size: 40px">
           ft_transcendence
