@@ -1,7 +1,9 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
+import databaseExtra from "../config/database-extra";
 
 @Entity({
   name: "users",
+  engine: databaseExtra.UTF8,
 })
 export default class User {
   @PrimaryGeneratedColumn()

@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import Channel from "./Channel";
 import User from "./User";
+import databaseExtra from "../config/database-extra";
 
 export enum Type {
   TEXT = "text",
@@ -9,6 +10,7 @@ export enum Type {
 
 @Entity({
   name: "channel_messages",
+  engine: databaseExtra.UTF8,
 })
 export default class ChannelMessage {
   @PrimaryGeneratedColumn()
@@ -47,5 +49,5 @@ export default class ChannelMessage {
     };
   }
 
-  static Type = Type
+  static Type = Type;
 }

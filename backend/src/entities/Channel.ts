@@ -1,12 +1,6 @@
-import {
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from "typeorm";
 import * as bcrypt from "bcrypt";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import databaseExtra from "../config/database-extra";
 import User from "./User";
 
 export enum Type {
@@ -22,6 +16,7 @@ export enum Visibility {
 
 @Entity({
   name: "channels",
+  engine: databaseExtra.UTF8,
 })
 export default class Channel {
   @PrimaryGeneratedColumn()
