@@ -56,12 +56,8 @@ export default class Page extends Vue {
     this.$router.push({ path: `/games/${id}` })
   }
 
-  destroyed() {
-    if (!this.joined) {
-      this.$socket.client.emit('waiting_room_leave', {
-        id: this.id,
-      })
-    }
+  beforeDestroy() {
+    this.$socket.client.emit('waiting_room_leave')
   }
 }
 </script>
