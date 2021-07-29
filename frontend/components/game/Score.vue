@@ -6,6 +6,9 @@
       {{ player.score }}
       <small v-if="max">/ {{ max }}</small>
     </p>
+    <v-chip v-if="status && !player.connected" color="red">
+      disconnected
+    </v-chip>
   </div>
 </template>
 
@@ -20,10 +23,13 @@ export default class Score extends Vue {
 
   @Prop()
   max!: Number
+
+  @Prop({ type: Boolean })
+  status!: boolean
 }
 </script>
 
-<style>
+<style scoped>
   .score {
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-size: 80px;

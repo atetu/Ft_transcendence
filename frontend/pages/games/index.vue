@@ -7,6 +7,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { Socket } from 'vue-socket.io-extended'
+import { Game } from '~/models/Game'
 
 @Component
 export default class WaitingRoom extends Vue {
@@ -30,7 +31,6 @@ export default class WaitingRoom extends Vue {
       (error: any) => {
         if (error) {
           this.error = error
-          console.log(error)
         } else {
           this.joined = true
         }
@@ -40,9 +40,8 @@ export default class WaitingRoom extends Vue {
     )
   }
 
-  @Socket('game_starting')
-  onGameStarting(data: any) {
-    console.log({ data })
+  @Socket('game_connect')
+  onGameStarting(data: Game) {
     const { id } = data
     this.joined = true
     this.$router.replace({ path: `/games/${id}` })

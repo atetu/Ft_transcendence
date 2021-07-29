@@ -119,7 +119,7 @@ export default class ComponentImpl extends Vue {
       return null
     }
 
-    return `/game/${this.game.id}`
+    return `/games/${this.game.id}`
   }
 
   @Watch('menu')

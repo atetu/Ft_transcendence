@@ -2,7 +2,12 @@
   <v-main class="fill-height">
     <v-row class="fill-height">
       <v-col cols="2" align="center" class="vertical">
-        <game-score v-if="leftPlayer" :player="leftPlayer" :max="maxRound" />
+        <game-score
+          v-if="leftPlayer"
+          :player="leftPlayer"
+          :max="maxRound"
+          status
+        />
       </v-col>
       <v-col cols="8">
         <canvas
@@ -17,7 +22,12 @@
         ></canvas>
       </v-col>
       <v-col cols="2" align="center" class="vertical">
-        <game-score v-if="rightPlayer" :player="rightPlayer" :max="maxRound" />
+        <game-score
+          v-if="rightPlayer"
+          :player="rightPlayer"
+          :max="maxRound"
+          status
+        />
       </v-col>
     </v-row>
   </v-main>

@@ -9,6 +9,7 @@ import { Context } from '@nuxt/types'
 import { Component, Vue } from 'nuxt-property-decorator'
 import { Socket } from 'vue-socket.io-extended'
 import { PendingGame } from '~/models'
+import { Game } from '~/models/Game'
 
 @Component
 export default class Page extends Vue {
@@ -54,8 +55,8 @@ export default class Page extends Vue {
     )
   }
 
-  @Socket('game_starting')
-  onGameStarting(data: any) {
+  @Socket('game_connect')
+  onGameStarting(data: Game) {
     const { id } = data
     this.joined = true
     this.$router.push({ path: `/games/${id}` })
