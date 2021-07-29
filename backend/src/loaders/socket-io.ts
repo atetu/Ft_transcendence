@@ -23,6 +23,7 @@ export default async ({ server }: { server: http.Server }) => {
 
     socket.on("disconnect", () => {
       socketService.onDisconnect(socket);
+      socketService.askGameDisconnect(socket);
     });
 
     socket.on(ChannelEvent.CONNECT, (body, callback) => {
@@ -37,6 +38,10 @@ export default async ({ server }: { server: http.Server }) => {
       socketService.askGameConnect(socket, body, callback);
     });
 
+    socket.on(GameEvent.DISCONNECT, () => {
+      socketService.askGameDisconnect(socket);
+    });
+
     socket.on(GameEvent.MOVE, (body, callback) => {
       socketService.askGameMove(socket, body, callback);
     });
@@ -45,18 +50,6 @@ export default async ({ server }: { server: http.Server }) => {
       socketService.askMatchMakingJoin(socket, body, callback);
     });
 
-    socket.on('game_restart', (body) => {
-      socketService.gameRestart(socket, body)
-    });
-
-    socket.on('waiting_room', () => {
-      socketService.matchMaking(socket)
-    });
-
-    socket.on('game_disconnect', () => {
-      socketService.gameDisconnect(socket)
-    });
-    
     socket.on(MatchMakingEvent.WAITING_ROOM_LEAVE, (body) => {
       socketService.askMatchMakingLeave(socket, body);
     });

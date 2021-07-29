@@ -84,7 +84,7 @@ export default (app: express.Router) => {
             result = await relationshipService.blockUser(user, peer);
           }
         }
-        console.log(result);
+        
         res.status(200).send(result);
       } catch (error) {
         next(error);

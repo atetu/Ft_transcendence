@@ -57,10 +57,6 @@ export default class Game {
   public achievementProgressService = Container.get(AchievementProgressService);
   public gameService = Container.get(GameService);
 
-  public waitingRoom: User[] = new Array(2);
-  public waitingRoomOption: number[] = new Array(2);
-  private leaving: Array<User>;
-
   constructor(
     first: socketio.Socket,
     second: socketio.Socket,
@@ -68,7 +64,6 @@ export default class Game {
   ) {
     this.settings = settings || defaultsGameSettings();
     this.map = Maps.find(this.settings.map);
-    this.leaving = [];
 
     this.player[Side.LEFT] = new Player(first);
     this.player[Side.RIGHT] = new Player(second);
@@ -83,9 +78,9 @@ export default class Game {
   }
 
   start() {
-    const io = Container.get(socketio.Server);
-
-    io.to(this.toRoom()).emit("game_connect", this.toJSON());
+    for (const player of this.players) {
+      player.socket.emit("game_connect", this.toJSON())
+    }
 
     if (this.interval === undefined) {
       this.interval = setInterval(() => this.loop(), 1000 / 20);
@@ -105,9 +100,6 @@ export default class Game {
     this.direction = this.nextDirection();
     this.ball.setDirection(this.direction);
     this.countdown = 3;
-
-    this.waitingRoomOption.length = 0;
-    this.waitingRoom.length = 0;
 
     this.interval = setInterval(() => this.loop(), 1000 / 20);
     this.decount();
@@ -213,7 +205,6 @@ export default class Game {
       );
     }
 
-    console.log(match);
     io.to(this.toRoom()).emit("game_end", match);
 
     try {
@@ -311,64 +302,6 @@ export default class Game {
     }
 
     return true;
-  }
-
-  restartWaitingRoom(player: User, option: number) {
-    // console.log('restartWaitingRoom')
-    let found: User | null;
-    if (this.waitingRoom) {
-      found = this.waitingRoom.find(function (element) {
-        return element === player;
-      });
-      // console.log('restartWaitingRoom2')
-      if (found === undefined) {
-        this.waitingRoom.push(player);
-        this.waitingRoomOption.push(option);
-        let found2: User | null;
-        found2 = this.waitingRoom.find(function (element) {
-          return element === player;
-        });
-        // if (found2 === player)
-        //   console.log ('find working')
-        // else
-        //   console.log ('find not working')
-        // console.log ('option : ' + option)
-      }
-    } else {
-      this.waitingRoom.push(player);
-      this.waitingRoomOption.push(option);
-      // console.log('restartWaitingRoom3 bis')
-    }
-    if (this.waitingRoom) {
-      if (Object.keys(this.waitingRoom).length === 2) return this;
-      // console.log('restartWaitingRoom4')
-    }
-    // console.log('restartWaitingRoom5')
-  }
-
-  disconnect(player: User) {
-    let found: User | null;
-    if (this.leaving && this.leaving.length !== 0) {
-      found = this.leaving.find(function (element) {
-        return element === player;
-      });
-      // console.log('restartWaitingRoom2')
-      if (found === undefined) {
-        this.leaving.push(player);
-      }
-    } else {
-      this.leaving.push(player);
-    }
-    if (this.leaving !== undefined) {
-      if (this.leaving.length === 2) {
-        // if (this.winner)
-        // {
-
-        // }
-        return true;
-      }
-    }
-    return false;
   }
 
   get players(): [Player, Player] {

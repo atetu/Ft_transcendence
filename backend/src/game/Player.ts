@@ -18,7 +18,7 @@ export class Player {
   }
 
   get connected(): boolean {
-    return !!this.socket;
+    return this.socket != null;
   }
 
   public toJSON(): any {

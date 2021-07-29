@@ -45,6 +45,7 @@ export enum DirectMessageEvent {
 
 export enum GameEvent {
   CONNECT = "game_connect",
+  DISCONNECT = "game_disconnect",
   MOVE = "game_move",
   STARTING = "game_starting",
 }
@@ -80,7 +81,7 @@ class SessionCounter {
     private readonly joinEvent: ClientEvent,
     private readonly quitEvent: ClientEvent,
     private readonly listEvent: ClientEvent,
-    private readonly preventSelf: boolean = false
+    private readonly notifySelf: boolean = false
   ) {}
 
   onJoin(socket: Socket) {
@@ -100,16 +101,23 @@ class SessionCounter {
 
   onQuit(socket: Socket) {
     const user: User = socket.data.user;
+
+    this.onUserQuit(user, socket);
+  }
+
+  onUserQuit(user: User, socket?: Socket) {
     const { id } = user;
 
     if (this.sessions[id]) {
       const now = (this.sessions[id] -= 1);
 
       if (now === 0) {
-        if (this.preventSelf) {
+        if (this.notifySelf) {
           this.io.emit(this.quitEvent, id);
         } else {
-          socket.broadcast.emit(this.quitEvent, id);
+          if (socket) {
+            socket.broadcast.emit(this.quitEvent, id);
+          }
         }
 
         delete this.sessions[id];
@@ -240,6 +248,10 @@ export default class SocketService {
   public broadcastChannelEditMessage(message: ChannelMessage) {
     const channel = message.channel;
 
+    if (!channel) {
+      return;
+    }
+
     this.broadcastToChannel(channel, ChannelEvent.EDIT_MESSAGE, message);
   }
 
@@ -365,11 +377,7 @@ export default class SocketService {
   }
 
   async askGameConnect(socket: Socket, body: any, callback: Callback) {
-    const { currentGameRoom } = socket.data;
-    if (currentGameRoom !== undefined) {
-      socket.leave(currentGameRoom);
-      delete socket.data.currentGameRoom;
-    }
+    await this.askGameDisconnect(socket, true);
 
     try {
       this.ensureBody(body);
@@ -387,9 +395,22 @@ export default class SocketService {
       socket.join(newGameRoom);
       socket.data.currentGameRoom = newGameRoom;
 
+      this.gameService.onConnected(socket);
+
       callback(null, game.toJSON());
     } catch (error) {
       callback(error, null);
+    }
+  }
+
+  async askGameDisconnect(socket: Socket, toReconnect = false) {
+    const { currentGameRoom } = socket.data;
+    
+    if (currentGameRoom !== undefined) {
+      socket.leave(currentGameRoom);
+      delete socket.data.currentGameRoom;
+
+      this.gameService.onDisconnected(socket);
     }
   }
 
@@ -415,68 +436,8 @@ export default class SocketService {
     }
   }
 
-  async gameRestart(socket, body) {
-    console.log("game restrt back");
-    const io = Container.get(socketio.Server);
-    const { gameId, option } = body;
-    console.log("option first : " + option);
-    const game: Game | false = this.gameService.gameRestartWaitingRoom(
-      gameId,
-      socket.data.user,
-      option
-    );
-    console.log("game restart : " + game);
-    if (game !== false) {
-      io.to(game.toRoom()).emit("game_restart", { gameId: game.id });
-      game.restart();
-      console.log("starting....");
-    }
-  }
-
-  gameDisconnect(socket) {
-    console.log("DISCONNECT");
-    const io = Container.get(socketio.Server);
-    const { game, ret } = this.gameService.gameDisconnect(socket.data.user);
-    // console.log('game restart : ' + game)
-    // if (game !== false)
-    // {
-    //   io.to(game.toRoom()).emit('game_disconnect', { gameId: game.id })
-    //   game.restart()
-    //   console.log('starting....')
-    // }
-    console.log("game exit");
-    console.log("RET: " + ret);
-    if (game && !ret) {
-      console.log("game exit");
-      io.to(game.toRoom()).emit("game_exit", { gameId: game.id });
-    }
-    // if (game && ret)
-    // {
-    //   console.log('game exit BOTH')
-    //   io.emit("client_playing_quit", game.player1.id);
-    //   io.emit("client_playing_quit", game.player2.id);
-    // }
-  }
-
-  async matchMaking(socket: Socket) {
-    const io = Container.get(socketio.Server);
-    console.log("matchMaking");
-    const game: Game = this.matchMakingService.addSocket(socket);
-    console.log("game : " + game);
-    if (game != undefined) {
-      io.to(game.toRoom()).emit("game_starting", game.toJSON());
-      game.start();
-      console.log("starting....");
-    }
-  }
-
   public broadcastGameStarting(game: Game) {
     this.broadcastToGame(game, GameEvent.STARTING, game.toJSON());
-
-    const io = Container.get(socketio.Server);
-    for (const user of game.users) {
-      io.emit("client_playing_join", user);
-    }
   }
 
   private broadcastToChannel(

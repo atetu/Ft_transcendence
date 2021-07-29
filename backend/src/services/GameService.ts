@@ -23,39 +23,13 @@ export default class GameService {
     return this.players[user.id];
   }
 
-  public gameMove(gameId: number, player: User, newY: number) {
-    const game = this.findById(gameId);
-
-    if (!game) {
-      return false;
-    }
-
-    return game.movePaddle(player, newY);
-  }
-
-  public gameRestartWaitingRoom(gameId: number, player: User, option: any) {
-    const game = this.findById(gameId);
-
-    if (!game) {
-      return false;
-    }
-
-    return game.restartWaitingRoom(player, option);
-  }
-
   public start(first: Socket, second: Socket, pendingGame?: PendingGame): Game {
-    const io = Container.get(socketio.Server);
-
     const game = new Game(first, second, pendingGame?.settings);
     this.provideId(game);
-
-    first.join(game.toRoom());
-    second.join(game.toRoom());
 
     this.save(game);
 
     game.start();
-    io.emit("game_status_join", game.id);
 
     return game;
   }
@@ -86,7 +60,7 @@ export default class GameService {
     delete this.repository[game.id];
 
     for (const player of game.players) {
-      this.socketService.playingUsers.onQuit(player.socket);
+      this.socketService.playingUsers.onUserQuit(player.user);
       delete this.players[player.user.id];
     }
   }
@@ -99,20 +73,43 @@ export default class GameService {
     game.id = ++this.incrementalId;
   }
 
-  public gameDisconnect(player: User) {
-    const io = Container.get(socketio.Server);
-    const game = this.findByUser(player);
+  public gameMove(gameId: number, player: User, newY: number) {
+    const game = this.findById(gameId);
 
     if (!game) {
-      return {};
+      return false;
     }
-    delete this.players[player.id];
-    io.emit("client_playing_quit", player.id);
 
-    let ret = game.disconnect(player);
-    console.log("RET: " + ret);
-    if (ret === true) io.emit("game_status_quit", game.id);
+    return game.movePaddle(player, newY);
+  }
 
-    return { game: game, ret: ret };
+  public onConnected(socket: Socket) {
+    const user: User = socket.data.user;
+    const game = this.findByUser(user);
+
+    if (!game) {
+      return;
+    }
+
+    const player = game.players.filter((x) => x.user.is(user));
+    for (const instance of player) {
+      if (!instance.connected) {
+        instance.setConnected(socket);
+      }
+    }
+  }
+
+  public onDisconnected(socket: Socket) {
+    const user: User = socket.data.user;
+    const game = this.findByUser(user);
+
+    if (!game) {
+      return;
+    }
+
+    const player = game.players.filter((x) => x.socket?.id === socket.id);
+    for (const instance of player) {
+      instance.setDisconnected();
+    }
   }
 }

@@ -1,8 +1,7 @@
-import { Inject, Service } from "typedi";
 import * as otplib from "@otplib/preset-default";
+import { Inject, Service } from "typedi";
 import User from "../entities/User";
 import UserService from "./UserService";
-import { isError } from "@hapi/joi";
 
 @Service()
 export default class OTPService {
@@ -26,10 +25,10 @@ export default class OTPService {
 
     return await this.userService.save(user);
   }
-  
+
   check(user: User, otpToken: string) {
     if (user.otp) {
-      return otplib.authenticator.check(otpToken, user.otpSecret)
+      return otplib.authenticator.check(otpToken, user.otpSecret);
     }
 
     return true;
