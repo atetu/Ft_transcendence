@@ -5,7 +5,7 @@
   "port": 3306,
   "username": "root",
   "password": "password",
-  "database": "ft_transcendence2",
+  "database": "ft_transcendence",
   "charset": "utf8mb4_unicode_ci",
   "synchronize": true,
   "autoLoadEntities": true,
