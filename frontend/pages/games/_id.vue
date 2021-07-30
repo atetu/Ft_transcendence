@@ -279,7 +279,7 @@ export default class Page extends Vue {
 
     this.player = player
 
-    if (++this.stateReceived % 50) {
+    if (++this.stateReceived % 100) {
       this.paddle[this.side].y = paddle[this.side].y
     }
 
