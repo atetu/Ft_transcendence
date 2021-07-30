@@ -42,7 +42,7 @@ export default class Maps {
     ]),
     new Map("Square", [
       new Rectangle(
-        tenthWidth * 3,
+        tenthWidth * 2,
         tenthHeight * 2,
         tenthWidth,
         tenthHeight * 2
@@ -60,7 +60,7 @@ export default class Maps {
         tenthHeight * 2
       ),
       new Rectangle(
-        tenthWidth * 6,
+        tenthWidth * 7,
         tenthHeight * 6,
         tenthWidth,
         tenthHeight * 2
