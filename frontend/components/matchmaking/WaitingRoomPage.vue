@@ -9,6 +9,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { Socket } from 'vue-socket.io-extended'
 import { PendingGame } from '~/models'
 import { Game } from '~/models/Game'
+import { authStore } from '~/store'
 
 @Component
 export default class Page extends Vue {
@@ -36,9 +37,15 @@ export default class Page extends Vue {
       {
         id: this.id,
       },
-      (error: any) => {
+      async (error: any) => {
         if (error) {
-          this.error = error
+          const message = error.message
+
+          if (message === 'already in game') {
+            await this.tryRejoin(error)
+          } else {
+            this.error = error
+          }
         } else {
           this.joined = true
         }
@@ -46,6 +53,19 @@ export default class Page extends Vue {
         this.loading = false
       }
     )
+  }
+
+  async tryRejoin(error: any) {
+    try {
+      const game = await this.$axios.$get(`/users/${authStore.user?.id}/game`)
+
+      this.$dialog.notify.info('You are currently in a game')
+      this.onGameStarting(game)
+    } catch (error2) {
+      console.log('Error when trying to fetch game', error2)
+
+      this.error = error
+    }
   }
 
   @Socket('game_connect')
