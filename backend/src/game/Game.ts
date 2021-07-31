@@ -10,7 +10,7 @@ import MatchService from "../services/MatchService";
 import UserStatisticsService from "../services/UserStatisticsService";
 import Achievements from "./Achievements";
 import { Ball } from "./Ball";
-import { COLLISION_STEP, HEIGHT, WIDTH } from "./Constants";
+import { COLLISION_STEP, HEIGHT, INITIAL_PADDLE_Y, PADDLE_HEIGHT, WIDTH } from "./Constants";
 import { Direction, Side } from "./Enums";
 import { Map } from "./Map";
 import Maps from "./Maps";
@@ -35,8 +35,8 @@ export default class Game {
   private direction: Direction;
 
   private paddle = {
-    [Side.LEFT]: new Paddle(15, 10),
-    [Side.RIGHT]: new Paddle(770, 10),
+    [Side.LEFT]: new Paddle(15, INITIAL_PADDLE_Y),
+    [Side.RIGHT]: new Paddle(770, INITIAL_PADDLE_Y),
   };
 
   private player = {
@@ -264,8 +264,6 @@ export default class Game {
     }
 
     this.gameService.delete(this);
-    // TODO : enregistrer infos match
-    // envoyer infos au front pour dire que c'est la fin des fins
   }
 
   loop() {
@@ -309,7 +307,7 @@ export default class Game {
   }
 
   movePaddle(user: User, y: number) {
-    if (y < 0 || y > 500) {
+    if (y < 0 || y > HEIGHT - PADDLE_HEIGHT) {
       return false;
     }
 
