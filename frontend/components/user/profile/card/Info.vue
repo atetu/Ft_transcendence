@@ -63,7 +63,7 @@ import { Game } from '~/models/Game'
 import { authStore, relationshipsStore } from '~/store'
 
 @Component
-export default class Dot extends Vue {
+export default class Info extends Vue {
   @Prop()
   user!: User
 
@@ -88,10 +88,6 @@ export default class Dot extends Vue {
     return authStore.user!.admin
   }
 
-  get picture() {
-    return `/api/users/${this.user.id}/avatar`
-  }
-
   refresh() {
     this.$emit('refresh')
   }
@@ -99,38 +95,6 @@ export default class Dot extends Vue {
   onChallenged() {
     this.$router.push({
       path: `/direct-messages/${this.user.id}`,
-    })
-  }
-
-  askBlock() {
-    this.$dialog.warning({
-      title: 'Blocking confirmation',
-      text: 'Are you sure',
-      actions: [
-        {
-          key: 'yes',
-          text: 'Yes',
-          color: 'error',
-          handler: async () => {
-            try {
-              await this.$axios.$post(`/users/@me/relationships`, {
-                peerId: this.user.id,
-                type: 'block',
-              })
-
-              this.$dialog.notify.success('user blocked')
-
-              this.$emit('refresh')
-            } catch (error) {
-              this.$dialog.notify.error('could not block user')
-            }
-          },
-        },
-        {
-          key: 'cancel',
-          text: 'Cancel',
-        },
-      ],
     })
   }
 }
