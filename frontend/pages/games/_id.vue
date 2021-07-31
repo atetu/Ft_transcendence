@@ -68,13 +68,23 @@ class VisibleObject {
 }
 
 class Paddle extends VisibleObject {
+  public shadow = false
+
   constructor(x: number, y: number) {
     super(x, y, 20, 100)
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = 'white'
+    ctx.fillStyle = this.color
     ctx.fillRect(this.x, this.y, 20, 100)
+  }
+
+  get color() {
+    if (this.shadow) {
+      return 'lightgray'
+    }
+
+    return 'white'
   }
 }
 
@@ -110,6 +120,8 @@ export default class Page extends Vue {
     [Side.RIGHT]: new Paddle(770, 10),
   }
 
+  myPaddle: Paddle | null = null
+
   player = {
     [Side.LEFT]: null as unknown as Player,
     [Side.RIGHT]: null as unknown as Player,
@@ -122,8 +134,6 @@ export default class Page extends Vue {
   message: string = ''
   countdown: number = 3
   state = State.WAITING
-
-  stateReceived = 0
 
   keys = {
     up: false,
@@ -185,6 +195,10 @@ export default class Page extends Vue {
     ) {
       const paddle = this.myPaddle
 
+      if (!paddle) {
+        return
+      }
+
       let newY = paddle.y
       const prevY = newY
 
@@ -192,6 +206,16 @@ export default class Page extends Vue {
         newY -= 4 * (this.settings?.paddleVelocity || 1)
       } else if (this.keys.down && !this.keys.up) {
         newY += 4 * (this.settings?.paddleVelocity || 1)
+      }
+
+      if (newY <= 0) {
+        newY = 10
+      } else {
+        const bottom = this.height - paddle.height
+
+        if (newY >= bottom) {
+          newY = bottom - 10
+        }
       }
 
       if (newY !== prevY) {
@@ -235,8 +259,13 @@ export default class Page extends Vue {
     if (this.state === State.PLAYING) {
       this.updatePaddles()
     }
+
     this.paddle[Side.LEFT].draw(this.ctx)
     this.paddle[Side.RIGHT].draw(this.ctx)
+
+    if (this.myPaddle) {
+      this.myPaddle.draw(this.ctx)
+    }
 
     if (this.state === State.WAITING) {
       if (this.countdown !== -1) {
@@ -279,11 +308,12 @@ export default class Page extends Vue {
 
     this.player = player
 
-    if (++this.stateReceived % 100) {
-      this.paddle[this.side].y = paddle[this.side].y
-    }
+    this.paddle[Side.LEFT].y = paddle[Side.LEFT].y
+    this.paddle[Side.RIGHT].y = paddle[Side.RIGHT].y
 
-    this.paddle[this.otherSide].y = paddle[this.otherSide].y
+    if (!this.myPaddle) {
+      this.initializeMyPaddle()
+    }
 
     this.countdown = countdown
 
@@ -319,7 +349,7 @@ export default class Page extends Vue {
   }
 
   @Socket('game_exit')
-  async onGameExit(data: any) {
+  async onGameExit(data: Game) {
     await this.$dialog.info({
       text: 'game exit',
     })
@@ -377,6 +407,8 @@ export default class Page extends Vue {
         this.paddle[Side.LEFT].copyPosition(paddle[Side.LEFT])
         this.paddle[Side.RIGHT].copyPosition(paddle[Side.RIGHT])
 
+        this.initializeMyPaddle()
+
         this.countdown = countdown
         this.obstacles = obstacles
         this.settings = settings
@@ -384,6 +416,13 @@ export default class Page extends Vue {
         this.loopInterval = setInterval(() => this.loop(), 1000 / 60)
       }
     )
+  }
+
+  initializeMyPaddle() {
+    const reference = this.paddle[this.side]
+    reference.shadow = true
+
+    this.myPaddle = new Paddle(reference.x, reference.y)
   }
 
   beforeDestroy() {
@@ -394,10 +433,6 @@ export default class Page extends Vue {
       clearInterval(this.loopInterval)
       this.loopInterval = null
     }
-  }
-
-  get myPaddle(): Paddle {
-    return this.paddle[this.side]
   }
 
   get otherSide(): Side {
