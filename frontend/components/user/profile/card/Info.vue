@@ -23,10 +23,7 @@
           <user-button-watch :game="game" />
         </v-col>
         <v-col v-if="isMe" cols="12">
-          <v-btn block color="primary" to="/profile/settings">
-            settings
-            <v-icon right>mdi-cog</v-icon>
-          </v-btn>
+          <user-button-settings />
         </v-col>
         <template v-else>
           <v-col cols="12">
@@ -52,10 +49,7 @@
             />
           </v-col>
           <v-col cols="12">
-            <v-btn depressed block color="primary" :to="toMessage">
-              message
-              <v-icon right>mdi-message-arrow-right</v-icon>
-            </v-btn>
+            <user-button-message :user="user" />
           </v-col>
           <v-col v-if="selfIsSiteAdmin && !isAdmin" cols="12">
             <user-button-ban :user="user" @refresh="refresh" />
@@ -100,10 +94,6 @@ export default class Dot extends Vue {
 
   get picture() {
     return `/api/users/${this.user.id}/avatar`
-  }
-
-  get toMessage() {
-    return `/direct-messages/${this.user.id}`
   }
 
   refresh() {
