@@ -12,7 +12,7 @@
       </v-col>
 
       <v-col cols="12" md="3">
-        <user-profile-card-info :user="user" @refresh="$fetch" />
+        <user-profile-card-info :user="user" :game="game" @refresh="$fetch" />
         <user-profile-card-statistics
           :user="user"
           :statistics="statistics"
@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import {
   AchievementProgress,
   Match,
@@ -59,7 +59,8 @@ import {
   User,
   UserStatistics,
 } from '~/models'
-import { relationshipsStore } from '~/store'
+import { Game } from '~/models/Game'
+import { relationshipsStore, socketStore } from '~/store'
 
 @Component
 export default class ComponentImpl extends Vue {
@@ -71,6 +72,7 @@ export default class ComponentImpl extends Vue {
   progresses: Array<AchievementProgress> = []
   statistics: UserStatistics | null = null
   friends: Array<Relationship> = []
+  game: Game | null = null
 
   async fetch() {
     this.user = await this.$axios.$get(`/users/${this.userId}`)
@@ -87,6 +89,23 @@ export default class ComponentImpl extends Vue {
     this.$axios
       .$get(`/users/@me/relationships/${this.userId}`)
       .then(relationshipsStore.updateItem)
+  }
+
+  get playing() {
+    return socketStore.playingUserIds.includes(this.userId)
+  }
+
+  @Watch('playing', { immediate: true })
+  onPlayingUpdate(val: boolean) {
+    if (val) {
+      this.$axios.$get(`/users/${this.userId}/game`).then((game) => {
+        if (this.playing) {
+          this.game = game
+        }
+      })
+    } else {
+      this.game = null
+    }
   }
 }
 </script>

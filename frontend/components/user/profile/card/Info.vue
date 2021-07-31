@@ -19,6 +19,9 @@
     </v-card-subtitle>
     <v-col cols="12">
       <v-row justify="center" align="center">
+        <v-col v-if="game" cols="12">
+          <user-button-watch :game="game" />
+        </v-col>
         <v-col v-if="isMe" cols="12">
           <v-btn block color="primary" to="/profile/settings">
             settings
@@ -66,12 +69,16 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { Relationship, User } from '~/models'
+import { Game } from '~/models/Game'
 import { authStore, relationshipsStore } from '~/store'
 
 @Component
 export default class Dot extends Vue {
   @Prop()
   user!: User
+
+  @Prop()
+  game!: Game | null
 
   get relationship(): Relationship | null {
     const { id } = this.user
