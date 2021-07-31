@@ -13,10 +13,6 @@
       {{ user.username }}
       <v-spacer />
     </v-card-title>
-    <v-card-subtitle class="text-center">
-      joined <br />
-      15 05 2021
-    </v-card-subtitle>
     <v-col cols="12">
       <v-row justify="center" align="center">
         <v-col v-if="game" cols="12">
