@@ -14,3 +14,5 @@ RUN npm install
 COPY . /app/
 
 CMD [ "npm", "run", "start" ]
+
+HEALTHCHECK --start-period=5s --retries=3000 CMD curl --fail http://localhost:3001/ping || exit 1
