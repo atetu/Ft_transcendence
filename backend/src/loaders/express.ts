@@ -12,6 +12,7 @@ export default async ({ app }: { app: express.Application }) => {
   });
 
   app.enable("trust proxy");
+  app.disable('etag');
 
   app.use(morgan("tiny"));
 
