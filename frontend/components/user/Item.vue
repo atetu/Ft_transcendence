@@ -6,21 +6,41 @@
     <v-list-item-content>
       <v-list-item-title>
         {{ user.username }}
-        <icon-tooltip v-if="user.admin" icon-right top text="Administrator">
-          mdi-account-supervisor
-        </icon-tooltip>
-        <icon-tooltip v-if="friend" icon-right top text="Friend">
-          mdi-account-heart
-        </icon-tooltip>
-        <icon-tooltip v-if="playing" icon-right top text="Playing">
-          mdi-controller-classic
-        </icon-tooltip>
-        <icon-tooltip v-if="blocked" icon-right top text="Blocked">
-          mdi-account-remove
-        </icon-tooltip>
-        <icon-tooltip v-if="user.banned" icon-right top text="Banned">
-          mdi-cancel
-        </icon-tooltip>
+        <icon-tooltip
+          v-if="user.admin"
+          icon="mdi-account-supervisor"
+          icon-right
+          top
+          text="Administrator"
+        />
+        <icon-tooltip
+          v-if="friend"
+          icon="mdi-account-heart"
+          icon-right
+          top
+          text="Friend"
+        />
+        <icon-tooltip
+          v-if="playing"
+          icon="mdi-controller-classic"
+          icon-right
+          top
+          text="Playing"
+        />
+        <icon-tooltip
+          v-if="blocked"
+          icon="mdi-account-remove"
+          icon-right
+          top
+          text="Blocked"
+        />
+        <icon-tooltip
+          v-if="user.banned"
+          icon="mdi-cancel"
+          icon-right
+          top
+          text="Banned"
+        />
       </v-list-item-title>
     </v-list-item-content>
   </v-list-item>
