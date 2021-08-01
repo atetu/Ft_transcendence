@@ -16,3 +16,5 @@ COPY . /app/
 RUN npm run build
 
 CMD [ "npm", "run", "start" ]
+
+HEALTHCHECK --start-period=5s --retries=10 CMD curl --fail http://localhost:3000/ping || exit 1
