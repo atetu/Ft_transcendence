@@ -34,8 +34,10 @@ services:
     ports:
     - "80:80"
     depends_on:
-      - "backend"
-      - "frontend"
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
     links:
       - "backend:ft-transcendence-backend"
       - "frontend:ft-transcendence-frontend"
