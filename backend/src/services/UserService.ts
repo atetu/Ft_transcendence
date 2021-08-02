@@ -35,6 +35,10 @@ export default class UserService {
     return this.repository.find();
   }
 
+  async hasNoUser(): Promise<boolean> {
+    return (await this.repository.count()) === 0;
+  }
+
   async fitUsername(input: string): Promise<string> {
     let suffix: string | number = "";
     let username: string;

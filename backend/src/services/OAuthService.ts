@@ -47,7 +47,7 @@ export default class OAuthService {
         user = new User();
         user.username = await this.userService.fitUsername(email.split("@")[0]);
         user.email = email;
-        user.admin = false;
+        user.admin = await this.userService.hasNoUser();
         user.picture = await this.avatarService.download(picture);
 
         user = await this.userService.save(user);
