@@ -81,6 +81,15 @@ export default (app: express.Router) => {
           }
         }
 
+        if (a?.type == RelationshipType.FRIEND && b?.type == RelationshipType.FRIEND) {
+          if (type == RelationshipType.FRIEND) {
+            /* no op */
+          } else {
+            await relationshipService.block(a, b);
+            result = a;
+          }
+        }
+
         if (!b && !a) {
           if (type == RelationshipType.FRIEND) {
             const [a2, b2] = await relationshipService.ask(user, peer);
